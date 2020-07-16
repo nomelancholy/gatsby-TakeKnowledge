@@ -8,7 +8,7 @@ export const Bio = () => (
   <StaticQuery
     query={bioQuery}
     render={data => {
-      const { author, social, introduction } = data.site.siteMetadata
+      const { author, introduction } = data.site.siteMetadata
 
       return (
         <div className="bio">
@@ -24,9 +24,11 @@ export const Bio = () => (
               />
               <div className="author-name">
                 <span className="author-name-prefix">Written by</span>
-                <Link to={'/about'} className="author-name-content">
+                {/* <Link to={'/about'} className="author-name-content"> */}
+                <a href={'#'} className="author-name-content">
                   <span>@{author}</span>
-                </Link>
+                </a>
+                {/* </Link> */}
                 <div className="author-introduction">{introduction}</div>
                 <p className="author-socials">
                   <a
@@ -36,7 +38,7 @@ export const Bio = () => (
                     skills
                   </a>
                   <a
-                    href={`https://nomelancholy.github.io/pj-project-driven-study-mind-map/`}
+                    href={`https://nomelancholy.github.io/pj-project-skill-map/`}
                     target={`_blank`}
                   >
                     projects
@@ -48,12 +50,12 @@ export const Bio = () => (
                   >
                     carrer
                   </a>
-                  <a
+                  {/* <a
                     href={`https://www.rocketpunch.com/@ceb3dd1534ca4f23`}
                     target={`_blank`}
                   >
                     tags
-                  </a>
+                  </a> */}
                 </p>
               </div>
             </div>
