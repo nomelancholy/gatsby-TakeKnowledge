@@ -2,8 +2,8 @@ module.exports = {
   title: `Take Knowledge`,
   description: `Blog posted about ...`,
   author: `Take Knowledge`,
-  introduction: `즐길 수 없으면 피해라`,
-  siteUrl: `https://gatsby-starter-bee.netlify.com`, // Your blog site url
+  introduction: `starmekey@naver.com`,
+  siteUrl: `https://takeknowledge.netlify.app/`, // Your blog site url
   social: {
     twitter: ``, // Your Twitter account
     github: `nomelancholy`, // Your GitHub account

@@ -48,7 +48,12 @@ export const Bio = () => (
                   >
                     carrer
                   </a>
-                  <a href={`https://github.com/${social.github}`}>contact</a>
+                  <a
+                    href={`https://www.rocketpunch.com/@ceb3dd1534ca4f23`}
+                    target={`_blank`}
+                  >
+                    tags
+                  </a>
                 </p>
               </div>
             </div>
