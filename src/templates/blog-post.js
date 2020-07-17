@@ -7,7 +7,6 @@ import { Head } from '../components/head'
 import { PostTitle } from '../components/post-title'
 import { PostDate } from '../components/post-date'
 import { PostContainer } from '../components/post-container'
-import { SocialShare } from '../components/social-share'
 import { SponsorButton } from '../components/sponsor-button'
 import { Bio } from '../components/bio'
 import { PostNavigator } from '../components/post-navigator'
@@ -28,22 +27,14 @@ export default ({ data, pageContext, location }) => {
   const metaData = data.site.siteMetadata
   const { title, comment, siteUrl, author, sponsor } = metaData
   const { disqusShortName, utterances } = comment
-  const { title: postTitle, date, thumbnail } = post.frontmatter
-  const thumbnailSrc = thumbnail
-    ? `${siteUrl}${thumbnail.childImageSharp.fixed.src}`
-    : undefined
+  const { title: postTitle, date } = post.frontmatter
 
   return (
     <Layout location={location} title={title}>
-      <Head
-        title={postTitle}
-        description={post.excerpt}
-        thumbnail={thumbnailSrc}
-      />
+      <Head title={postTitle} description={post.excerpt} />
       <PostTitle title={postTitle} />
       <PostDate date={date} />
       <PostContainer html={post.html} />
-      <SocialShare title={postTitle} author={author} />
       {!!sponsor.buyMeACoffeeId && (
         <SponsorButton sponsorId={sponsor.buyMeACoffeeId} />
       )}
@@ -86,13 +77,6 @@ export const pageQuery = graphql`
       frontmatter {
         title
         date(formatString: "MMMM DD, YYYY")
-        thumbnail {
-          childImageSharp {
-            fixed(width: 800) {
-              src
-            }
-          }
-        }
       }
     }
   }
