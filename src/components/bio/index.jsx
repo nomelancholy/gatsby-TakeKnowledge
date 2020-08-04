@@ -38,7 +38,7 @@ export const Bio = () => (
                     skills
                   </a>
                   <a
-                    href={`https://nomelancholy.github.io/pj-project-skill-map/`}
+                    href={`https://nomelancholy.github.io/project-skill-map/`}
                     target={`_blank`}
                   >
                     projects
