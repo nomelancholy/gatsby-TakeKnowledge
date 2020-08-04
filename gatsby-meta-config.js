@@ -2,7 +2,7 @@ module.exports = {
   title: `Take Knowledge`,
   description: `Blog posted about ...`,
   author: `Take Knowledge`,
-  introduction: `starmekey@naver.com`,
+  introduction: `주로 개발을 하고, 가끔 글을 쓰며 어쩌다 랩을 합니다`,
   siteUrl: `https://takeknowledge.netlify.app/`, // Your blog site url
   social: {
     twitter: ``, // Your Twitter account
