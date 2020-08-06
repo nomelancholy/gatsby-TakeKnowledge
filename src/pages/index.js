@@ -13,7 +13,6 @@ import { useScrollEvent } from '../hooks/useScrollEvent'
 import { Layout } from '../layout'
 import * as Dom from '../utils/dom'
 import * as EventManager from '../utils/event-manager'
-import { THEME } from '../constants'
 
 const BASE_LINE = 80
 
@@ -31,8 +30,6 @@ export default ({ data, location }) => {
   )
   const [count, countRef, increaseCount] = useRenderedCount()
   const [category, selectCategory] = useCategory()
-
-  Dom.addClassToBody(THEME.LIGHT)
 
   useIntersectionObserver()
   useScrollEvent(() => {
