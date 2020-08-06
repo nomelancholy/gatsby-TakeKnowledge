@@ -31,6 +31,8 @@ export default ({ data, location }) => {
   const [count, countRef, increaseCount] = useRenderedCount()
   const [category, selectCategory] = useCategory()
 
+  Dom.addClassToBody(THEME.LIGHT)
+
   useIntersectionObserver()
   useScrollEvent(() => {
     const currentPos = window.scrollY + window.innerHeight
