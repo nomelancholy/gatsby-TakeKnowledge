@@ -6,6 +6,8 @@ import { ThemeSwitch } from '../components/theme-switch'
 import { Footer } from '../components/footer'
 import { rhythm } from '../utils/typography'
 
+import * as Dom from '../../utils/dom'
+
 import './index.scss'
 
 export const Layout = ({ location, title, children }) => {
@@ -22,7 +24,7 @@ export const Layout = ({ location, title, children }) => {
           padding: `${rhythm(1.5)} ${rhythm(3 / 4)}`,
         }}
       >
-        {/* <ThemeSwitch /> */}
+        <ThemeSwitch />
         <Header title={title} location={location} rootPath={rootPath} />
         {children}
         <Footer />
