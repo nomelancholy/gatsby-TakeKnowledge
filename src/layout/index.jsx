@@ -6,8 +6,6 @@ import { ThemeSwitch } from '../components/theme-switch'
 import { Footer } from '../components/footer'
 import { rhythm } from '../utils/typography'
 
-import * as Dom from '../../utils/dom'
-
 import './index.scss'
 
 export const Layout = ({ location, title, children }) => {
