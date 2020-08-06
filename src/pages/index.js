@@ -13,7 +13,7 @@ import { useScrollEvent } from '../hooks/useScrollEvent'
 import { Layout } from '../layout'
 import * as Dom from '../utils/dom'
 import * as EventManager from '../utils/event-manager'
-import { THEME } from '../../constants'
+import { THEME } from '../constants'
 
 const BASE_LINE = 80
 
