@@ -2,7 +2,7 @@
 title: 'SPA'
 date: 2020-7-19 22:34:13
 category: 'foundation'
-draft: false
+draft: true
 ---
 
 ![Traditional Page vs SPA](https://linked2ev.github.io/assets/img/devlog/201808/2018-08-01-SPA-step1.png)

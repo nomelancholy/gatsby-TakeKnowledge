@@ -2,7 +2,7 @@
 title: '영어 공부 3.0 version release'
 date: 2020-7-17 15:32:13
 category: 'english'
-draft: false
+draft: true
 ---
 
 ![alphabet](https://i.insider.com/5db6fe26045a31180a56abd3?width=1100&format=jpeg&auto=webp)
