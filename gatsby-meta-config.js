@@ -1,8 +1,8 @@
 module.exports = {
   title: `Take Knowledge`,
-  description: `Blog posted about ...`,
+  description: `Take Knowledge's Tech Blog`,
   author: `Take Knowledge`,
-  introduction: `주로 개발을 하고, 가끔 글을 쓰며 어쩌다 랩을 합니다`,
+  introduction: `주로 개발을 하고, 가끔 글을 쓰며, 어쩌다 랩을 합니다`,
   siteUrl: `https://takeknowledge.netlify.app/`, // Your blog site url
   social: {
     twitter: ``, // Your Twitter account
