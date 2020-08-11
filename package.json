@@ -3,9 +3,9 @@
   "private": true,
   "description": "gatsby-take-knowledge-from-gatsby-starter-bee",
   "version": "0.1.0",
-  "author": "Jbee[JaeYeopHan]<ljyhanll@gmail.com>",
+  "author": "TakeKnowledge[nomelancholy]<starmekey@naver.com>",
   "bugs": {
-    "url": "https://github.com/JaeYeopHan/gatsby-starter-bee/issues"
+    "url": "https://github.com/nomelancholy/gatsby-TakeKnowledge/issues"
   },
   "dependencies": {
     "gatsby": "^2.2.8",
@@ -67,7 +67,7 @@
     "recursive-readdir": "^2.2.2",
     "signale": "^1.3.0"
   },
-  "homepage": "https://github.com/JaeYeopHan/gatsby-starter-bee#readme",
+  "homepage": "https://github.com/nomelancholy/gatsby-TakeKnowledge#readme",
   "keywords": [
     "gatsby"
   ],
@@ -75,7 +75,7 @@
   "main": "n/a",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/JaeYeopHan/gatsby-starter-bee.git"
+    "url": "git+https://github.com/nomelancholy/gatsby-TakeKnowledge.git"
   },
   "scripts": {
     "post": "gatsby-post-gen",
