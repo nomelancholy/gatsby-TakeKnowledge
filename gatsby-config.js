@@ -99,6 +99,14 @@ module.exports = {
         exclude: [`/about`],
       },
     },
+    {
+      resolve: `gatsby-plugin-robots-txt`,
+      options: {
+        host: `https://takeknowledge.netlify.app/`,
+        sitemap: `https://takeknowledge.netlify.app/sitemap.xml`,
+        policy: [{ userAgent: `*`, allow: `/` }],
+      },
+    },
     `gatsby-transformer-sharp`,
     `gatsby-plugin-sharp`,
     `gatsby-plugin-feed`,
