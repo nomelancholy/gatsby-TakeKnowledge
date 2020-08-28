@@ -5,7 +5,7 @@ category: 'foundation'
 draft: true
 ---
 
-# 코어 자바스크립트 내용 정리
+## 코어 자바스크립트 내용 정리
 
 ## 데이터 타입
 
