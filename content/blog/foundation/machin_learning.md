@@ -2,7 +2,7 @@
 title: '머신러닝1 수업 내용 정리 '
 date: 2020-8-12 22:34:13
 category: 'foundation'
-draft: true
+draft: false
 ---
 
 생활코딩의 [머신러닝1](https://opentutorials.org/module/4916) 수업을 듣고 내용을 정리한 포스팅입니다.
