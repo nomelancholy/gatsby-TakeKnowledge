@@ -29,4 +29,12 @@ Unit 1은 be 동사입니다. be 동사가 긍정의 형태로 사용될 때는 
 | he,she,it   | is not  | (he's not or he isn't)   |
 | we,you,they | are not | (we're not or we aren't) |
 
-<p style: onmou></p>
+### 예문
+
+```ex
+I'm cold
+Steve is sick. He's in bed
+It's 10:00. You're late again.
+Ann and I are good friends
+
+```
