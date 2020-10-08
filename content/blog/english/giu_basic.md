@@ -29,6 +29,12 @@ Unit 1은 be 동사입니다. be 동사가 긍정의 형태로 사용될 때는 
 | he,she,it   | is not  | (he's not or he isn't)   |
 | we,you,they | are not | (we're not or we aren't) |
 
+that, there, here 뒤에 오는 is는 줄일 수 있습니다
+
+```ex
+that's = that is / there's = there is / here's = here is
+```
+
 ### 예문
 
 ```ex
@@ -36,5 +42,9 @@ I'm cold
 Steve is sick. He's in bed
 It's 10:00. You're late again.
 Ann and I are good friends
-
+Look! There is Carol
+My brother and I are good tennis players
+Amy is at home. Her children are at school
+my hands are cold
+diamonds aren't cheap
 ```
