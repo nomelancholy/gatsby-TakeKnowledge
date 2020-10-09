@@ -48,3 +48,19 @@ Amy is at home. Her children are at school
 my hands are cold
 diamonds aren't cheap
 ```
+
+## unit 2 - am/is/are(questions) (20/10/07)
+
+Unit 2는 be 동사의 의문문 형태입니다. 사용되는 형태를 표로 나타내면 아래와 같습니다.
+
+| positive    |     |
+| ----------- | --- |
+| I           | am  |
+| he,she,it   | is  |
+| we,you,they | are |
+
+| question    |         |
+| ----------- | ------- |
+| I           | am not  |
+| he,she,it   | is not  |
+| we,you,they | are not |
