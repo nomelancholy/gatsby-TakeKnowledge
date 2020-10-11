@@ -59,8 +59,49 @@ Unit 2는 be 동사의 의문문 형태입니다. 사용되는 형태를 표로 
 | he,she,it   | is  |
 | we,you,they | are |
 
-| question    |         |
-| ----------- | ------- |
-| I           | am not  |
-| he,she,it   | is not  |
-| we,you,they | are not |
+| question |                 |
+| -------- | --------------- |
+| am       | I?              |
+| is       | he?, she?, it?  |
+| are      | we?, you? they? |
+
+대답은 아래와 같이 할 수 있습니다.
+
+|     |             |     |
+| --- | ----------- | --- |
+| yes | I           | am  |
+| yes | he,she,it   | is  |
+| yes | we,you,they | are |
+
+질문에 대한 대답이 부정일 때는 두가지 형태로 줄여서 사용할 수 있습니다.
+
+하나는
+
+|     |                      |     |
+| --- | -------------------- | --- |
+| No, | I'm                  | not |
+| No, | he's,she's,it's      | not |
+| No, | we're,you're,they're | not |
+
+과 같은 형태고 다른 하나는
+
+|     |             |        |
+| --- | ----------- | ------ |
+| No, | he,she,it   | isn't  |
+| No, | we,you,they | aren't |
+
+와 같은 형태입니다
+
+또한 비동사 의문문은 Where, What, Who, How, Why 등과 같이 사용할 수 있습니다.
+
+이들 뒤에 is가 붙을 때는 What's, who's, how's, where's와 같이 축약형으로 사용할 수 있습니다
+
+### 예문
+
+- "Am I late?" "No, you're on time"
+- "Your shoes are nice. Are they new?"
+- "Is your car blue?" "No, it's black"
+
+- "How old are your children?" "Five, six, and ten"
+
+-
