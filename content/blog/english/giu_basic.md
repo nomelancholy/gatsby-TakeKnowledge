@@ -98,10 +98,11 @@ Unit 2는 be 동사의 의문문 형태입니다. 사용되는 형태를 표로 
 
 ### 예문
 
-- "Am I late?" "No, you're on time"
-- "Your shoes are nice. Are they new?"
-- "Is your car blue?" "No, it's black"
+```ex
+"Am I late?" "No, you're on time"
+"Your shoes are nice. Are they new?"
+"Is your car blue?" "No, it's black"
 
-- "How old are your children?" "Five, six, and ten"
-
--
+"How old are your children?" "Five, six, and ten"
+"What color is your new shoes?" "Black"
+```
