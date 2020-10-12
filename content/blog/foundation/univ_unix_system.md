@@ -203,9 +203,15 @@ draft: true
 
 ### 사용자 추가
 
-- root 계정으로 이동 : su - root
+- root 계정으로 이동 : su -
 
-- 사용자 추가 : useradd
+- 사용자 추가 : useradd 사용자 이름
+
+### Cent OS 8 한글 입력
+
+```terminal
+dnf install ibus-hangul
+```
 
 ## 텍스트 편집
 
