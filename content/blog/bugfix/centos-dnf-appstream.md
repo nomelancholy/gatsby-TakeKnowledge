@@ -21,6 +21,8 @@ dnf install ibus-hangul
 
 ## 원인 확인 및 해결
 
+검색해보니 굉장히 민망한 이유때문에 발생한 에러였습니다.
+
 인터넷 연결
 
 ![complete-dnf-appstream-error](../../assets/bugfix/centos-dnf-appstream/complete-dnf-appstream.PNG)
