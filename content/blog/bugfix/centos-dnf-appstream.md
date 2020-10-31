@@ -23,6 +23,8 @@ dnf install ibus-hangul
 
 검색해보니 굉장히 민망한 이유때문에 발생한 에러였습니다.
 
+인터넷이 연결되어 있지 않기 때문에 발생하는 에러라고 하더군요. Cent OS는 처음 설지했을 때
+
 인터넷 연결
 
 ![complete-dnf-appstream-error](../../assets/bugfix/centos-dnf-appstream/complete-dnf-appstream.PNG)
