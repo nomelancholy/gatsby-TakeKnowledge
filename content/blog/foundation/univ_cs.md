@@ -171,6 +171,10 @@ ASCII는 미국표준협회에서 개발한 코드로서 7비트를 사용해 �
 
 #### 다차원 배열
 
+![2-dimensional-array](../../assets/foundation/univ-cs/2-dimensional-array.PNG)
+
+![2-dimensional-array-in-memory](../../assets/foundation/univ-cs/2-dimensional-array-in-memory.PNG)
+
 #### 희소행렬
 
 ### 리스트
