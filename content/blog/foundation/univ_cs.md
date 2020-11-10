@@ -165,13 +165,24 @@ ASCII는 미국표준협회에서 개발한 코드로서 7비트를 사용해 �
 
 #### 1차원 배열
 
-![1-dimensional array](../../assets/foundation/univ-cs/1-dimensional-array.PNG)
 
-1차원 배열은 원소들이 1열로만 정렬된 말그대로 1차원인 가장 간단한 형태의 배열입니다. 배열의 원소들은 컴퓨터 메모리 상에서도 연속적인 기억장소에 순차적으로 할당됩니다. 따라서 0번째 원소가 저장된 메모리 시작 주소를 a라 하고 원소의 크기를 k라 하면 i번째 원소가 저장된 위치는 a+k*i로 구할 수 있습니다.
 
-#### 다차원 배열
+
+1차원 배열은 원소들이 1열로만 정렬된 말그대로 1차원인 가장 간단한 형태의 배열입니다. 
+
+![1-dimensional-array](../../assets/foundation/univ-cs/1-dimensional-array.PNG)
+
+배열의 원소들은 컴퓨터 메모리 상에서도 연속적인 기억장소에 순차적으로 할당됩니다. 따라서 0번째 원소가 저장된 메모리 시작 주소를 a라 하고 원소의 크기를 k라 하면 i번째 원소가 저장된 위치는 a+k*i로 구할 수 있습니다.
+
+![1-dimensional-array-in-memory](../../assets/foundation/univ-cs/1-dimensional-array.-in-memory.png)
+
+#### 2차원 배열
+
+2차원 배열은 동일한 크기의 1차원 배열을 여러개 모아놓은 형태의 배열입니다. 2차원 배열은 가로인 행과 세로인 열이 존재하기 때문에 자료에 접근 하기 위해 두개의 인덱스를 사용해야 합니다.
 
 ![2-dimensional-array](../../assets/foundation/univ-cs/2-dimensional-array.PNG)
+
+그러나 메모리에 저장될 때는 1차원 배열과 마찬가지로 메모리에 순차적으로 저장됩니다. 이 때 같은 행에 있는 데이터가 다 저장된 후 다음 열의 같은 행에 있는 데이터가 저장되는 형태의 배열을 행우선 순서 배열이라고 하고 같은 열에 있는 데이터가 다 저장된 후 다음 행의 같은 열에 있는 데이터가 저장되는 형태의 배열을 열우선 순서 배열이라고 합니다. 이 둘은 프로그래밍 언어에 따라 다르게 결정됩니다. 
 
 ![2-dimensional-array-in-memory](../../assets/foundation/univ-cs/2-dimensional-array-in-memory.PNG)
 
