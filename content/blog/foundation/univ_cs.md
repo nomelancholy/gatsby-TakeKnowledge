@@ -245,6 +245,18 @@ ASCII는 미국표준협회에서 개발한 코드로서 7비트를 사용해 �
 
 #### 특수한 조건을 갖는 이진 트리
 
+포화 이진트리(full binary tree), 완전 이진트리(complete binary tree), 경사 이진트리(skewed binary tree)는 특수한 조건을 갖는 이진트리입니다. 
+
+먼저 포화 이진트리는 가질 수 있는 최대 갯수만큼의 노드를 가진 이진 트리를 말합니다. 이진 트리의 깊이를 k라고 하면 가질 수 있는 최대 노드 갯수는 2<sup>k</sup>-1인데 포화 이진 트리는 그만큼의 노드를 가지고 있는 이진 트리입니다. 따라서 모든 레벨에서 빈 자리가 없이 노드를 가득 가지고 있습니다.
+
+![full-binary-tree](../../assets/foundation/univ-cs/full-binary-tree.png)
+
+완전 이진트리는 최대 레벨이 K일때 레벨 K-1까지는 포화이진 트리를 형성하고 마지막 레벨 k에서는 왼쪽에서부터 오른쪽으로, 노드가 순서대로 채워진 트리입니다. 즉 포화 이진 트리는 완전 이진 트리 이기도 합니다. 
+
+경사 이진트리는 한쪽 방향으로만 가지가 뻗어 나간 이진 트리를 말합니다.
+
+![skewed-complete-binary-tree](../../assets/foundation/univ-cs/skewed-complete-binary-tree.jpg)
+
 ### 그래프
 
 #### 그래프의 개념과 용어
