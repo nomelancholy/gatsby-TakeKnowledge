@@ -5,6 +5,10 @@ category: 'lecture'
 draft: true
 ---
 
+## 오리엔테이션
+
+### 왜 코딩테스트에 C++ 인가
+
 ## IDE
 
 ### Visual Studio
