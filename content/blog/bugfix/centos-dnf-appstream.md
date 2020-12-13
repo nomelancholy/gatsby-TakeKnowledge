@@ -1,19 +1,19 @@
 ---
-title: 'Cent OS8 - Errors during downloading metadata for repository 'AppStream'
+title: 'Cent OS 8 - Errors during downloading metadata for repository 'AppStream'
 date: 2020-08-12 17:00:00
 category: 'bugfix'
-draft: true
+draft: false
 ---
 
 ## 버그 발생 상황
 
-Cent OS 8 터미널에서 한글 입력을 하기 위해
+Cent OS 8 터미널에서 한글 입력을 하기 위해 ibus-hangul을 다운받으려고
 
 ```bash
 dnf install ibus-hangul
 ```
 
-명령어를 입력해 dnf 에서 ibus-hangul을 설치하려고 하자
+명령어를 입력하자
 
 ![dnf-appstream-error](../../assets/bugfix/centos-dnf-appstream/dnf-appstream.PNG)
 
@@ -23,11 +23,13 @@ dnf install ibus-hangul
 
 검색해보니 굉장히 민망한 이유때문에 발생한 에러였습니다.
 
-인터넷이 연결되어 있지 않기 때문에 발생하는 에러라고 하더군요. Cent OS는 처음 설지했을 때
-
-인터넷 연결
+인터넷이 연결되어 있지 않기 때문에 발생하는 에러라고 하더군요. Cent OS는 처음 설치했을 때 자동으로 인터넷 연결이 설정되진 않는다고 합니다. 그러니 인터넷을 켜고 다시 원래 입력했던 명령어를 입력했더니
 
 ![complete-dnf-appstream-error](../../assets/bugfix/centos-dnf-appstream/complete-dnf-appstream.PNG)
+
+아무 문제 없이 다운로드가 완료되었습니다.
+
+혹시 인터넷을 켜는데 문제가 있다면 아래 참조의 포스팅을 참고하세요!
 
 ## 참조
 
