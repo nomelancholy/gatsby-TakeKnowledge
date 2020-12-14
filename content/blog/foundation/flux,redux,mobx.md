@@ -1,6 +1,6 @@
 ---
 title: 'flux, redux, mobx'
-date: 2020-7-19 22:34:13
+date: '2020-07-19 22:34:13'
 category: 'foundation'
 draft: true
 ---

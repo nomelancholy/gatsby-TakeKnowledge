@@ -1,6 +1,6 @@
 ---
 title: '[부스트코스] 모두를 위한 컴퓨터 과학 강의 내용 정리 '
-date: 2020-8-27 21:34:13
+date: '2020-08-29 21:34:13'
 category: 'foundation'
 draft: true
 ---

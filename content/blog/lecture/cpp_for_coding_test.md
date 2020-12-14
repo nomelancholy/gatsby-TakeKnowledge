@@ -1,6 +1,6 @@
 ---
 title: '코딩테스트를 위한 C++'
-date: 2020-12-03 15:32:13
+date: '2020-12-03 15:32:13'
 category: 'lecture'
 draft: true
 ---

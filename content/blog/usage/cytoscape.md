@@ -1,6 +1,6 @@
 ---
 title: '생활코딩 마인드맵 라이브러리 cytoscape 사용법'
-date: 2020-7-17 15:32:13
+date: '2020-06-17 15:32:13'
 category: 'usage'
 draft: true
 ---

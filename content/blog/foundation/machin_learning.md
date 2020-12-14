@@ -1,6 +1,6 @@
 ---
 title: '머신러닝1 수업 내용 정리 '
-date: 2020-8-12 22:34:13
+date: '2020-08-16 22:34:13'
 category: 'foundation'
 draft: false
 ---

@@ -1,6 +1,6 @@
 ---
 title: '나의 첫 스타트업'
-date: 2020-07-20 10:00:13
+date: '2020-07-20 10:00:13'
 category: 'log'
 draft: true
 ---

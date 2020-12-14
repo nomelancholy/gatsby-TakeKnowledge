@@ -1,6 +1,6 @@
 ---
 title: 'typescript props 받는 법'
-date: 2020-07-23 14:36:13
+date: '2020-07-23 14:36:13'
 category: 'bugfix'
 draft: true
 ---

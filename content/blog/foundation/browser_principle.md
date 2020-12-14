@@ -1,6 +1,6 @@
 ---
 title: '브라우저는 어떻게 동작하는가?'
-date: 2020-7-17 11:27:13
+date: '2020-07-14 11:27:13'
 category: 'foundation'
 draft: true
 ---

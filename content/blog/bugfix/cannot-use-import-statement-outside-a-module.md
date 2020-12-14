@@ -1,6 +1,6 @@
 ---
 title: 'Cannot use import statement outside a module 에러 해결'
-date: 2020-08-12 17:00:00
+date: '2020-08-12 17:00:00'
 category: 'bugfix'
 draft: false
 ---

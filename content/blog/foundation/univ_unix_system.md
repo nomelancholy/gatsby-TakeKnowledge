@@ -1,6 +1,6 @@
 ---
 title: 'UNIX 시스템 - '
-date: 2020-10-02 16:31:13
+date: '2020-10-02 16:31:13'
 category: 'foundation'
 draft: true
 ---
