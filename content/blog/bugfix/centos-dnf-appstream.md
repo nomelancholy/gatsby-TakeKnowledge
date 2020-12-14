@@ -1,6 +1,6 @@
 ---
 title: 'Cent OS 8 - Errors during downloading metadata for repository 'AppStream'
-date: 2020-08-12 17:00:00
+date: 2020-12-14 17:37:00
 category: 'bugfix'
 draft: false
 ---
