@@ -1,6 +1,6 @@
 ---
 title: '선형대수 - '
-date: '2020-09-20 20:55:13'
+date: '2020-09-20'
 category: 'foundation'
 draft: true
 ---

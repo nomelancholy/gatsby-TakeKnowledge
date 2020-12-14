@@ -1,6 +1,6 @@
 ---
 title: '컴퓨터 과학 개론 - '
-date: '2020-08-27 21:34:13'
+date: '2020-08-27'
 category: 'foundation'
 draft: true
 ---

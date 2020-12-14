@@ -1,6 +1,6 @@
 ---
 title: '자료구조 - '
-date: '2020-09-20 20:55:13'
+date: '2020-09-20'
 category: 'foundation'
 draft: true
 ---

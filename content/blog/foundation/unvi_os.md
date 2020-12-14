@@ -1,6 +1,6 @@
 ---
 title: '운영체제 - '
-date: '2020-08-10 22:34:13'
+date: '2020-08-10'
 category: 'foundation'
 draft: true
 ---

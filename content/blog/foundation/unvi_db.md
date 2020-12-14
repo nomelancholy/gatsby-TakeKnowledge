@@ -1,6 +1,6 @@
 ---
 title: '데이터베이스 - '
-date: '2020-08-12 22:34:13'
+date: '2020-08-12'
 category: 'foundation'
 draft: true
 ---

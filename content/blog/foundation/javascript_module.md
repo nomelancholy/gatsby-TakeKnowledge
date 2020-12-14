@@ -1,6 +1,6 @@
 ---
 title: '자바스크립트 모듈(Module) 학습 내용 간단 요약'
-date: '2019-12-21 22:34:13'
+date: '2019-12-21'
 category: 'foundation'
 draft: false
 ---

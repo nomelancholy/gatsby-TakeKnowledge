@@ -1,6 +1,6 @@
 ---
 title: '입문자를 위한 slack 사용법'
-date: '2020-08-13 15:32:13'
+date: '2020-08-13'
 category: 'usage'
 draft: true
 ---
