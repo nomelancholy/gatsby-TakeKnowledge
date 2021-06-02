@@ -1,7 +1,7 @@
 ---
-title: 'C언어의 컴파일 과정'
-date: '2021-01-03'
-category: 'foundation'
+title: "C언어의 컴파일 과정"
+date: "2021-01-03"
+category: "foundation"
 draft: true
 ---
 

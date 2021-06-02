@@ -1,7 +1,7 @@
 ---
-title: 'C++ 프로그래밍 - '
-date: '2020-09-20'
-category: 'foundation'
+title: "C++ 프로그래밍 - "
+date: "2020-09-20"
+category: "foundation"
 draft: true
 ---
 

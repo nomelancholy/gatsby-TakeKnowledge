@@ -1,7 +1,7 @@
 ---
-title: '선형대수 - '
-date: '2020-09-20'
-category: 'foundation'
+title: "선형대수 - "
+date: "2020-09-20"
+category: "foundation"
 draft: true
 ---
 

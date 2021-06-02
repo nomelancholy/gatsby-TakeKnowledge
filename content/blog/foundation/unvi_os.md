@@ -1,7 +1,7 @@
 ---
-title: '운영체제 - '
-date: '2020-08-10'
-category: 'foundation'
+title: "운영체제 - "
+date: "2020-08-10"
+category: "foundation"
 draft: true
 ---
 

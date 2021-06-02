@@ -1,7 +1,7 @@
 ---
-title: '코딩테스트를 위한 C++'
-date: '2020-12-03'
-category: 'lecture'
+title: "코딩테스트를 위한 C++"
+date: "2020-12-03"
+category: "lecture"
 draft: true
 ---
 

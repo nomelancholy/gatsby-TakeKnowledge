@@ -1,7 +1,7 @@
 ---
-title: '데이터 모델링 - '프로젝트 성패를 결정짓는 데이터 모델링 이야기' 정리'
-date: '2020-08-29'
-category: 'foundation'
+title: "데이터 모델링 - '프로젝트 성패를 결정짓는 데이터 모델링 이야기' 정리"
+date: "2020-08-29"
+category: "foundation"
 draft: true
 ---
 

@@ -1,7 +1,7 @@
 ---
-title: '자료구조 - '
-date: '2020-09-20'
-category: 'foundation'
+title: "자료구조 - "
+date: "2020-09-20"
+category: "foundation"
 draft: true
 ---
 

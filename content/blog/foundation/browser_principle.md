@@ -1,7 +1,7 @@
 ---
-title: '브라우저는 어떻게 동작하는가?'
-date: '2020-07-14'
-category: 'foundation'
+title: "브라우저는 어떻게 동작하는가?"
+date: "2020-07-14"
+category: "foundation"
 draft: true
 ---
 

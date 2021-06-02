@@ -1,7 +1,7 @@
 ---
-title: 'Cannot use import statement outside a module 에러 해결'
-date: '2020-08-12'
-category: 'bugfix'
+title: "Cannot use import statement outside a module 에러 해결"
+date: "2020-08-12"
+category: "bugfix"
 draft: false
 ---
 

@@ -1,7 +1,7 @@
 ---
-title: '생활코딩 마인드맵 라이브러리 cytoscape 사용법'
-date: '2020-06-17'
-category: 'usage'
+title: "생활코딩 마인드맵 라이브러리 cytoscape 사용법"
+date: "2020-06-17"
+category: "usage"
 draft: true
 ---
 

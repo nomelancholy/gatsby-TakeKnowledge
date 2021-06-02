@@ -1,7 +1,7 @@
 ---
-title: 'typescript props 받는 법'
-date: '2020-07-23'
-category: 'bugfix'
+title: "typescript props 받는 법"
+date: "2020-07-23"
+category: "bugfix"
 draft: true
 ---
 

@@ -1,7 +1,7 @@
 ---
-title: 'Cent OS 8 - Errors during downloading metadata for repository 'AppStream' 에러 해결'
-date: '2020-12-14'
-category: 'bugfix'
+title: "Cent OS 8 - Errors during downloading metadata for repository 'AppStream' 에러 해결"
+date: "2020-12-14"
+category: "bugfix"
 draft: false
 ---
 

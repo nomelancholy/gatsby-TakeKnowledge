@@ -1,7 +1,7 @@
 ---
-title: 'Cent OS8 - Errors during downloading metadata for repository 'AppStream'
-date: '2020-10-12'
-category: 'bugfix'
+title: "Cent OS8 - Errors during downloading metadata for repository 'AppStream'"
+date: "2020-10-12"
+category: "bugfix"
 draft: true
 ---
 
@@ -11,7 +11,6 @@ Cent OS 8 터미널에서 한글 입력을 하려고 한영키를 눌러봐도 �
 
 ## 해결
 
-````ps
 ### 사용자 추가
 
 - root 계정으로 이동 : su -
@@ -19,9 +18,7 @@ Cent OS 8 터미널에서 한글 입력을 하려고 한영키를 눌러봐도 �
 
 ### Cent OS 8 한글 입력
 
-```terminal
 dnf install ibus-hangul
-```
 
 1. 위 명령어를 입력해 ibus-hangul을 다운받고
 2. 재부팅 후
@@ -32,7 +29,4 @@ dnf install ibus-hangul
 - 사용자 정보 변경: usermod [option] 사용자계정
 - test라는 사용자 계정의 코멘트를 '테스트'로 변경하는 예
 
-```terminal
 usermod -c "테스트" test
-```
-````

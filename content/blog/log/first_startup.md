@@ -1,7 +1,7 @@
 ---
-title: '나의 첫 스타트업'
-date: '2020-07-20'
-category: 'log'
+title: "나의 첫 스타트업"
+date: "2020-07-20"
+category: "log"
 draft: true
 ---
 

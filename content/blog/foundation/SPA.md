@@ -1,7 +1,7 @@
 ---
-title: 'SPA'
-date: '2020-07-19'
-category: 'foundation'
+title: "SPA"
+date: "2020-07-19"
+category: "foundation"
 draft: true
 ---
 

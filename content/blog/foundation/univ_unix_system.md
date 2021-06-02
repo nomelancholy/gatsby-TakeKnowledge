@@ -1,7 +1,7 @@
 ---
-title: 'UNIX 시스템 - '
-date: '2020-10-02'
-category: 'foundation'
+title: "UNIX 시스템 - "
+date: "2020-10-02"
+category: "foundation"
 draft: true
 ---
 

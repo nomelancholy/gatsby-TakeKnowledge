@@ -1,7 +1,7 @@
 ---
-title: '컴퓨터 과학 개론 - '
-date: '2020-08-27'
-category: 'foundation'
+title: "컴퓨터 과학 개론 - "
+date: "2020-08-27"
+category: "foundation"
 draft: true
 ---
 

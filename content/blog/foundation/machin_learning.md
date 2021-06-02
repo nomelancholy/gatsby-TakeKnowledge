@@ -1,7 +1,7 @@
 ---
-title: '머신러닝1 수업 내용 정리 '
-date: '2020-08-16'
-category: 'foundation'
+title: "머신러닝1 수업 내용 정리 "
+date: "2020-08-16"
+category: "foundation"
 draft: false
 ---
 

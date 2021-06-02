@@ -1,7 +1,7 @@
 ---
-title: 'Gatsy Build Fail dml '
-date: '2020-08-12 17:00:00'
-category: 'bugfix'
+title: "Gatsy Build Fail "
+date: "2020-08-12"
+category: "bugfix"
 draft: false
 ---
 

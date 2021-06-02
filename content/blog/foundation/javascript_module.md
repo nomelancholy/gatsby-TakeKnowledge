@@ -1,7 +1,7 @@
 ---
-title: '자바스크립트 모듈(Module) 학습 내용 간단 요약'
-date: '2019-12-21'
-category: 'foundation'
+title: "자바스크립트 모듈(Module) 학습 내용 간단 요약"
+date: "2019-12-21"
+category: "foundation"
 draft: false
 ---
 
@@ -35,29 +35,29 @@ draft: false
 
 // 배열 내보내기
 export let months = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-]
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec"
+];
 
 // 상수 내보내기
-export const MODULES_BECAME_STANDARD_YEAR = 2015
+export const MODULES_BECAME_STANDARD_YEAR = 2015;
 
 // 함수 내보내기
 export function sayHi(user) {
-  alert('Hello! `user`')
+  alert("Hello! `user`");
 }
 
 // 클래스 내보내기
 export class User {
   constructor(name) {
-    this.name = name
+    this.name = name;
   }
 }
 ```
@@ -66,30 +66,30 @@ export class User {
 
 ```js
 // 배열 내보내기
-let months = ['Jan', 'Feb', 'Mar', 'Apr', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+let months = ["Jan", "Feb", "Mar", "Apr", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 // 상수 내보내기
-const MODULES_BECAME_STANDARD_YEAR = 2015
+const MODULES_BECAME_STANDARD_YEAR = 2015;
 
 // 함수 내보내기
 function sayHi(user) {
-  alert(`Hello, ${user}!`)
+  alert(`Hello, ${user}!`);
 }
 
 // 클래스 내보내기
 class User {
   constructor(name) {
-    this.name = name
+    this.name = name;
   }
 }
 
-export { months, MODULES_BECAME_STANDARD_YEAR, sayHi, User }
+export { months, MODULES_BECAME_STANDARD_YEAR, sayHi, User };
 ```
 
 `as`를 활용해 이름을 바꿔 내보낼 수도 있습니다.
 
 ```js
-export { months, MODULES_BECAME_STANDARD_YEAR as year, sayHi, User }
+export { months, MODULES_BECAME_STANDARD_YEAR as year, sayHi, User };
 ```
 
 ### 2️⃣ named export - import
@@ -100,7 +100,7 @@ named export로 내보낸 모듈은 `import` 지시자를 활용해 가져올 �
 ```js
 // 📃 import.js
 
-import { months, year, sayHi, User } from './modules/export.js'
+import { months, year, sayHi, User } from "./modules/export.js";
 ```
 
 import 뒤 중괄호안에 가져올 모듈을 적습니다. 여러개인 경우 , 로 구분합니다.
@@ -108,17 +108,17 @@ from 뒤엔 경로를 적습니다. `.`이 현재 경로를 의미합니다. `.`
 일부 모듈 시스템에선 확장명을 생략할 수 있지만 네이티브 자바스크립트에서는 확장명이 있어야 합니다.
 
 ```js
-import { months, year, sayHi as hello, User } from './modules/export.js'
+import { months, year, sayHi as hello, User } from "./modules/export.js";
 
-hello('길동')
+hello("길동");
 ```
 
 import에서도 역시 `as` 지시자로 이름을 바꿀 수 있습니다.
 
 ```js
-import * as all from './modules/export.js'
+import * as all from "./modules/export.js";
 
-console.log(all)
+console.log(all);
 ```
 
 또한 import 에서 `*` 를 활용하면 경로에서 export된 모든 모듈을 가져와 사용할 수 있습니다.
@@ -142,7 +142,7 @@ named export를 설명하기 위해 예시를 든 방식과는 다르게, 대개
 export default class User {
   // export 옆에 "default"를 추가해보았습니다.
   constructor(name) {
-    this.name = name
+    this.name = name;
   }
 }
 ```
@@ -169,11 +169,11 @@ export default ['Jan', 'Feb', 'Mar','Apr', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 ```js
 function sayHi(user) {
-  alert(`Hello, ${user}!`)
+  alert(`Hello, ${user}!`);
 }
 
 // 함수 선언부 앞에 "export default"를 붙여준 것과 동일합니다.
-export { sayHi as default }
+export { sayHi as default };
 ```
 
 이와 같은 방식으로도 구현할 수 있습니다.
@@ -184,8 +184,8 @@ default export로 내보낸 값을 가져올 때는 import 뒤에 중괄호를 �
 또한 넘어온 모듈의 이름은 import 한 페이지에서 원하는 대로 적어 사용할 수 있습니다.
 
 ```js
-import Lorem from './modules/export.js' // 동작
-import Ipsum from './modules/export.js' // 동작
+import Lorem from "./modules/export.js"; // 동작
+import Ipsum from "./modules/export.js"; // 동작
 // 어떤 이름이든 에러 없이 동작합니다.
 ```
 
@@ -193,9 +193,9 @@ import Ipsum from './modules/export.js' // 동작
 
 ```js
 // 📁 main.js
-import { default as User, sayHi } from './user.js'
+import { default as User, sayHi } from "./user.js";
 
-new User('John')
+new User("John");
 ```
 
 위와 같이 import 해서 사용할 수 있습니다.
@@ -207,11 +207,11 @@ new User('John')
 ```js
 // named export로 넘어온 모듈
 // login과 logout을 가지고 온 후 바로 내보냅니다.
-export { login, logout } from './helpers.js'
+export { login, logout } from "./helpers.js";
 
 // default export로 넘어온 모듈
 // User 가져온 후 default 지시자를 활용해 바로 내보냅니다.
-export { default as User } from './user.js'
+export { default as User } from "./user.js";
 ```
 
 위와 같이 처리할 수 있습니다.
@@ -248,7 +248,7 @@ type 속성을 명시하지 않으면
 
 ```html
 <script type="module">
-  alert(typeof button)
+  alert(typeof button);
   // 모듈 스크립트는 지연 실행되기 때문에
   //페이지가 모두 로드되고 난 다음에 얼럿 함수가 실행되므로
   // 얼럿창에 object가 정상적으로 출력됩니다. 모듈 스크립트는 아래쪽의 button 요소를 '볼 수' 있죠.
@@ -257,7 +257,7 @@ type 속성을 명시하지 않으면
 하단의 일반 스크립트와 비교해 봅시다.
 
 <script>
-  alert(typeof button) // 일반 스크립트는 페이지가 완전히 구성되기 전이라도 바로 실행됩니다.
+  alert(typeof button); // 일반 스크립트는 페이지가 완전히 구성되기 전이라도 바로 실행됩니다.
   // 버튼 요소가 페이지에 만들어지기 전에 접근하였기 때문에 undefined가 출력되는 것을 확인할 수 있습니다.
 </script>
 

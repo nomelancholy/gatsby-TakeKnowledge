@@ -1,7 +1,7 @@
 ---
-title: '이산수학 - '
-date: '2020-08-26'
-category: 'foundation'
+title: "이산수학 - "
+date: "2020-08-26"
+category: "foundation"
 draft: true
 ---
 

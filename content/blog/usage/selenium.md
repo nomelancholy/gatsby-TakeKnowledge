@@ -1,7 +1,7 @@
 ---
-title: '단순 작업을 자동화해보자 selenium 사용법'
-date: '2020-08-14'
-category: 'usage'
+title: "단순 작업을 자동화해보자 selenium 사용법"
+date: "2020-08-14"
+category: "usage"
 draft: true
 ---
 

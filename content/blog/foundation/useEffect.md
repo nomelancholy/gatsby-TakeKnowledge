@@ -1,7 +1,7 @@
 ---
-title: 'use effect'
-date: '2020-07-19'
-category: 'foundation'
+title: "use effect"
+date: "2020-07-19"
+category: "foundation"
 draft: true
 ---
 
