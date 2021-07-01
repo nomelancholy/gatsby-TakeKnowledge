@@ -7,12 +7,13 @@ import Head from "next/head";
 import NProgress from "nprogress";
 import Page from "../components/Page";
 import Router from "next/router";
+import { wrapper } from "../state/stores";
 
 Router.events.on("routeChangeStart", () => NProgress.start());
 Router.events.on("routeChangeComplete", () => NProgress.done());
 Router.events.on("routeChangeError", () => NProgress.done());
 
-class MyApp extends App {
+class FSAdmin extends App {
   static async getInitialProps({ Component, ctx, req }) {
     let pageProps = {};
     const userAgent = ctx.req
@@ -49,7 +50,10 @@ class MyApp extends App {
           <link rel="shortcut icon" href="/images/triangle.png" />
           <title>One - React Next.js Ant Design Dashboard</title>
           <link rel="preconnect" href="https://fonts.gstatic.com" />
-          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900|Anonymous+Pro:400,700&display=swap" rel="stylesheet" />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900|Anonymous+Pro:400,700&display=swap"
+            rel="stylesheet"
+          />
           {pageProps.ieBrowser && (
             <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.2.5/polyfill.min.js" />
           )}
@@ -64,4 +68,4 @@ class MyApp extends App {
   }
 }
 
-export default MyApp;
+export default wrapper.withRedux(FSAdmin);
