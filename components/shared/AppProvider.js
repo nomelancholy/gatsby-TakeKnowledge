@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useReducer } from "react";
 
-import { ConfigProvider } from 'antd';
+import { ConfigProvider } from "antd";
 import Router from "next/router";
 
 const Context = createContext();
@@ -12,7 +12,7 @@ Router.events.on(
   () => (document.querySelector(".workspace > .ant-layout").scrollTop = 0)
 );
 
-const saveToLocal = state => {
+const saveToLocal = (state) => {
   delete state.mobile;
   delete state.optionDrawer;
   delete state.mobileDrawer;
@@ -30,7 +30,7 @@ const reducer = (state, action) => {
         element.requestFullScreen ||
         element.webkitRequestFullScreen ||
         element.mozRequestFullScreen ||
-        function() {
+        function () {
           return false;
         };
 
@@ -38,7 +38,7 @@ const reducer = (state, action) => {
         document.cancelFullScreen ||
         document.webkitCancelFullScreen ||
         document.mozCancelFullScreen ||
-        function() {
+        function () {
           return false;
         };
 
@@ -84,7 +84,7 @@ const reducer = (state, action) => {
       return newState;
     }
     case "direction": {
-      const newDirection = state.direction === 'rtl' ? 'ltr' : 'rtl';
+      const newDirection = state.direction === "rtl" ? "ltr" : "rtl";
       const newState = { ...state, direction: newDirection };
       saveToLocal(newState);
       return newState;
@@ -104,9 +104,9 @@ const reducer = (state, action) => {
   }
 };
 
-const AppProvider = props => {
+const AppProvider = (props) => {
   const [state, dispatch] = useReducer(reducer, {
-    name: "One",
+    name: "FIVESPOT",
     mobile: false,
     boxed: false,
     darkSidebar: false,
@@ -117,7 +117,7 @@ const AppProvider = props => {
     optionDrawer: false,
     mobileDrawer: false,
     fullscreen: false,
-    direction: 'ltr'
+    direction: "ltr",
   });
 
   useEffect(() => {
@@ -131,7 +131,11 @@ const AppProvider = props => {
     dispatch({ type: "mobile" });
   };
 
-  return <ConfigProvider direction={state.direction}><Provider value={[state, dispatch]}>{props.children}</Provider></ConfigProvider>;
+  return (
+    <ConfigProvider direction={state.direction}>
+      <Provider value={[state, dispatch]}>{props.children}</Provider>
+    </ConfigProvider>
+  );
 };
 
 export default AppProvider;
