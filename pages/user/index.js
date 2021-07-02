@@ -119,14 +119,6 @@ const User = () => {
           <SlidersOutlined></SlidersOutlined>필터
         </Button>
         <span className="px-2 w-10"></span>
-        <Button
-          type="primary"
-          onClick={() => {
-            setRegistrationModalOpen(true);
-          }}
-        >
-          + 등록
-        </Button>
       </Row>
 
       <Table
