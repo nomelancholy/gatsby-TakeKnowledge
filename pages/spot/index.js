@@ -9,27 +9,19 @@ const Spot = () => {
   const columns = [
     {
       title: "스팟 ID",
-      dataIndex: "name",
-      // sorter: true,
-      // render: (name) => `${name.first} ${name.last}`,
-      width: "20%",
+      dataIndex: "spot_id",
     },
     {
       title: "스팟명",
-      dataIndex: "gender",
-      // filters: [
-      //   { text: "Male", value: "male" },
-      //   { text: "Female", value: "female" },
-      // ],
-      width: "20%",
+      dataIndex: "name",
     },
     {
       title: "좌석 수",
-      dataIndex: "email",
+      dataIndex: "seat_capacity",
     },
     {
       title: "최대 허용 수",
-      dataIndex: "email",
+      dataIndex: "seat_limit",
     },
     {
       title: "라운지",
@@ -49,13 +41,15 @@ const Spot = () => {
     },
     {
       title: "활성/비활성",
-      dataIndex: "email",
+      dataIndex: "status",
     },
     {
       title: "생성 일시",
       dataIndex: "email",
     },
   ];
+
+  const [spots, setSpots] = useState([]);
 
   const [data, setData] = useState([]);
   const [pagination, setPagination] = useState({});
@@ -78,31 +72,29 @@ const Spot = () => {
     });
   };
 
-  const fetch = (params = {}) => {
+  let spotList = [];
+
+  const getSpotList = () => {
     setLoading(true);
     axios
-      .get(
-        "https://randomuser.me/api",
-        {
-          results: 10,
-          ...params,
-        },
+      .post(
+        `${process.env.BACKEND_API}/spot/list`,
+        {},
         {
           headers: {
             "Content-Type": "application/json;charset=UTF-8",
             "Access-Control-Allow-Origin": "*",
+            Authorization:
+              "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjUsInVzZXJfbG9naW4iOiJjc0BkbWFpbi5pbyIsInVzZXJfbmFtZSI6Ilx1Yzc3OFx1YzEzMSIsInVzZXJfcm9sZSI6ImZmYWRtaW4iLCJwaG9uZSI6IjAxMC0zNjc0LTc1NjMiLCJtYXJrZXRpbmdfYWdyZWUiOjEsImdyb3VwX2lkIjpudWxsLCJleHAiOjE2NTY5NDkzMTh9.TMNWMrhtKzYb0uCFLuqTbqKE19ZXVzT0nRBqsPN5N4I",
           },
         }
       )
       .then((response) => {
-        console.log(`response`, response);
         const data = response.data;
-        console.log(`data`, data);
-        // Read total count from server
-        // pagination.total = data.totalCount;
+        console.log(`spots`, data.items);
         setPagination({ ...pagination, total: 200 });
-        setLoading(false);
-        setData(data.results);
+        setSpots(data.items);
+        // setData(data.items);
       })
       .catch((error) => {
         console.log(`error`, error);
@@ -110,8 +102,89 @@ const Spot = () => {
   };
 
   useEffect(() => {
-    // fetch();
+    getSpotList();
   }, []);
+
+  const getSpace = (spot) => {
+    const spaceList = ["lounge", "meeting", "coworking"];
+    let lounge = undefined;
+    let meeting = undefined;
+    let coworking = undefined;
+
+    spaceList.map(async (space) => {
+      await axios
+        .post(
+          `${process.env.BACKEND_API}/spot/space/list`,
+          {
+            spot_id: spot.spot_id,
+            type: space,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json;charset=UTF-8",
+              "Access-Control-Allow-Origin": "*",
+              Authorization:
+                "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjUsInVzZXJfbG9naW4iOiJjc0BkbWFpbi5pbyIsInVzZXJfbmFtZSI6Ilx1Yzc3OFx1YzEzMSIsInVzZXJfcm9sZSI6ImZmYWRtaW4iLCJwaG9uZSI6IjAxMC0zNjc0LTc1NjMiLCJtYXJrZXRpbmdfYWdyZWUiOjEsImdyb3VwX2lkIjpudWxsLCJleHAiOjE2NTY5NDkzMTh9.TMNWMrhtKzYb0uCFLuqTbqKE19ZXVzT0nRBqsPN5N4I",
+            },
+          }
+        )
+        .then((response) => {
+          switch (space) {
+            case "lounge":
+              lounge = { ...{}, data: response.data };
+              console.log(`lounge`, lounge);
+              break;
+            case "meeting":
+              meeting = { ...{}, data: response.data };
+              console.log(`meeting`, meeting);
+              break;
+            case "coworking":
+              coworking = { ...{}, data: response.data };
+              console.log(`coworking`, coworking);
+            default:
+              break;
+          }
+        })
+        .catch((error) => {
+          console.log(`error`, error);
+        });
+    });
+    console.log(`lounge`, lounge);
+    console.log(`meeting`, meeting);
+    console.log(`coworking`, coworking);
+    const obj = {
+      ...spot,
+      status: spot.status === "active" ? "활성" : "비활성",
+      lounge: lounge,
+      meeting: meeting,
+      coworking: coworking,
+    };
+    console.log("obj", obj);
+    spotList.push(obj);
+  };
+
+  useEffect(() => {
+    if (spots) {
+      async function addSpace() {
+        await Promise.all(
+          spots.map((spot) => {
+            getSpace(spot);
+          })
+        );
+      }
+
+      addSpace();
+      console.log(`spotList`, spotList);
+      setData(spotList);
+    }
+  }, [spots]);
+
+  useEffect(() => {
+    if (data) {
+      setLoading(false);
+      console.log(`data`, data);
+    }
+  }, [data]);
 
   const handleGroupTypeChange = (value) => {
     console.log(value);
@@ -156,7 +229,7 @@ const Spot = () => {
 
       <Table
         columns={columns}
-        rowKey={(record) => record.login.uuid}
+        rowKey={(record) => record.spot_id}
         dataSource={data}
         pagination={pagination}
         loading={loading}
