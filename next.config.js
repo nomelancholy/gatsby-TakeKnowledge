@@ -1,34 +1,31 @@
 if (typeof require !== "undefined") {
-  require.extensions[".less"] = file => {};
+  require.extensions[".less"] = (file) => {};
 }
 
 const withLess = require("@zeit/next-less"),
   nextConfig = {
     target: "serverless",
     env: {
-      weatherApi: "YOUR_WEATHER_API_KEY",
-      mapBoxApi: "YOUR_MAP_BOX_API_KEY"
+      BACKEND_API: "http://3.34.133.211:8000/api/v1",
     },
     onDemandEntries: {
       maxInactiveAge: 1000 * 60 * 60,
-      pagesBufferLength: 5
+      pagesBufferLength: 5,
     },
     lessLoaderOptions: {
-      javascriptEnabled: true
+      javascriptEnabled: true,
     },
     webpack: (config, { isServer }) => {
       if (!isServer) {
         config.node = {
-          fs: 'empty'
-        }
+          fs: "empty",
+        };
       }
 
-      config.module.rules.push(
-        {
-          test: /\.md$/,
-          use: "raw-loader",
-        }
-      );
+      config.module.rules.push({
+        test: /\.md$/,
+        use: "raw-loader",
+      });
 
       if (isServer) {
         const antStyles = /antd\/.*?\/style.*?/;
@@ -42,16 +39,16 @@ const withLess = require("@zeit/next-less"),
               callback();
             }
           },
-          ...(typeof origExternals[0] === "function" ? [] : origExternals)
+          ...(typeof origExternals[0] === "function" ? [] : origExternals),
         ];
 
         config.module.rules.unshift({
           test: antStyles,
-          use: "null-loader"
+          use: "null-loader",
         });
       }
       return config;
-    }
+    },
   };
 
 module.exports = withLess(nextConfig);
