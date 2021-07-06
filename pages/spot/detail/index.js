@@ -31,14 +31,19 @@ const Detail = () => {
   const [status, setStatus] = useState(true);
   const [property, setProperty] = useState(true);
   const [spotPostcode, setSpotPostcode] = useState("");
-  const [form] = Form.useForm();
 
-  const handlePropertyChange = (e) => {
-    setProperty(e.target.value);
-  };
+  const [fileList, setFileList] = useState([]);
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const [previewImage, setPreviewImage] = useState("");
+
+  const [form] = Form.useForm();
 
   const handleStatusChange = (e) => {
     setStatus(e.target.value);
+  };
+
+  const handlePropertyChange = (e) => {
+    setProperty(e.target.value);
   };
 
   const userAddressEtcRef = useRef(null);
@@ -63,12 +68,6 @@ const Detail = () => {
     }).open();
   };
 
-  useEffect(() => {
-    if (spotPostcode) {
-      console.log(`spotPostcode`, spotPostcode);
-    }
-  }, [spotPostcode]);
-
   const facilityInfoOptions = [
     { label: "라운지", value: "lounge" },
     { label: "미팅룸", value: "meeting" },
@@ -82,9 +81,6 @@ const Detail = () => {
 
   const handleSpotRegisterSubmit = (values) => {
     console.log(`values`, values);
-    values.facilityInfos.map((facilityInfo) => {
-      console.log(`facilityInfo`, facilityInfo);
-    });
 
     facilityInfoObj = [
       { lounge: false },
@@ -96,6 +92,23 @@ const Detail = () => {
       { unmanned: false },
       { phone: false },
     ];
+
+    const returnObj = Object.keys(facilityInfoObj).filter((key) =>
+      values.facilityInfo.inclueds(key)
+    );
+    values.facilityInfos.map((facilityInfo) => {
+      facilityInfoObj;
+      console.log(`facilityInfo`, facilityInfo);
+    });
+  };
+
+  const handleFileChange = ({ fileList }) => {
+    setFileList(fileList);
+  };
+
+  const handlePreview = (file) => {
+    setPreviewVisible(true);
+    setPreviewImage(file.url || file.thumbUrl);
   };
 
   return (
@@ -121,8 +134,8 @@ const Detail = () => {
                   </Radio>
                 </Radio.Group>
               </Form.Item>
-              <Form.Item name="name" label="스팟 명">
-                <Input defaultValue="신규" />
+              <Form.Item name="name" label="스팟 명" initialValue="신규">
+                <Input />
               </Form.Item>
               <Form.Item name="spot_id" label="스팟 ID">
                 <InputNumber min={1} />
@@ -136,16 +149,40 @@ const Detail = () => {
               <Form.Item name="address_etc" label="상세 주소">
                 <Input ref={userAddressEtcRef} />
               </Form.Item>
-              <Form.Item name="operation_time" label="운영 시간">
-                <Input defaultValue={"연중무휴, 24시간"} />
+              <Form.Item
+                name="operation_time"
+                label="운영 시간"
+                initialValue="연중무휴, 24시간"
+              >
+                <Input />
               </Form.Item>
               <Form.Item name="인원" label="인원">
-                <Input placeholder="신규" />
+                <Input />
               </Form.Item>
               <Form.Item name="images" label="대표 이미지">
-                <Upload name="image" listType="picture">
-                  <Button icon={<UploadOutlined />}>업로드</Button>
+                <Upload
+                  name="image"
+                  listType="picture-card"
+                  onChange={handleFileChange}
+                  onPreview={handlePreview}
+                >
+                  {fileList.length < 5 ? (
+                    <Button icon={<UploadOutlined />}>업로드</Button>
+                  ) : null}
                 </Upload>
+                <Modal
+                  visible={previewVisible}
+                  footer={null}
+                  onCancel={() => {
+                    setPreviewVisible(false);
+                  }}
+                >
+                  <img
+                    alt="example"
+                    style={{ width: "100%" }}
+                    src={previewImage}
+                  />
+                </Modal>
               </Form.Item>
               <Form.Item name="content" label="설명">
                 <Input.TextArea rows={4}></Input.TextArea>
