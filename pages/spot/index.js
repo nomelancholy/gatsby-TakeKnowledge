@@ -4,6 +4,7 @@ import { SlidersOutlined, SearchOutlined } from "@ant-design/icons";
 import React, { Component, useState, useEffect } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
+import Router, { useRouter } from "next/router";
 
 const Spot = () => {
   const columns = [
@@ -186,6 +187,10 @@ const Spot = () => {
     }
   }, [data]);
 
+  const moveToRegister = () => {
+    Router.push(`/spot/detail`, `/spot/write`);
+  };
+
   return (
     <>
       <h3>스팟 관리</h3>
@@ -200,12 +205,7 @@ const Spot = () => {
           <SlidersOutlined></SlidersOutlined>필터
         </Button>
         <span className="px-2 w-10"></span>
-        <Button
-          type="primary"
-          onClick={() => {
-            setRegistrationModalOpen(true);
-          }}
-        >
+        <Button type="primary" onClick={moveToRegister}>
           + 등록
         </Button>
       </Row>
