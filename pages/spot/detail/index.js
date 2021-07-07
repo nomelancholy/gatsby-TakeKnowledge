@@ -28,15 +28,24 @@ const Detail = () => {
     lineHeight: "30px",
   };
 
+  const router = useRouter();
+  const { id } = router.query;
   const [status, setStatus] = useState(true);
   const [property, setProperty] = useState(true);
   const [spotPostcode, setSpotPostcode] = useState("");
+  const [registerMode, setRegisterMode] = useState(true);
 
   const [fileList, setFileList] = useState([]);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
 
   const [form] = Form.useForm();
+
+  useEffect(() => {
+    if (id) {
+      setRegisterMode(false);
+    }
+  }, []);
 
   const handleStatusChange = (e) => {
     setStatus(e.target.value);
@@ -209,9 +218,12 @@ const Detail = () => {
               <Form.Item name="name" label="스팟 명" initialValue="신규">
                 <Input />
               </Form.Item>
-              <Form.Item name="spot_id" label="스팟 ID">
-                <InputNumber min={1} />
-              </Form.Item>
+              {registerMode ? null : (
+                <Form.Item name="spot_id" label="스팟 ID">
+                  <InputNumber min={1} />
+                </Form.Item>
+              )}
+
               <Form.Item name="nickname" label="스팟 별칭">
                 <Input />
               </Form.Item>
@@ -228,9 +240,12 @@ const Detail = () => {
               >
                 <Input />
               </Form.Item>
-              <Form.Item name="seat_capacity" label="인원">
-                <Input />
-              </Form.Item>
+              {registerMode ? null : (
+                <Form.Item name="seat_capacity" label="인원">
+                  <Input />
+                </Form.Item>
+              )}
+
               <Form.Item name="images" label="대표 이미지">
                 <Upload
                   name="image"
