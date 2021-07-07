@@ -82,6 +82,7 @@ const Detail = () => {
   const handleSpotRegisterSubmit = (values) => {
     console.log(`values`, values);
 
+    // 시설 정보
     const facilityInfos = [
       { lounge: false },
       { meeting: false },
@@ -103,11 +104,77 @@ const Detail = () => {
         return facilityInfo;
       }
     });
+    // 파이브스팟 전용, 공용
 
-    console.log(`excerpt`, excerpt);
+    const property = values.property ? "fivespot" : "fastfive";
+
+    // 스팟 활성 / 비활성
+
+    const status = values.status ? "active" : "inactive";
+    // 삭제는 trash
+
+    const formData = new FormData();
+
+    formData.append("name", values.name);
+    formData.append("nickname", values.nickname);
+    formData.append("property", property);
+    formData.append("status", status);
+    formData.append("address", values.address);
+    formData.append("address_etc", values.address_etc);
+    formData.append("content", values.content);
+    formData.append("operation_time", values.operation_time);
+    // formData.append("seat_capacity", "50");
+    formData.append("excerpt", JSON.stringify(excerpt));
+
+    // 파일 처리
+
+    values.images.map((image, index) => {
+      console.log(`image`, image);
+      console.log(`JSON.stringify(image)`, JSON.stringify(image));
+      console.log(`image.originFileObj`, image.originFileObj);
+      console.log(
+        `JSON.stringify(image.originFileObj)`,
+        JSON.stringify(image.originFileObj)
+      );
+      // formData.append(`image${index + 1}`, JSON.stringify(image.originFileObj));
+      formData.append(`image${index + 1}`, image.originFileObj);
+    });
+
+    // formData의 key 확인
+    for (let key of formData.keys()) {
+      console.log("key", key);
+    }
+
+    // FormData의 value 확인
+    for (let value of formData.values()) {
+      console.log("value", value);
+    }
+
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/spot/add`,
+        {
+          data: formData,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization:
+              "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjUsInVzZXJfbG9naW4iOiJjc0BkbWFpbi5pbyIsInVzZXJfbmFtZSI6Ilx1Yzc3OFx1YzEzMSIsInVzZXJfcm9sZSI6ImZmYWRtaW4iLCJwaG9uZSI6IjAxMC0zNjc0LTc1NjMiLCJtYXJrZXRpbmdfYWdyZWUiOjEsImdyb3VwX2lkIjpudWxsLCJleHAiOjE2NTY5NDkzMTh9.TMNWMrhtKzYb0uCFLuqTbqKE19ZXVzT0nRBqsPN5N4I",
+          },
+        }
+      )
+      .then((response) => {
+        console.log(`response`, response);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
   };
 
   const handleFileChange = ({ fileList }) => {
+    form.setFieldsValue({ images: fileList });
     setFileList(fileList);
   };
 
@@ -161,13 +228,14 @@ const Detail = () => {
               >
                 <Input />
               </Form.Item>
-              <Form.Item name="인원" label="인원">
+              <Form.Item name="seat_capacity" label="인원">
                 <Input />
               </Form.Item>
               <Form.Item name="images" label="대표 이미지">
                 <Upload
                   name="image"
                   listType="picture-card"
+                  fileList={fileList}
                   onChange={handleFileChange}
                   onPreview={handlePreview}
                 >
