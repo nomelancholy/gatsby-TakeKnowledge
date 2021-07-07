@@ -82,7 +82,7 @@ const Detail = () => {
   const handleSpotRegisterSubmit = (values) => {
     console.log(`values`, values);
 
-    facilityInfoObj = [
+    const facilityInfos = [
       { lounge: false },
       { meeting: false },
       { coworking: false },
@@ -93,13 +93,18 @@ const Detail = () => {
       { phone: false },
     ];
 
-    const returnObj = Object.keys(facilityInfoObj).filter((key) =>
-      values.facilityInfo.inclueds(key)
-    );
-    values.facilityInfos.map((facilityInfo) => {
-      facilityInfoObj;
-      console.log(`facilityInfo`, facilityInfo);
+    const validFacilityInfos = values.facilityInfos;
+
+    const excerpt = facilityInfos.map((facilityInfo) => {
+      const infoKey = Object.keys(facilityInfo)[0];
+      if (validFacilityInfos.includes(infoKey)) {
+        return { ...facilityInfo, [infoKey]: true };
+      } else {
+        return facilityInfo;
+      }
     });
+
+    console.log(`excerpt`, excerpt);
   };
 
   const handleFileChange = ({ fileList }) => {
