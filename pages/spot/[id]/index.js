@@ -35,6 +35,8 @@ const Detail = () => {
   const [spotPostcode, setSpotPostcode] = useState("");
   const [registerMode, setRegisterMode] = useState(true);
 
+  const [spotInfo, setSpotInfo] = useState(undefined);
+
   const [fileList, setFileList] = useState([]);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
@@ -42,10 +44,69 @@ const Detail = () => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    if (id) {
+    if (id === "new") {
+      setRegisterMode(true);
+    } else {
       setRegisterMode(false);
+      axios
+        .post(
+          `${process.env.BACKEND_API}/spot/get`,
+          { spot_id: id },
+          {
+            headers: {
+              "Content-Type": "application/json;charset=UTF-8",
+              "Access-Control-Allow-Origin": "*",
+              Authorization:
+                "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjUsInVzZXJfbG9naW4iOiJjc0BkbWFpbi5pbyIsInVzZXJfbmFtZSI6Ilx1Yzc3OFx1YzEzMSIsInVzZXJfcm9sZSI6ImZmYWRtaW4iLCJwaG9uZSI6IjAxMC0zNjc0LTc1NjMiLCJtYXJrZXRpbmdfYWdyZWUiOjEsImdyb3VwX2lkIjpudWxsLCJleHAiOjE2NTY5NDkzMTh9.TMNWMrhtKzYb0uCFLuqTbqKE19ZXVzT0nRBqsPN5N4I",
+            },
+          }
+        )
+        .then((response) => {
+          const data = response.data;
+          console.log(`data`, data);
+          setSpotInfo(data);
+        })
+        .catch((error) => {
+          console.log(`error`, error);
+        });
     }
   }, []);
+
+  useEffect(() => {
+    if (spotInfo) {
+      form.setFieldsValue({
+        status: spotInfo.status === "active" ? true : false,
+        name: spotInfo.name,
+        spot_id: spotInfo.spot_id,
+        nickname: spotInfo.nickname,
+        address: spotInfo.address,
+        address_etc: spotInfo.address_etc,
+        operation_time: spotInfo.operation_time,
+        seat_capacity: spotInfo.seat_capacity,
+        content: spotInfo.content,
+        // facilityInfos: spotInfo.excerpt,
+        property: spotInfo.property === "fivespot" ? true : false,
+      });
+
+      if (spotInfo.images) {
+        // 이미지 작업 필요
+      }
+
+      let checkExcerpt = [];
+
+      if (spotInfo.excerpt) {
+        Object.entries(spotInfo.excerpt).filter((obj) => {
+          if (obj[1]) {
+            checkExcerpt.push(obj[0]);
+          }
+        });
+
+        form.setFieldsValue({
+          facilityInfos: checkExcerpt,
+        });
+      }
+    }
+  }, [spotInfo]);
 
   const handleStatusChange = (e) => {
     setStatus(e.target.value);
@@ -93,32 +154,34 @@ const Detail = () => {
 
     // 시설 정보
     const facilityInfos = [
-      { lounge: false },
-      { meeting: false },
-      { coworking: false },
-      { qa: false },
-      { locker: false },
-      { fb: false },
-      { unmanned: false },
-      { phone: false },
+      "lounge",
+      "meeting",
+      "coworking",
+      "qa",
+      "locker",
+      "fb",
+      "unmanned",
+      "phone",
     ];
 
     const validFacilityInfos = values.facilityInfos;
 
-    const excerpt = facilityInfos.map((facilityInfo) => {
-      const infoKey = Object.keys(facilityInfo)[0];
-      if (validFacilityInfos.includes(infoKey)) {
-        return { ...facilityInfo, [infoKey]: true };
-      } else {
-        return facilityInfo;
-      }
-    });
-    // 파이브스팟 전용, 공용
+    let excerpt = {};
+    if (validFacilityInfos) {
+      facilityInfos.map((facilityInfo) => {
+        if (validFacilityInfos.includes(facilityInfo)) {
+          excerpt[facilityInfo] = true;
+        } else {
+          excerpt[facilityInfo] = false;
+        }
+      });
+    }
 
+    console.log(`excerpt`, excerpt);
+    // 파이브스팟 전용, 공용
     const property = values.property ? "fivespot" : "fastfive";
 
     // 스팟 활성 / 비활성
-
     const status = values.status ? "active" : "inactive";
     // 삭제는 trash
 
@@ -132,22 +195,23 @@ const Detail = () => {
     formData.append("address_etc", values.address_etc);
     formData.append("content", values.content);
     formData.append("operation_time", values.operation_time);
-    // formData.append("seat_capacity", "50");
+    formData.append("seat_capacity", values.seat_capacity);
     formData.append("excerpt", JSON.stringify(excerpt));
 
     // 파일 처리
-
-    values.images.map((image, index) => {
-      console.log(`image`, image);
-      console.log(`JSON.stringify(image)`, JSON.stringify(image));
-      console.log(`image.originFileObj`, image.originFileObj);
-      console.log(
-        `JSON.stringify(image.originFileObj)`,
-        JSON.stringify(image.originFileObj)
-      );
-      // formData.append(`image${index + 1}`, JSON.stringify(image.originFileObj));
-      formData.append(`image${index + 1}`, image.originFileObj);
-    });
+    if (values.images) {
+      values.images.map((image, index) => {
+        // console.log(`image`, image);
+        // console.log(`JSON.stringify(image)`, JSON.stringify(image));
+        // console.log(`image.originFileObj`, image.originFileObj);
+        // console.log(
+        //   `JSON.stringify(image.originFileObj)`,
+        //   JSON.stringify(image.originFileObj)
+        // );
+        // formData.append(`image${index + 1}`, JSON.stringify(image.originFileObj));
+        formData.append(`image${index + 1}`, image.originFileObj);
+      });
+    }
 
     // formData의 key 확인
     for (let key of formData.keys()) {
@@ -159,26 +223,36 @@ const Detail = () => {
       console.log("value", value);
     }
 
-    axios
-      .post(
-        `${process.env.BACKEND_API}/admin/spot/add`,
-        {
-          data: formData,
+    let config = {};
+
+    if (registerMode) {
+      config = {
+        method: "post",
+        url: "http://3.34.133.211:8000/api/v1/admin/spot/add",
+        headers: {
+          Authorization:
+            "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjUsInVzZXJfbG9naW4iOiJjc0BkbWFpbi5pbyIsInVzZXJfbmFtZSI6Ilx1Yzc3OFx1YzEzMSIsInVzZXJfcm9sZSI6ImZmYWRtaW4iLCJwaG9uZSI6IjAxMC0zNjc0LTc1NjMiLCJtYXJrZXRpbmdfYWdyZWUiOjEsImdyb3VwX2lkIjpudWxsLCJleHAiOjE2NTY5NDkzMTh9.TMNWMrhtKzYb0uCFLuqTbqKE19ZXVzT0nRBqsPN5N4I",
         },
-        {
-          headers: {
-            "Content-Type": "application/json;charset=UTF-8",
-            "Access-Control-Allow-Origin": "*",
-            Authorization:
-              "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjUsInVzZXJfbG9naW4iOiJjc0BkbWFpbi5pbyIsInVzZXJfbmFtZSI6Ilx1Yzc3OFx1YzEzMSIsInVzZXJfcm9sZSI6ImZmYWRtaW4iLCJwaG9uZSI6IjAxMC0zNjc0LTc1NjMiLCJtYXJrZXRpbmdfYWdyZWUiOjEsImdyb3VwX2lkIjpudWxsLCJleHAiOjE2NTY5NDkzMTh9.TMNWMrhtKzYb0uCFLuqTbqKE19ZXVzT0nRBqsPN5N4I",
-          },
-        }
-      )
-      .then((response) => {
-        console.log(`response`, response);
+        data: formData,
+      };
+    } else {
+      formData.append("spot_id", id);
+      config = {
+        method: "post",
+        url: "http://3.34.133.211:8000/api/v1/admin/spot/update",
+        headers: {
+          Authorization:
+            "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjUsInVzZXJfbG9naW4iOiJjc0BkbWFpbi5pbyIsInVzZXJfbmFtZSI6Ilx1Yzc3OFx1YzEzMSIsInVzZXJfcm9sZSI6ImZmYWRtaW4iLCJwaG9uZSI6IjAxMC0zNjc0LTc1NjMiLCJtYXJrZXRpbmdfYWdyZWUiOjEsImdyb3VwX2lkIjpudWxsLCJleHAiOjE2NTY5NDkzMTh9.TMNWMrhtKzYb0uCFLuqTbqKE19ZXVzT0nRBqsPN5N4I",
+        },
+        data: formData,
+      };
+    }
+    axios(config)
+      .then(function (response) {
+        console.log(JSON.stringify(response.data));
       })
-      .catch((error) => {
-        console.log(`error`, error);
+      .catch(function (error) {
+        console.log(error);
       });
   };
 
@@ -228,7 +302,7 @@ const Detail = () => {
                 <Input />
               </Form.Item>
               <Form.Item name="address" label="주소">
-                <Input onClick={showAddressPopup} />
+                <Input onFocus={showAddressPopup} />
               </Form.Item>
               <Form.Item name="address_etc" label="상세 주소">
                 <Input ref={userAddressEtcRef} />
@@ -240,12 +314,9 @@ const Detail = () => {
               >
                 <Input />
               </Form.Item>
-              {registerMode ? null : (
-                <Form.Item name="seat_capacity" label="인원">
-                  <Input />
-                </Form.Item>
-              )}
-
+              <Form.Item name="seat_capacity" label="인원">
+                <Input />
+              </Form.Item>
               <Form.Item name="images" label="대표 이미지">
                 <Upload
                   name="image"

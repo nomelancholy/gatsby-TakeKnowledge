@@ -16,7 +16,7 @@ const Spot = () => {
       title: "스팟명",
       dataIndex: "name",
       render: (text, record) => {
-        return <a href={`/spot/detail${record.spot_id}`}>{text}</a>;
+        return <a href={`/spot/${record.spot_id}`}>{text}</a>;
       },
     },
     {
@@ -188,7 +188,7 @@ const Spot = () => {
   }, [data]);
 
   const moveToRegister = () => {
-    Router.push(`/spot/detail`);
+    Router.push(`/spot/new`);
   };
 
   return (
