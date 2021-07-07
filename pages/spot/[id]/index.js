@@ -20,6 +20,7 @@ import { connect } from "react-redux";
 import axios from "axios";
 import Router, { useRouter } from "next/router";
 import NextHead from "next/head";
+import Space from "../../../components/spot/space";
 
 const Detail = () => {
   const radioStyle = {
@@ -32,7 +33,7 @@ const Detail = () => {
   const { id } = router.query;
   const [status, setStatus] = useState(true);
   const [property, setProperty] = useState(true);
-  const [spotPostcode, setSpotPostcode] = useState("");
+
   const [registerMode, setRegisterMode] = useState(true);
 
   const [spotInfo, setSpotInfo] = useState(undefined);
@@ -86,6 +87,7 @@ const Detail = () => {
         content: spotInfo.content,
         // facilityInfos: spotInfo.excerpt,
         property: spotInfo.property === "fivespot" ? true : false,
+        max_seat_capacity: Math.floor(spotInfo.seat_capacity * 1.5),
       });
 
       if (spotInfo.images) {
@@ -266,6 +268,12 @@ const Detail = () => {
     setPreviewImage(file.url || file.thumbUrl);
   };
 
+  const handleSeatCapacityChange = (seat_capacity) => {
+    form.setFieldsValue({
+      max_seat_capacity: Math.floor(seat_capacity * 1.5),
+    });
+  };
+
   return (
     <>
       <NextHead>
@@ -294,7 +302,7 @@ const Detail = () => {
               </Form.Item>
               {registerMode ? null : (
                 <Form.Item name="spot_id" label="스팟 ID">
-                  <InputNumber min={1} />
+                  <InputNumber min={1} disabled={true} />
                 </Form.Item>
               )}
 
@@ -315,9 +323,15 @@ const Detail = () => {
                 <Input />
               </Form.Item>
               <Form.Item name="seat_capacity" label="인원">
-                <Input />
+                <InputNumber onChange={handleSeatCapacityChange} />
               </Form.Item>
-              <Form.Item name="images" label="대표 이미지">
+              <Form.Item name="max_seat_capacity" label="최대 인원">
+                <InputNumber disabled={true} />
+              </Form.Item>
+              <Form.Item
+                name="images"
+                label="대표 이미지 (최대 5장까지 첨부 가능)"
+              >
                 <Upload
                   name="image"
                   listType="picture-card"
@@ -364,7 +378,11 @@ const Detail = () => {
               </Button>
             </Form>
           </Card>
-          <Card title="라운지" bodyStyle={{ padding: "1rem" }} className="mb-4">
+          <Space type="lounge" spotId={id} />
+          <Space type="meeting" spotId={id} />
+          <Space type="coworking" spotId={id} />
+          <Space type="locker" spotId={id} />
+          {/* <Card title="라운지" bodyStyle={{ padding: "1rem" }} className="mb-4">
             <Form>
               <Form.Item name="대표 이미지" label="대표 이미지">
                 <Input placeholder="신규" />
@@ -391,7 +409,7 @@ const Detail = () => {
             title="락커"
             bodyStyle={{ padding: "1rem" }}
             className="mb-4"
-          ></Card>
+          ></Card> */}
           <Row type="flex" align="middle" className="py-4">
             <span className="px-2 w-10"></span>
           </Row>
