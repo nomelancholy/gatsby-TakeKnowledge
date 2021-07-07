@@ -188,7 +188,7 @@ const Spot = () => {
   }, [data]);
 
   const moveToRegister = () => {
-    Router.push(`/spot/detail`, `/spot/write`);
+    Router.push(`/spot/detail`);
   };
 
   return (
