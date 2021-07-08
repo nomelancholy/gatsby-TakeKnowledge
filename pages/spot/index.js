@@ -1,12 +1,13 @@
-import { Button, Table, Form, Input, Row, Select, Modal } from "antd";
-import { SlidersOutlined, SearchOutlined } from "@ant-design/icons";
+import { Button, Table, Form, Input, Row, Modal } from "antd";
+import { SlidersOutlined } from "@ant-design/icons";
 
-import React, { Component, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
-import Router, { useRouter } from "next/router";
+import Router from "next/router";
 
 const Spot = () => {
+  // Grid Column 정의
   const columns = [
     {
       title: "스팟 ID",
@@ -56,13 +57,16 @@ const Spot = () => {
     },
   ];
 
+  // 조회해온 spot list
   const [spotList, setSpotList] = useState([]);
 
-  const [data, setData] = useState([]);
-  const [pagination, setPagination] = useState({});
-  const [loading, setLoading] = useState(false);
+  // space count 추가된 spot list
+  const [spotData, setSpotData] = useState([]);
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
+
+  const [pagination, setPagination] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const handleTableChange = (pagination, filters, sorter) => {
     setPagination(2);
@@ -80,11 +84,12 @@ const Spot = () => {
     getSpotList();
   }, []);
 
+  // spot list 조회
   const getSpotList = () => {
     setLoading(true);
     axios
       .post(
-        `${process.env.BACKEND_API}/spot/list`,
+        `${process.env.BACKEND_API}/admin/spot/list`,
         {},
         {
           headers: {
@@ -105,24 +110,26 @@ const Spot = () => {
       });
   };
 
+  // spot list 조회 완료 후 spot 별 space 조회해서 spot에 추가
   useEffect(() => {
-    let list = [];
-    const addSpace = async () => {
-      list = await Promise.all(
+    let completeSpotList = [];
+
+    const setCompleteSpotData = async () => {
+      completeSpotList = await Promise.all(
         spotList.map((spot) => {
-          return getSpace(spot);
+          return getSpotWithSpaceCount(spot);
         })
       );
-
-      setData(list);
+      setSpotData(completeSpotList);
     };
 
     if (spotList) {
-      addSpace();
+      setCompleteSpotData();
     }
   }, [spotList]);
 
-  const getSpace = async (spot) => {
+  // spot 별 space count 추가
+  const getSpotWithSpaceCount = async (spot) => {
     const spaceList = ["lounge", "meeting", "coworking", "locker"];
 
     let lounge = undefined;
@@ -167,29 +174,24 @@ const Spot = () => {
           .catch((error) => {
             console.log(`error`, error);
           });
-
-        return;
       })
     );
-    const obj = {
+
+    const completeSpotObj = {
       ...spot,
       loungeCnt: lounge.total,
       meetingCnt: meeting.total,
       coworkingCnt: coworking.total,
       lockerCnt: locker.total,
     };
-    return obj;
+    return completeSpotObj;
   };
 
   useEffect(() => {
-    if (data) {
+    if (spotData) {
       setLoading(false);
     }
-  }, [data]);
-
-  const moveToRegister = () => {
-    Router.push(`/spot/new`);
-  };
+  }, [spotData]);
 
   return (
     <>
@@ -205,7 +207,12 @@ const Spot = () => {
           <SlidersOutlined></SlidersOutlined>필터
         </Button>
         <span className="px-2 w-10"></span>
-        <Button type="primary" onClick={moveToRegister}>
+        <Button
+          type="primary"
+          onClick={() => {
+            Router.push(`/spot/new`);
+          }}
+        >
           + 등록
         </Button>
       </Row>
@@ -213,7 +220,7 @@ const Spot = () => {
       <Table
         columns={columns}
         rowKey={(record) => record.spot_id}
-        dataSource={data}
+        dataSource={spotData}
         pagination={pagination}
         loading={loading}
         onChange={handleTableChange}
