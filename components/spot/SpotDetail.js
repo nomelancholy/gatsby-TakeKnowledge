@@ -363,15 +363,32 @@ const SpotDetail = (props) => {
             </Modal>
           </Card>
           {/* 공간 정보 */}
-          {(spotId || generatedSpotId) && (
+          {(spotId || generatedSpotId) && spotInfo && (
             <>
-              <Space type="lounge" spotId={spotId ? spotId : generatedSpotId} />
+              <Space
+                type="lounge"
+                spotId={spotId ? spotId : generatedSpotId}
+                desc={spotInfo.lounge_desc}
+                images={spotInfo.lounge_image}
+              />
               <Space
                 type="meeting"
                 spotId={spotId ? spotId : generatedSpotId}
+                desc={spotInfo.meeting_desc}
+                images={spotInfo.meeting_image}
               />
-              <Space type="cowork" spotId={spotId ? spotId : generatedSpotId} />
-              <Space type="locker" spotId={spotId ? spotId : generatedSpotId} />
+              <Space
+                type="cowork"
+                spotId={spotId ? spotId : generatedSpotId}
+                desc={spotInfo.coworking_desc}
+                images={spotInfo.coworking_image}
+              />
+              <Space
+                type="locker"
+                spotId={spotId ? spotId : generatedSpotId}
+                desc={spotInfo.locker_desc}
+                images={spotInfo.locker_image}
+              />
             </>
           )}
 
