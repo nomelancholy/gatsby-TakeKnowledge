@@ -7,6 +7,7 @@ const withLess = require("@zeit/next-less"),
     target: "serverless",
     env: {
       BACKEND_API: "http://3.34.133.211:8000/api/v1",
+      DOMAIN: "localhost",
     },
     onDemandEntries: {
       maxInactiveAge: 1000 * 60 * 60,
