@@ -6,8 +6,7 @@ import Link from "next/link";
 import Router from "next/router";
 import styled from "styled-components";
 import { useAppState } from "./shared/AppProvider";
-
-import useSWR from "swr";
+import AuthActionCreators from "@state/actions/AuthActionCreators";
 
 const FormItem = Form.Item;
 
@@ -17,25 +16,29 @@ const Content = styled.div`
   min-width: 300px;
 `;
 
-const Signin = ({ form }) => {
+const Signin = (props) => {
+  const { dispatch } = props;
+  const { isLoggedIn } = props.auth;
+
+  const [form] = Form.useForm();
   const [state] = useAppState();
 
   useEffect(() => {
-    console.log(`state`, state);
-  }, []);
+    if (isLoggedIn) {
+      Router.push("/contract");
+    }
+  }, [isLoggedIn]);
 
   const handleSigninSubmit = (values) => {
-    console.log(`values`, values);
-    // (e) => {
-    //   e.preventDefault();
-    //   form.validateFields((err, values) => {
-    //     if (!err) {
-    //       Message.success(
-    //         "Sign complete. Taking you to your dashboard!"
-    //       ).then(() => Router.push("/"));
-    //     }
-    //   });
-    // }
+    const { email, password, remember } = values;
+
+    dispatch(
+      AuthActionCreators.authenticate({
+        user_login: email,
+        user_pass: password,
+        remember,
+      })
+    );
   };
 
   return (
@@ -56,7 +59,7 @@ const Signin = ({ form }) => {
           <h5 className="mb-0 mt-3">Sign in</h5>
         </div>
 
-        <Form form={form} layout="vertical" onSubmit={handleSigninSubmit}>
+        <Form form={form} layout="vertical" onFinish={handleSigninSubmit}>
           <FormItem
             label="Email"
             name="email"
