@@ -2,6 +2,8 @@ if (typeof require !== "undefined") {
   require.extensions[".less"] = (file) => {};
 }
 
+const webpack = require("webpack");
+
 const withLess = require("@zeit/next-less"),
   nextConfig = {
     target: "serverless",
@@ -48,6 +50,15 @@ const withLess = require("@zeit/next-less"),
           use: "null-loader",
         });
       }
+
+      config.plugins.push(
+        new webpack.ProvidePlugin({
+          $: "jquery",
+          jQuery: "jquery",
+        })
+      );
+      // 참조 : https://github.com/summernote/react-summernote
+
       return config;
     },
   };

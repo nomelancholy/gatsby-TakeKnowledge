@@ -28,6 +28,8 @@ import NextHead from "next/head";
 // import "bootstrap/js/tooltip";
 // import "bootstrap/dist/css/bootstrap.css";
 
+// 참조 : https://github.com/summernote/react-summernote
+
 const NoticeDetail = (props) => {
   const { spotId } = props;
 
