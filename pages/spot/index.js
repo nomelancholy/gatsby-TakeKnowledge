@@ -5,8 +5,18 @@ import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 import Router from "next/router";
+import { wrapper } from "@state/stores";
+import initialize from "@utils/initialize";
 
-const Spot = () => {
+const Spot = (props) => {
+  const { user, isLoggedIn, token } = props.auth;
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+  }, []);
+
   // Grid Column 정의
   const columns = [
     {
@@ -274,5 +284,9 @@ const Spot = () => {
     </>
   );
 };
+
+export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
+  return { props: initialize(ctx) };
+});
 
 export default connect((state) => state)(Spot);

@@ -4,8 +4,19 @@ import { SlidersOutlined, SearchOutlined } from "@ant-design/icons";
 import React, { Component, useState, useEffect } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
+import Router from "next/router";
+import { wrapper } from "@state/stores";
+import initialize from "@utils/initialize";
 
-const Payment = () => {
+const Payment = (props) => {
+  const { user, isLoggedIn, token } = props.auth;
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+  }, []);
+
   const columns = [
     {
       title: "요금제 ID",
@@ -290,5 +301,9 @@ const Payment = () => {
     </>
   );
 };
+
+export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
+  return { props: initialize(ctx) };
+});
 
 export default connect((state) => state)(Payment);

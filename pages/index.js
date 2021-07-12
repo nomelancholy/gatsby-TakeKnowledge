@@ -25,8 +25,6 @@ const Index = (props) => {
   );
 };
 
-wrapper;
-
 export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
   return { props: initialize(ctx) };
 });
