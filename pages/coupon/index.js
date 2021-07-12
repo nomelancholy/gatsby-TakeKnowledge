@@ -21,18 +21,10 @@ const Coupon = (props) => {
     {
       title: "쿠폰 ID",
       dataIndex: "name",
-      // sorter: true,
-      // render: (name) => `${name.first} ${name.last}`,
-      width: "20%",
     },
     {
       title: "쿠폰명",
       dataIndex: "gender",
-      // filters: [
-      //   { text: "Male", value: "male" },
-      //   { text: "Female", value: "female" },
-      // ],
-      width: "20%",
     },
     {
       title: "쿠폰 유형",

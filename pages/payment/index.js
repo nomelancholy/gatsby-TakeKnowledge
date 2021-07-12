@@ -21,18 +21,10 @@ const Payment = (props) => {
     {
       title: "요금제 ID",
       dataIndex: "name",
-      // sorter: true,
-      // render: (name) => `${name.first} ${name.last}`,
-      width: "20%",
     },
     {
       title: "상품 그룹",
       dataIndex: "gender",
-      // filters: [
-      //   { text: "Male", value: "male" },
-      //   { text: "Female", value: "female" },
-      // ],
-      width: "20%",
     },
     {
       title: "상품 명",

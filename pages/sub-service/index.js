@@ -21,18 +21,10 @@ const SubService = (props) => {
     {
       title: "예약 ID",
       dataIndex: "name",
-      // sorter: true,
-      // render: (name) => `${name.first} ${name.last}`,
-      width: "20%",
     },
     {
       title: "계약자명(회원 id)",
       dataIndex: "gender",
-      // filters: [
-      //   { text: "Male", value: "male" },
-      //   { text: "Female", value: "female" },
-      // ],
-      width: "20%",
     },
     {
       title: "예약 상태",

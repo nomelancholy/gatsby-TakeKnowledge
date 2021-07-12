@@ -21,18 +21,10 @@ const User = (props) => {
     {
       title: "회원 ID",
       dataIndex: "name",
-      // sorter: true,
-      // render: (name) => `${name.first} ${name.last}`,
-      width: "20%",
     },
     {
       title: "계약자명",
       dataIndex: "gender",
-      // filters: [
-      //   { text: "Male", value: "male" },
-      //   { text: "Female", value: "female" },
-      // ],
-      width: "20%",
     },
     {
       title: "회원 구분",

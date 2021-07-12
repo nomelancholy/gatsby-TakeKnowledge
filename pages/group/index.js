@@ -21,18 +21,10 @@ const Group = (props) => {
     {
       title: "그룹 ID",
       dataIndex: "name",
-      // sorter: true,
-      // render: (name) => `${name.first} ${name.last}`,
-      width: "20%",
     },
     {
       title: "그룹명",
       dataIndex: "gender",
-      // filters: [
-      //   { text: "Male", value: "male" },
-      //   { text: "Female", value: "female" },
-      // ],
-      width: "20%",
     },
     {
       title: "그룹 회원 상태",
