@@ -20,23 +20,23 @@ const Product = (props) => {
   const columns = [
     {
       title: "상품 ID",
-      dataIndex: "name",
+      dataIndex: "product_id",
     },
     {
       title: "상품 구분",
-      dataIndex: "gender",
+      dataIndex: "type",
     },
     {
       title: "상품명",
-      dataIndex: "email",
+      dataIndex: "name",
     },
     {
       title: "멤버십 유형",
-      dataIndex: "email",
+      dataIndex: "service_type",
     },
     {
       title: "결제 유형",
-      dataIndex: "email",
+      dataIndex: "pay_demand",
     },
     {
       title: "요일",
@@ -44,11 +44,11 @@ const Product = (props) => {
     },
     {
       title: "시작시간",
-      dataIndex: "email",
+      dataIndex: "start_time",
     },
     {
       title: "종료시간",
-      dataIndex: "email",
+      dataIndex: "end_time",
     },
     {
       title: "사용 가능 공간ID",
@@ -56,11 +56,11 @@ const Product = (props) => {
     },
     {
       title: "활성/비활성",
-      dataIndex: "email",
+      dataIndex: "status",
     },
     {
       title: "생성 일시",
-      dataIndex: "email",
+      dataIndex: "regdate",
     },
   ];
 
