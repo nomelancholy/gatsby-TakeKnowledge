@@ -4,15 +4,26 @@ import { SlidersOutlined, SearchOutlined } from "@ant-design/icons";
 import React, { Component, useState, useEffect } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
+import Router from "next/router";
+import { wrapper } from "@state/stores";
+import initialize from "@utils/initialize";
 
-const Billing = () => {
+const ContractDetail = (props) => {
+  const { user, isLoggedIn, token } = props.auth;
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+  }, []);
+
   const columns = [
     {
-      title: "청구 ID(계약 ID)",
-      dataIndex: "name"
+      title: "계약 ID",
+      dataIndex: "name",
     },
     {
-      title: "계약자명(회원 id)",
+      title: "계약자명",
       dataIndex: "gender",
     },
     {
@@ -20,47 +31,35 @@ const Billing = () => {
       dataIndex: "email",
     },
     {
-      title: "그룹 유형",
+      title: "그룹",
       dataIndex: "email",
     },
     {
-      title: "구분",
+      title: "상품",
       dataIndex: "email",
     },
     {
-      title: "상품명",
+      title: "선호 지점",
       dataIndex: "email",
     },
     {
-      title: "정기 결제일",
+      title: "시작일",
       dataIndex: "email",
     },
     {
-      title: "결제 방식",
+      title: "종료일",
       dataIndex: "email",
     },
     {
-      title: "결제 유형",
+      title: "취소일",
       dataIndex: "email",
     },
     {
-      title: "청구 상태",
+      title: "해지일",
       dataIndex: "email",
     },
     {
-      title: "청구 금액",
-      dataIndex: "email",
-    },
-    {
-      title: "결제 금액",
-      dataIndex: "email",
-    },
-    {
-      title: "결제 상태",
-      dataIndex: "email",
-    },
-    {
-      title: "생성일시",
+      title: "생성 일시",
       dataIndex: "email",
     },
   ];
@@ -70,8 +69,6 @@ const Billing = () => {
   const [loading, setLoading] = useState(false);
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
-
-  const [form] = Form.useForm();
 
   const handleTableChange = (pagination, filters, sorter) => {
     setPagination(2);
@@ -116,13 +113,9 @@ const Billing = () => {
       });
   };
 
-  useEffect(() => {
-    // fetch();
-  }, []);
-
   return (
     <>
-      <h3>청구/결제</h3>
+      <h3>계약</h3>
 
       <Row type="flex" align="middle" className="py-4">
         {/* <Button type="primary">
@@ -197,4 +190,8 @@ const Billing = () => {
   );
 };
 
-export default connect((state) => state)(Billing);
+export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
+  return { props: initialize(ctx) };
+});
+
+export default connect((state) => state)(ContractDetail);
