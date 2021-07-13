@@ -5,6 +5,8 @@ import { connect } from "react-redux";
 import axios from "axios";
 import { useRouter } from "next/router";
 import SpaceCard from "./SpaceCard";
+import { wrapper } from "@state/stores";
+import initialize from "@utils/initialize";
 
 const SpaceDetail = (props) => {
   const { spotId, type, spotName } = props;
@@ -102,5 +104,9 @@ const SpaceDetail = (props) => {
     </>
   );
 };
+
+export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
+  return { props: initialize(ctx) };
+});
 
 export default connect((state) => state)(SpaceDetail);

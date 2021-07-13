@@ -3,6 +3,8 @@ import { connect } from "react-redux";
 import { useRouter } from "next/router";
 import SpaceDetail from "../../../../components/spot/SpaceDetail";
 import axios from "axios";
+import { wrapper } from "@state/stores";
+import initialize from "@utils/initialize";
 
 const Lounge = (props) => {
   const { user, isLoggedIn, token } = props.auth;
@@ -45,5 +47,9 @@ const Lounge = (props) => {
     </>
   );
 };
+
+export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
+  return { props: initialize(ctx) };
+});
 
 export default connect((state) => state)(Lounge);

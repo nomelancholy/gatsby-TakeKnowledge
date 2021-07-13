@@ -16,6 +16,8 @@ import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 import { useForm } from "antd/lib/form/Form";
+import { wrapper } from "@state/stores";
+import initialize from "@utils/initialize";
 
 const SpaceCard = (props) => {
   const { user, isLoggedIn, token } = props.auth;
@@ -285,5 +287,9 @@ const SpaceCard = (props) => {
     </Col>
   );
 };
+
+export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
+  return { props: initialize(ctx) };
+});
 
 export default connect((state) => state)(SpaceCard);

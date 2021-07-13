@@ -19,10 +19,12 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import NextHead from "next/head";
 import Space from "./Space";
+import { wrapper } from "@state/stores";
+import initialize from "@utils/initialize";
 
 const SpotDetail = (props) => {
   const { spotId } = props;
-  const { user, isLoggedIn, token } = props.auth;
+  const { token } = props.auth;
 
   const radioStyle = {
     display: "inline",
@@ -64,6 +66,7 @@ const SpotDetail = (props) => {
   useEffect(() => {
     if (spotId) {
       setRegisterMode(false);
+
       axios
         .post(
           `${process.env.BACKEND_API}/spot/get`,
@@ -406,5 +409,9 @@ const SpotDetail = (props) => {
     </>
   );
 };
+
+export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
+  return { props: initialize(ctx) };
+});
 
 export default connect((state) => state)(SpotDetail);
