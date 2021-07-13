@@ -79,14 +79,9 @@ const Spot = (props) => {
   const [loading, setLoading] = useState(false);
 
   const handleTableChange = (pagination, filters, sorter) => {
-    // setPagination(2);
-    // fetch({
-    //   results: pagination.pageSize,
-    //   page: pagination.current,
-    //   sortField: sorter.field,
-    //   sortOrder: sorter.order,
-    //   ...filters,
-    // });
+    console.log(`pagination`, pagination);
+    console.log(`filters`, filters);
+    console.log(`sorter`, sorter);
   };
 
   useEffect(() => {
