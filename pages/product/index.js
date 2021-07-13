@@ -11,6 +11,7 @@ import initialize from "@utils/initialize";
 const Product = (props) => {
   const { user, isLoggedIn, token } = props.auth;
 
+  // grid 요일 render 함수
   const renderWorkingDays = (value, row, index) => {
     let workingDays = [];
 
@@ -28,6 +29,27 @@ const Product = (props) => {
     return renderDay;
   };
 
+  const covertEngDayToKorDay = (value) => {
+    switch (value) {
+      case "mon":
+        return "월";
+      case "tue":
+        return "화";
+      case "wed":
+        return "수";
+      case "thu":
+        return "목";
+      case "fri":
+        return "금";
+      case "sat":
+        return "토";
+      case "sun":
+        return "일";
+      default:
+        break;
+    }
+  };
+
   const columns = [
     {
       title: "상품 ID",
@@ -40,6 +62,9 @@ const Product = (props) => {
     {
       title: "상품명",
       dataIndex: "name",
+      render: (text, record) => {
+        return <a href={`/product/${record.product_id}`}>{text}</a>;
+      },
     },
     {
       title: "멤버십 유형",
@@ -80,10 +105,7 @@ const Product = (props) => {
   const [loading, setLoading] = useState(false);
   const [productList, setProductList] = useState([]);
 
-  const [registrationModalOpen, setRegistrationModalOpen] = useState(false);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
-
-  const [form] = Form.useForm();
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -109,7 +131,7 @@ const Product = (props) => {
       )
       .then((response) => {
         const data = response.data;
-        setPagination({ ...pagination, total: 200 });
+        setPagination({ ...pagination, total: data.total });
         setProductList(data.items);
         setLoading(false);
       })
@@ -118,86 +140,10 @@ const Product = (props) => {
       });
   };
 
-  const covertEngDayToKorDay = (value) => {
-    switch (value) {
-      case "mon":
-        return "월";
-      case "tue":
-        return "화";
-      case "wed":
-        return "수";
-      case "thu":
-        return "목";
-      case "fri":
-        return "금";
-      case "sat":
-        return "토";
-      case "sun":
-        return "일";
-      default:
-        break;
-    }
-  };
-
   const handleTableChange = (pagination, filters, sorter) => {
-    setPagination(2);
-
-    fetch({
-      results: pagination.pageSize,
-      page: pagination.current,
-      sortField: sorter.field,
-      sortOrder: sorter.order,
-      ...filters,
-    });
-  };
-
-  const fetch = (params = {}) => {
-    setLoading(true);
-    axios
-      .get(
-        "https://randomuser.me/api",
-        {
-          results: 10,
-          ...params,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json;charset=UTF-8",
-            "Access-Control-Allow-Origin": "*",
-          },
-        }
-      )
-      .then((response) => {
-        console.log(`response`, response);
-        const data = response.data;
-        console.log(`data`, data);
-        // Read total count from server
-        // pagination.total = data.totalCount;
-        setPagination({ ...pagination, total: 200 });
-        setLoading(false);
-        setData(data.results);
-      })
-      .catch((error) => {
-        console.log(`error`, error);
-      });
-  };
-
-  useEffect(() => {
-    // fetch();
-  }, []);
-
-  const handleGroupTypeChange = (value) => {
-    console.log(value);
-    form.setFieldsValue({
-      note: `Hi, ${value === "male" ? "man" : "lady"}!`,
-    });
-  };
-
-  const handlePaymentTypeChange = (value) => {
-    console.log(value);
-    form.setFieldsValue({
-      note: `Hi, ${value === "male" ? "man" : "lady"}!`,
-    });
+    console.log(`pagination`, pagination);
+    console.log(`filters`, filters);
+    console.log(`sorter`, sorter);
   };
 
   return (
@@ -220,7 +166,7 @@ const Product = (props) => {
         <Button
           type="primary"
           onClick={() => {
-            setRegistrationModalOpen(true);
+            Router.push("/product/new");
           }}
         >
           + 등록
@@ -278,85 +224,6 @@ const Product = (props) => {
           </Form.Item>
           <Form.Item name="활성/휴면 여부" label="활성/휴면 여부">
             <Input />
-          </Form.Item>
-        </Form>
-      </Modal>
-      {/* 등록 모달 */}
-      <Modal
-        visible={registrationModalOpen}
-        title="그룹 등록"
-        okText="등록"
-        cancelText="취소"
-        onCancel={() => {
-          setRegistrationModalOpen(false);
-        }}
-        onOk={
-          () => {
-            console.log(`onOk`);
-          }
-          //     () => {
-          //   form
-          //     .validateFields()
-          //     .then((values) => {
-          //       form.resetFields();
-          //       onCreate(values);
-          //     })
-          //     .catch((info) => {
-          //       console.log("Validate Failed:", info);
-          //     });
-          // }
-        }
-      >
-        <Form
-          // form={form}
-          layout="vertical"
-          name="form_in_modal"
-          initialValues={{ modifier: "public" }}
-        >
-          <Form.Item
-            name="그룹 유형"
-            label="그룹 유형"
-            rules={[
-              { required: true, message: "그룹 유형은 필수 선택 사항입니다." },
-            ]}
-          >
-            <Select
-              placeholder="그룹 유형을 선택해주세요"
-              onChange={handleGroupTypeChange}
-            >
-              <Select.Option value="male">개인 사업자</Select.Option>
-              <Select.Option value="female">법인</Select.Option>
-            </Select>
-          </Form.Item>
-          <Form.Item
-            name="그룹명"
-            label="그룹명"
-            rules={[
-              {
-                required: true,
-                message: "그룹명은 필수 입력 사항입니다.",
-              },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="결제수단 선택"
-            label="결제수단 선택"
-            rules={[
-              {
-                required: true,
-                message: "결제 수단은은 필수 선택 사항입니다.",
-              },
-            ]}
-          >
-            <Select
-              placeholder="결제수단 선택"
-              onChange={handlePaymentTypeChange}
-            >
-              <Select.Option value="male">카드</Select.Option>
-              <Select.Option value="female">계좌이체</Select.Option>
-            </Select>
           </Form.Item>
         </Form>
       </Modal>

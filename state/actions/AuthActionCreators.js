@@ -19,7 +19,6 @@ const authenticate = ({ user_login, user_pass, remember = false }, type) => {
       )
       .then((response) => {
         if (response.status == 200 && response.data.user_role === "ffadmin") {
-          console.log(`response`, response);
           const user = response.data;
           dispatch({
             type: AUTHENTICATE,
