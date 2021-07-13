@@ -30,6 +30,7 @@ const GlobalStyles = createGlobalStyle`
   }
 
   body {
+    min-width: 1280px;
     background-color: ${theme.backgroundColor};
     -ms-text-size-adjust: 100%;
     -webkit-font-smoothing: antialiased;
