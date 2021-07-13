@@ -61,7 +61,10 @@ const MainHeader = () => {
           <Menu.Item>
             <Link href="/">
               <a className="brand">
-                <PlaySquareTwoTone style={{ fontSize: "20px" }} />
+                <PlaySquareTwoTone
+                  style={{ fontSize: "20px" }}
+                  twoToneColor="#F26224"
+                />
                 <strong className="text-black">{state.name}</strong>
               </a>
             </Link>
