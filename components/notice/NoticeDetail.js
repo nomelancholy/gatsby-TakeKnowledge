@@ -31,6 +31,7 @@ import NextHead from "next/head";
 // 참조 : https://github.com/summernote/react-summernote
 
 const NoticeDetail = (props) => {
+  const { user, isLoggedIn, token } = props.auth;
   const { spotId } = props;
 
   const radioStyle = {

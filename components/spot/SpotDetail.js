@@ -22,6 +22,7 @@ import Space from "./Space";
 
 const SpotDetail = (props) => {
   const { spotId } = props;
+  const { user, isLoggedIn, token } = props.auth;
 
   const radioStyle = {
     display: "inline",

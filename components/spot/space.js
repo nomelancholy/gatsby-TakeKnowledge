@@ -7,6 +7,7 @@ import axios from "axios";
 import Router from "next/router";
 
 const Space = (props) => {
+  const { user, isLoggedIn, token } = props.auth;
   const { type, spotId, desc, images } = props;
 
   const [title, setTitle] = useState("");

@@ -18,6 +18,7 @@ import axios from "axios";
 import { useForm } from "antd/lib/form/Form";
 
 const SpaceCard = (props) => {
+  const { user, isLoggedIn, token } = props.auth;
   const { spaceInfo, title, spotId, type, handleSpaceDeleted } = props;
 
   // 등록 수정 flag state

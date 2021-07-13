@@ -8,6 +8,7 @@ import SpaceCard from "./SpaceCard";
 
 const SpaceDetail = (props) => {
   const { spotId, type, spotName } = props;
+  const { user, isLoggedIn, token } = props.auth;
   const router = useRouter();
 
   const [title, setTitle] = useState("");

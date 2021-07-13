@@ -5,6 +5,7 @@ import SpaceDetail from "../../../../components/spot/SpaceDetail";
 import axios from "axios";
 
 const Lounge = (props) => {
+  const { user, isLoggedIn, token } = props.auth;
   const router = useRouter();
   const { id } = router.query;
   const [type, setType] = useState("");
