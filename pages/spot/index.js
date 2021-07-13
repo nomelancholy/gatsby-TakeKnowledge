@@ -1,5 +1,5 @@
 import { Button, Table, Form, Input, Row, Modal } from "antd";
-import { SlidersOutlined } from "@ant-design/icons";
+import { SlidersOutlined, PlusOutlined } from "@ant-design/icons";
 
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
@@ -208,7 +208,8 @@ const Spot = (props) => {
             setFilterModalOpen(true);
           }}
         >
-          <SlidersOutlined></SlidersOutlined>필터
+          <SlidersOutlined />
+          <span>필터</span>
         </Button>
         <span className="px-2 w-10"></span>
         <Button
@@ -217,7 +218,8 @@ const Spot = (props) => {
             Router.push(`/spot/new`);
           }}
         >
-          + 등록
+          <PlusOutlined />
+          <span>등록</span>
         </Button>
       </Row>
 
