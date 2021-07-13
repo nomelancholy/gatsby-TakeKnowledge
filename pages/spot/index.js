@@ -7,6 +7,7 @@ import axios from "axios";
 import Router from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
+import { Filter } from "@components/elements";
 
 const Spot = (props) => {
   const { user, isLoggedIn, token } = props.auth;
@@ -200,7 +201,7 @@ const Spot = (props) => {
     <>
       <h3>스팟 관리</h3>
 
-      <Row type="flex" align="middle" className="py-4">
+      <Row type="flex" align="middle" className="py-3">
         <Button
           type="primary"
           onClick={() => {
@@ -221,6 +222,7 @@ const Spot = (props) => {
       </Row>
 
       <Table
+        size="middle"
         columns={columns}
         rowKey={(record) => record.spot_id}
         dataSource={spotData}
@@ -228,8 +230,37 @@ const Spot = (props) => {
         loading={loading}
         onChange={handleTableChange}
       />
-      {/* 필터 모달 */}
-      <Modal
+
+      {/* 필터 */}
+      <Filter
+        visible={filterModalOpen}
+        onClose={() => setFilterModalOpen(false)}
+        onSearch={() => {
+          console.log(`onOk`);
+        }}
+      >
+        <Form
+          // form={form}
+          layout="vertical"
+          name="form_in_modal"
+          initialValues={{ modifier: "public" }}
+        >
+          <Form.Item name="그룹 ID" label="그룹 ID">
+            <Input />
+          </Form.Item>
+          <Form.Item name="그룹명" label="그룹명">
+            <Input />
+          </Form.Item>
+          <Form.Item name="회원 상태" label="회원 상태">
+            <Input />
+          </Form.Item>
+          <Form.Item name="활성/휴면 여부" label="활성/휴면 여부">
+            <Input />
+          </Form.Item>
+        </Form>
+      </Filter>
+
+      {/* <Modal
         visible={filterModalOpen}
         title="검색 항목"
         okText="검색"
@@ -254,26 +285,7 @@ const Spot = (props) => {
           // }
         }
       >
-        <Form
-          // form={form}
-          layout="vertical"
-          name="form_in_modal"
-          initialValues={{ modifier: "public" }}
-        >
-          <Form.Item name="그룹 ID" label="그룹 ID">
-            <Input />
-          </Form.Item>
-          <Form.Item name="그룹명" label="그룹명">
-            <Input />
-          </Form.Item>
-          <Form.Item name="회원 상태" label="회원 상태">
-            <Input />
-          </Form.Item>
-          <Form.Item name="활성/휴면 여부" label="활성/휴면 여부">
-            <Input />
-          </Form.Item>
-        </Form>
-      </Modal>
+      </Modal> */}
     </>
   );
 };
