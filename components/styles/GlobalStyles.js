@@ -5,11 +5,11 @@ import paletteLess from "!!raw-loader!../../assets/antd-custom.less";
 
 const lessVariables = lessToJs(paletteLess, {
     resolveVariables: true,
-    stripPrefix: true
+    stripPrefix: true,
   }),
   camelCasedVariables = objectToCamelCase(lessVariables),
   theme = {
-    ...camelCasedVariables
+    ...camelCasedVariables,
   };
 
 const GlobalStyles = createGlobalStyle`
@@ -36,7 +36,7 @@ const GlobalStyles = createGlobalStyle`
     -moz-osx-font-smoothing: grayscale;
     text-rendering:optimizeLegibility;
     font-size: 14px;
-    font-family: Inter, -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;
+    font-family: Noto Sans KR, -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;
   }
 
   html, body, #__next {
