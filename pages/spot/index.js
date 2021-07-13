@@ -79,15 +79,14 @@ const Spot = (props) => {
   const [loading, setLoading] = useState(false);
 
   const handleTableChange = (pagination, filters, sorter) => {
-    setPagination(2);
-
-    fetch({
-      results: pagination.pageSize,
-      page: pagination.current,
-      sortField: sorter.field,
-      sortOrder: sorter.order,
-      ...filters,
-    });
+    // setPagination(2);
+    // fetch({
+    //   results: pagination.pageSize,
+    //   page: pagination.current,
+    //   sortField: sorter.field,
+    //   sortOrder: sorter.order,
+    //   ...filters,
+    // });
   };
 
   useEffect(() => {
@@ -105,14 +104,13 @@ const Spot = (props) => {
           headers: {
             "Content-Type": "application/json;charset=UTF-8",
             "Access-Control-Allow-Origin": "*",
-            Authorization:
-              "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjUsInVzZXJfbG9naW4iOiJjc0BkbWFpbi5pbyIsInVzZXJfbmFtZSI6Ilx1Yzc3OFx1YzEzMSIsInVzZXJfcm9sZSI6ImZmYWRtaW4iLCJwaG9uZSI6IjAxMC0zNjc0LTc1NjMiLCJtYXJrZXRpbmdfYWdyZWUiOjEsImdyb3VwX2lkIjpudWxsLCJleHAiOjE2NTY5NDkzMTh9.TMNWMrhtKzYb0uCFLuqTbqKE19ZXVzT0nRBqsPN5N4I",
+            Authorization: decodeURIComponent(token),
           },
         }
       )
       .then((response) => {
         const data = response.data;
-        setPagination({ ...pagination, total: 200 });
+        setPagination({ ...pagination, total: data.total });
         setSpotList(data.items);
       })
       .catch((error) => {
