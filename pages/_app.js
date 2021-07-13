@@ -8,6 +8,7 @@ import NProgress from "nprogress";
 import Page from "../components/Page";
 import Router from "next/router";
 import { wrapper } from "../state/stores";
+import "../public/styles.less";
 
 Router.events.on("routeChangeStart", () => NProgress.start());
 Router.events.on("routeChangeComplete", () => NProgress.done());
