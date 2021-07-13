@@ -11,11 +11,22 @@ import initialize from "@utils/initialize";
 const Product = (props) => {
   const { user, isLoggedIn, token } = props.auth;
 
-  useEffect(() => {
-    if (!isLoggedIn) {
-      Router.push("/");
-    }
-  }, []);
+  const renderWorkingDays = (value, row, index) => {
+    let workingDays = [];
+
+    Object.entries(value).filter((obj) => {
+      if (obj[1]) {
+        workingDays.push(obj[0]);
+      }
+    });
+
+    const startDay = covertEngDayToKorDay(workingDays[0]);
+    const endDay = covertEngDayToKorDay(workingDays[workingDays.length - 1]);
+
+    const renderDay = `${startDay}~${endDay}`;
+
+    return renderDay;
+  };
 
   const columns = [
     {
@@ -40,7 +51,8 @@ const Product = (props) => {
     },
     {
       title: "요일",
-      dataIndex: "email",
+      dataIndex: "working_days",
+      render: renderWorkingDays,
     },
     {
       title: "시작시간",
@@ -64,14 +76,68 @@ const Product = (props) => {
     },
   ];
 
-  const [data, setData] = useState([]);
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(false);
+  const [productList, setProductList] = useState([]);
 
   const [registrationModalOpen, setRegistrationModalOpen] = useState(false);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
   const [form] = Form.useForm();
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+
+    getProductList();
+  }, []);
+
+  const getProductList = () => {
+    setLoading(true);
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/product/list`,
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        const data = response.data;
+        setPagination({ ...pagination, total: 200 });
+        setProductList(data.items);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
+
+  const covertEngDayToKorDay = (value) => {
+    switch (value) {
+      case "mon":
+        return "월";
+      case "tue":
+        return "화";
+      case "wed":
+        return "수";
+      case "thu":
+        return "목";
+      case "fri":
+        return "금";
+      case "sat":
+        return "토";
+      case "sun":
+        return "일";
+      default:
+        break;
+    }
+  };
 
   const handleTableChange = (pagination, filters, sorter) => {
     setPagination(2);
@@ -163,8 +229,8 @@ const Product = (props) => {
 
       <Table
         columns={columns}
-        rowKey={(record) => record.login.uuid}
-        dataSource={data}
+        rowKey={(record) => record.product_id}
+        dataSource={productList}
         pagination={pagination}
         loading={loading}
         onChange={handleTableChange}
