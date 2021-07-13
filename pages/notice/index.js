@@ -119,7 +119,7 @@ const Notice = (props) => {
         <Button
           type="primary"
           onClick={() => {
-            Router.push("/notice/write");
+            Router.push("/notice/new");
           }}
         >
           + 등록
