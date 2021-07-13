@@ -18,15 +18,19 @@ import { connect } from "react-redux";
 import axios from "axios";
 import { useRouter } from "next/router";
 import NextHead from "next/head";
-// import ReactSummernote from "react-summernote";
-// import "react-summernote/dist/react-summernote.css"; // import styles
-// import "react-summernote/lang/summernote-ru-RU"; // you can import any other locale
+import dynamic from "next/dynamic";
 
-// Import bootstrap(v3 or v4) dependencies
-// import "bootstrap/js/modal";
-// import "bootstrap/js/dropdown";
-// import "bootstrap/js/tooltip";
-// import "bootstrap/dist/css/bootstrap.css";
+const ReactSummernote = dynamic(() => import("react-summernote"));
+
+// import ReactSummernote from "react-summernote";
+import "react-summernote/dist/react-summernote.css"; // import styles
+import "react-summernote/lang/summernote-ru-RU"; // you can import any other locale
+
+// Import bootstrap(v3 or v4) dependencies;
+import "bootstrap/js/modal";
+import "bootstrap/js/dropdown";
+import "bootstrap/js/tooltip";
+import "bootstrap/dist/css/bootstrap.css";
 
 // 참조 : https://github.com/summernote/react-summernote
 
@@ -182,6 +186,8 @@ const NoticeDetail = (props) => {
     setIsTop(e.target.value);
   };
 
+  const handleEditorChange = (content) => {};
+
   return (
     <>
       <NextHead>
@@ -235,6 +241,24 @@ const NoticeDetail = (props) => {
               <InputNumber min={1} disabled={true} />
             </Form.Item>
           )} */}
+          <ReactSummernote
+            value="Default value"
+            options={{
+              lang: "ru-RU",
+              height: 350,
+              dialogsInBody: true,
+              toolbar: [
+                ["style", ["style"]],
+                ["font", ["bold", "underline", "clear"]],
+                ["fontname", ["fontname"]],
+                ["para", ["ul", "ol", "paragraph"]],
+                ["table", ["table"]],
+                ["insert", ["link", "picture", "video"]],
+                ["view", ["fullscreen", "codeview"]],
+              ],
+            }}
+            onChange={handleEditorChange}
+          />
 
           <Button type="primary" htmlType="submit">
             저장
