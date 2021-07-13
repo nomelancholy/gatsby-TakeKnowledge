@@ -4,7 +4,7 @@ import {
   DEAUTHENTICATE,
   AUTHENTICATE_FAILED,
 } from "../actions/AuthActionConstants";
-import { getCookie } from "@utils/cookie";
+import { getCookie, setCookie } from "@utils/cookie";
 
 let initialState;
 if (typeof localStorage !== "undefined") {
@@ -31,6 +31,9 @@ const authReducer = (state = initialState, action) => {
       };
 
       const remember = action.remember ? action.remember : false;
+
+      setCookie("token", authObj.token, remember);
+      setCookie("user", JSON.stringify(authObj.user), remember);
 
       return { ...state, ...authObj };
     case DEAUTHENTICATE:
