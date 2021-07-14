@@ -7,6 +7,7 @@ import axios from "axios";
 import Router from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
+import { Filter } from "@components/elements";
 
 const Product = (props) => {
   const { user, isLoggedIn, token } = props.auth;
@@ -150,7 +151,7 @@ const Product = (props) => {
     <>
       <h3>상품 관리</h3>
 
-      <Row type="flex" align="middle" className="py-4">
+      <Row type="flex" align="middle" className="py-3">
         {/* <Button type="primary">
           <SearchOutlined></SearchOutlined>검색
         </Button> */}
@@ -174,6 +175,7 @@ const Product = (props) => {
       </Row>
 
       <Table
+        size="middle"
         columns={columns}
         rowKey={(record) => record.product_id}
         dataSource={productList}
@@ -182,15 +184,10 @@ const Product = (props) => {
         onChange={handleTableChange}
       />
       {/* 필터 모달 */}
-      <Modal
+      <Filter
         visible={filterModalOpen}
-        title="검색 항목"
-        okText="검색"
-        cancelText="취소"
-        onCancel={() => {
-          setFilterModalOpen(false);
-        }}
-        onOk={
+        onClose={() => setFilterModalOpen(false)}
+        onSearch={
           () => {
             console.log(`onOk`);
           }
@@ -226,7 +223,7 @@ const Product = (props) => {
             <Input />
           </Form.Item>
         </Form>
-      </Modal>
+      </Filter>
     </>
   );
 };

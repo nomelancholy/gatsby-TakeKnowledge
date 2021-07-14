@@ -7,6 +7,7 @@ import axios from "axios";
 import Router from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
+import { Filter } from "@components/elements";
 
 const Notice = (props) => {
   const { user, isLoggedIn, token } = props.auth;
@@ -103,7 +104,7 @@ const Notice = (props) => {
     <>
       <h3>알림(공지) 관리</h3>
 
-      <Row type="flex" align="middle" className="py-4">
+      <Row type="flex" align="middle" className="py-3">
         {/* <Button type="primary">
           <SearchOutlined></SearchOutlined>검색
         </Button> */}
@@ -127,6 +128,7 @@ const Notice = (props) => {
       </Row>
 
       <Table
+        size="middle"
         columns={columns}
         rowKey={(record) => record.login.uuid}
         dataSource={data}
@@ -135,18 +137,11 @@ const Notice = (props) => {
         onChange={handleTableChange}
       />
       {/* 필터 모달 */}
-      <Modal
+      <Filter
         visible={filterModalOpen}
-        title="검색 항목"
-        okText="검색"
-        cancelText="취소"
-        onCancel={() => {
-          setFilterModalOpen(false);
-        }}
-        onOk={
-          () => {
-            console.log(`onOk`);
-          }
+        onClose={() => setFilterModalOpen(false)}
+        onSearch={() => {
+          console.log(`onOk`);
           //     () => {
           //   form
           //     .validateFields()
@@ -158,7 +153,7 @@ const Notice = (props) => {
           //       console.log("Validate Failed:", info);
           //     });
           // }
-        }
+        }}
       >
         <Form
           // form={form}
@@ -179,7 +174,7 @@ const Notice = (props) => {
             <Input />
           </Form.Item>
         </Form>
-      </Modal>
+      </Filter>
     </>
   );
 };

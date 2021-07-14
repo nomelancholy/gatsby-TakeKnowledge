@@ -7,6 +7,7 @@ import axios from "axios";
 import Router from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
+import { Filter } from "@components/elements";
 
 const Payment = (props) => {
   const { user, isLoggedIn, token } = props.auth;
@@ -134,7 +135,7 @@ const Payment = (props) => {
     <>
       <h3>요금제 관리</h3>
 
-      <Row type="flex" align="middle" className="py-4">
+      <Row type="flex" align="middle" className="py-3">
         {/* <Button type="primary">
           <SearchOutlined></SearchOutlined>검색
         </Button> */}
@@ -158,6 +159,7 @@ const Payment = (props) => {
       </Row>
 
       <Table
+        size="middle"
         columns={columns}
         rowKey={(record) => record.login.uuid}
         dataSource={data}
@@ -166,15 +168,10 @@ const Payment = (props) => {
         onChange={handleTableChange}
       />
       {/* 필터 모달 */}
-      <Modal
+      <Filter
         visible={filterModalOpen}
-        title="검색 항목"
-        okText="검색"
-        cancelText="취소"
-        onCancel={() => {
-          setFilterModalOpen(false);
-        }}
-        onOk={
+        onClose={() => setFilterModalOpen(false)}
+        onSearch={
           () => {
             console.log(`onOk`);
           }
@@ -210,7 +207,7 @@ const Payment = (props) => {
             <Input />
           </Form.Item>
         </Form>
-      </Modal>
+      </Filter>
       {/* 등록 모달 */}
       <Modal
         visible={registrationModalOpen}
