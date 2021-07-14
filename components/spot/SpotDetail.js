@@ -265,7 +265,11 @@ const SpotDetail = (props) => {
             bodyStyle={{ padding: "1rem" }}
             className="mb-4"
           >
-            <Form form={form} onFinish={handleSpotRegisterSubmit}>
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={handleSpotRegisterSubmit}
+            >
               <Form.Item name="status" label="스팟 활성 / 비활성">
                 <Radio.Group onChange={handleStatusChange} value={status}>
                   <Radio style={radioStyle} value={"active"}>

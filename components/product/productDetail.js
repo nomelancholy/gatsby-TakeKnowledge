@@ -284,7 +284,11 @@ const ProductDetail = (props) => {
             bodyStyle={{ padding: "1rem" }}
             className="mb-4"
           >
-            <Form form={form} onFinish={handleSpotRegisterSubmit}>
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={handleSpotRegisterSubmit}
+            >
               <Form.Item name="type" label="상품 구분">
                 <Select
                   defaultValue="-"
