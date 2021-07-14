@@ -1,5 +1,9 @@
 import { Button, Table, Form, Input, Row, Select, Modal } from "antd";
-import { SlidersOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  SlidersOutlined,
+  SearchOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 
 import React, { Component, useState, useEffect } from "react";
 import { connect } from "react-redux";
@@ -161,7 +165,8 @@ const Product = (props) => {
             setFilterModalOpen(true);
           }}
         >
-          <SlidersOutlined></SlidersOutlined>필터
+          <SlidersOutlined />
+          <span>필터</span>
         </Button>
         <span className="px-2 w-10"></span>
         <Button
@@ -170,7 +175,8 @@ const Product = (props) => {
             Router.push("/product/new");
           }}
         >
-          + 등록
+          <PlusOutlined />
+          <span>등록</span>
         </Button>
       </Row>
 
