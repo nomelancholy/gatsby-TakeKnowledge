@@ -1,22 +1,52 @@
 import React, { useRef } from "react";
-import { Editor } from "@toast-ui/react-editor";
-import "@toast-ui/editor/dist/toastui-editor.css";
-
-// import CodeMirror from "react-codemirror";
-// import colorSyntax from "@toast-ui/editor-plugin-color-syntax";
-// import tableMergedCell from "@toast-ui/editor-plugin-table-merged-cell";
+import SunEditor from "suneditor-react";
+import plugins from "suneditor/src/plugins";
+import lang from "suneditor/src/lang";
+import { ko } from "suneditor/src/lang";
+import "suneditor/dist/css/suneditor.min.css"; // Import Sun Editor's CSS File
 
 const PostEditor = () => {
-  const editorRef = useRef(null);
   return (
-    <Editor
-      initialValue="hello react editor world!"
-      previewStyle="vertical"
-      height="600px"
-      initialEditType="markdown"
-      useCommandShortcut={true}
-      ref={editorRef}
-      usageStatistics={false}
+    <SunEditor
+      lang={lang.ko}
+      setOptions={{
+        buttonList: [
+          [
+            "undo",
+            "redo",
+            "font",
+            "fontSize",
+            "formatBlock",
+            "paragraphStyle",
+            "blockquote",
+            "bold",
+            "underline",
+            "italic",
+            "strike",
+            "subscript",
+            "superscript",
+            "fontColor",
+            "hiliteColor",
+            "textStyle",
+            "removeFormat",
+            "outdent",
+            "indent",
+            "align",
+            "horizontalRule",
+            "list",
+            "lineHeight",
+            "table",
+            "link",
+            "image",
+            "fullScreen",
+            "showBlocks",
+            "codeView",
+            "preview",
+            "save",
+            "template",
+          ],
+        ],
+      }}
     />
   );
 };
