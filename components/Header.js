@@ -13,7 +13,7 @@ import Link from "next/link";
 import MockNotifications from "../demos/mock/notifications";
 import { useAppState } from "./shared/AppProvider";
 import { useState } from "react";
-
+import { removeCookie } from "@utils/cookie";
 import Actions from "../state/actions/AuthActionCreators";
 
 const { SubMenu } = Menu;
@@ -45,7 +45,15 @@ const MainHeader = () => {
           <span className="mr-auto" />
 
           <Menu.Item>
-            <a onClick={() => dispatch(Actions.deauthenticate())}>로그아웃</a>
+            <a
+              onClick={() => {
+                removeCookie("token");
+                removeCookie("user");
+                // dispatch(Actions.deauthenticate());
+              }}
+            >
+              로그아웃
+            </a>
           </Menu.Item>
           {/* 
           {!state.mobile && (
