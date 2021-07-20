@@ -21,10 +21,21 @@ import { useRouter } from "next/router";
 import NextHead from "next/head";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
+import dynamic from "next/dynamic";
+
+const PostEditor = dynamic(() => import("@utils/Editor"), {
+  ssr: false,
+});
 
 const ProductDetail = (props) => {
   const { productId } = props;
   const { user, isLoggedIn, token } = props.auth;
+
+  const TIMES = [
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+    22, 23, 24,
+  ];
+  const DAYS = [1, 2, 3, 4, 5, 6, 7];
 
   const radioStyle = {
     display: "inline",
@@ -52,15 +63,14 @@ const ProductDetail = (props) => {
   const [form] = Form.useForm();
 
   // 시설정보 checkbox 옵션
-  const facilityInfoOptions = [
-    { label: "라운지", value: "lounge" },
-    { label: "미팅룸", value: "meeting" },
-    { label: "코워킹룸", value: "coworking" },
-    { label: "QA존", value: "qa" },
-    { label: "스마트락커", value: "locker" },
-    { label: "F&B바", value: "fb" },
-    { label: "무인편의점", value: "unmanned" },
-    { label: "폰부스", value: "phone" },
+  const workingDaysOptions = [
+    { label: "월", value: "mon" },
+    { label: "화", value: "tue" },
+    { label: "수", value: "wed" },
+    { label: "목", value: "thu" },
+    { label: "금", value: "fri" },
+    { label: "토", value: "sat" },
+    { label: "일", value: "sun" },
   ];
 
   useEffect(() => {
@@ -256,6 +266,18 @@ const ProductDetail = (props) => {
     console.log(`values`, values);
   };
 
+  const handleStartTimeChange = (values) => {
+    console.log(`values`, values);
+  };
+
+  const handleEndTimeChange = (values) => {
+    console.log(`values`, values);
+  };
+
+  const handleWeekLimitChange = (values) => {
+    console.log(`values`, values);
+  };
+
   const handlePlanSpotChange = (values) => {
     console.log(`values`, values);
   };
@@ -279,7 +301,11 @@ const ProductDetail = (props) => {
       <Tabs defaultActiveKey="1">
         <Tabs.TabPane tab="상품 상세" key="1">
           <Card
-            title={`상품 ID ${productId}`}
+            title={
+              productId && productId !== null
+                ? `상품 ID ${productId}`
+                : "상품 등록"
+            }
             extra={<a onClick={() => router.back()}>뒤로 가기</a>}
             bodyStyle={{ padding: "1rem" }}
             className="mb-4"
@@ -356,7 +382,38 @@ const ProductDetail = (props) => {
                   </Radio>
                 </Radio.Group>
               </Form.Item>
-              <Form.Item name="intro" label="상품 소개"></Form.Item>
+              <Form.Item name="images" label="상품  로고이미지">
+                <Upload
+                  name="image"
+                  listType="picture-card"
+                  fileList={[]}
+                  // onChange={handleFileChange}
+                  // onPreview={handlePreview}
+                >
+                  {fileList.length < 1 ? (
+                    <Button icon={<UploadOutlined />}>업로드</Button>
+                  ) : null}
+                </Upload>
+                {/* <Modal
+                  visible={previewVisible}
+                  footer={null}
+                  onCancel={() => {
+                    setPreviewVisible(false);
+                  }}
+                >
+                  <img
+                    alt="example"
+                    style={{ width: "100%" }}
+                    src={previewImage}
+                  />
+                </Modal> */}
+              </Form.Item>
+              <Form.Item name="intro" label="상품 소개">
+                <PostEditor />
+              </Form.Item>
+              <Form.Item name="content" label="상품 신청">
+                <PostEditor />
+              </Form.Item>
               <Form.Item
                 name="images"
                 label="상품 이미지 (최대 5장까지 첨부 가능)"
@@ -392,45 +449,42 @@ const ProductDetail = (props) => {
                 </Form.Item>
               )}
 
-              <Form.Item name="nickname" label="스팟 별칭">
-                <Input />
+              <Form.Item name="operation_time" label="운영 시간">
+                <Select
+                  defaultValue="-"
+                  style={{ width: 120 }}
+                  onChange={handleStartTimeChange}
+                >
+                  {TIMES.map((time) => (
+                    <Select.Option value={time}>{time}</Select.Option>
+                  ))}
+                </Select>
+                <Select
+                  defaultValue="-"
+                  style={{ width: 120 }}
+                  onChange={handleEndTimeChange}
+                >
+                  {TIMES.map((time) => (
+                    <Select.Option value={time}>{time}</Select.Option>
+                  ))}
+                </Select>
               </Form.Item>
-              <Form.Item name="address" label="주소">
-                <Input onFocus={showAddressPopup} />
-              </Form.Item>
-              <Form.Item name="address_etc" label="상세 주소">
-                <Input ref={userAddressEtcRef} />
-              </Form.Item>
-              <Form.Item
-                name="operation_time"
-                label="운영 시간"
-                initialValue="연중무휴, 24시간"
-              >
-                <Input />
-              </Form.Item>
-              <Form.Item name="seat_capacity" label="인원">
-                <InputNumber onChange={handleSeatCapacityChange} />
-              </Form.Item>
-              <Form.Item name="max_seat_capacity" label="최대 인원">
-                <InputNumber disabled={true} />
+              <Form.Item name="week_limit" label="주간 이용 한도">
+                <Select
+                  defaultValue="-"
+                  style={{ width: 120 }}
+                  onChange={handleWeekLimitChange}
+                >
+                  {DAYS.map((day) => (
+                    <Select.Option value={day}>{day}</Select.Option>
+                  ))}
+                </Select>
               </Form.Item>
 
-              <Form.Item name="content" label="설명">
-                <Input.TextArea rows={4}></Input.TextArea>
+              <Form.Item name="working_days" label="운영 요일">
+                <Checkbox.Group options={workingDaysOptions} />
               </Form.Item>
-              <Form.Item name="facilityInfos" label="시설 정보">
-                <Checkbox.Group options={facilityInfoOptions} />
-              </Form.Item>
-              <Form.Item name="property" label="파이브스팟 전용">
-                <Radio.Group onChange={handlePropertyChange} value={property}>
-                  <Radio style={radioStyle} value={"fivespot"}>
-                    전용
-                  </Radio>
-                  <Radio style={radioStyle} value={"fastfive"}>
-                    공용
-                  </Radio>
-                </Radio.Group>
-              </Form.Item>
+
               <Button type="primary" htmlType="submit">
                 저장
               </Button>
