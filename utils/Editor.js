@@ -5,7 +5,8 @@ import lang from "suneditor/src/lang";
 import { ko } from "suneditor/src/lang";
 import "suneditor/dist/css/suneditor.min.css"; // Import Sun Editor's CSS File
 
-const PostEditor = () => {
+const PostEditor = (props) => {
+  const { onChange, ...rest } = props;
   return (
     <SunEditor
       lang={lang.ko}
@@ -40,6 +41,9 @@ const PostEditor = () => {
             "save",
           ],
         ],
+      }}
+      onChange={(content) => {
+        onChange(content);
       }}
     />
   );
