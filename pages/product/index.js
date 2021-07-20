@@ -63,6 +63,18 @@ const Product = (props) => {
     {
       title: "상품 구분",
       dataIndex: "type",
+      render: (text, record) => {
+        let renderText = "";
+        if (text === "membership") {
+          renderText = "멤버십";
+        } else if (text === "service") {
+          renderText = "부가서비스";
+        } else if (text === "voucher") {
+          renderText = "이용권";
+        }
+
+        return renderText;
+      },
     },
     {
       title: "상품명",
@@ -74,10 +86,30 @@ const Product = (props) => {
     {
       title: "멤버십 유형",
       dataIndex: "service_type",
+      render: (text, record) => {
+        let renderText = "";
+        if (text === "accumulate") {
+          renderText = "기본형";
+        } else if (text === "deduction") {
+          renderText = "차감형";
+        }
+
+        return renderText;
+      },
     },
     {
       title: "결제 유형",
       dataIndex: "pay_demand",
+      render: (text, record) => {
+        let renderText = "";
+        if (text === "pre") {
+          renderText = "선불";
+        } else if (text === "deffered") {
+          renderText = "후불";
+        }
+
+        return renderText;
+      },
     },
     {
       title: "요일",
@@ -94,11 +126,21 @@ const Product = (props) => {
     },
     {
       title: "사용 가능 공간ID",
-      dataIndex: "email",
+      dataIndex: "spots",
     },
     {
       title: "활성/비활성",
       dataIndex: "status",
+      render: (text, record) => {
+        let renderText = "";
+        if (text === "active") {
+          renderText = "활성";
+        } else if (text === "inactive") {
+          renderText = "비활성";
+        }
+
+        return renderText;
+      },
     },
     {
       title: "생성 일시",
