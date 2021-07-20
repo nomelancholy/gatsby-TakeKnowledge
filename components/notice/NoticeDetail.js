@@ -18,17 +18,11 @@ import { connect } from "react-redux";
 import axios from "axios";
 import { useRouter } from "next/router";
 import NextHead from "next/head";
-// import ReactSummernote from "react-summernote";
-// import "react-summernote/dist/react-summernote.css"; // import styles
-// import "react-summernote/lang/summernote-ru-RU"; // you can import any other locale
+import dynamic from "next/dynamic";
 
-// Import bootstrap(v3 or v4) dependencies
-// import "bootstrap/js/modal";
-// import "bootstrap/js/dropdown";
-// import "bootstrap/js/tooltip";
-// import "bootstrap/dist/css/bootstrap.css";
-
-// 참조 : https://github.com/summernote/react-summernote
+const PostEditor = dynamic(() => import("../../utils/Editor"), {
+  ssr: false,
+});
 
 const NoticeDetail = (props) => {
   const { user, isLoggedIn, token } = props.auth;
@@ -230,12 +224,7 @@ const NoticeDetail = (props) => {
           <Form.Item name="title" label="제목">
             <Input />
           </Form.Item>
-          {/* {registerMode ? null : (
-            <Form.Item name="spot_id" label="스팟 ID">
-              <InputNumber min={1} disabled={true} />
-            </Form.Item>
-          )} */}
-
+          <PostEditor />
           <Button type="primary" htmlType="submit">
             저장
           </Button>
