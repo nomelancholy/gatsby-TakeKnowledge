@@ -31,9 +31,7 @@ const Notice = (props) => {
       method: "post",
       url: `${process.env.BACKEND_API}/services/notices`,
       headers: {
-        Authorization:
-          "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjgsInVzZXJfbG9naW4iOiJhbGxzcG90QGRtYWluLmlvIiwidXNlcl9uYW1lIjoiXHVjNjJjXHVjMmE0XHVkMzFmXHVkMTRjXHVjMmE0XHVkMmI4IiwidXNlcl9yb2xlIjoibWVtYmVyIiwicGhvbmUiOiIwMTAtODg5NS0zOTc2IiwibWFya2V0aW5nX2FncmVlIjowLCJncm91cF9pZCI6bnVsbCwiZXhwIjoxNjU4MjEwNzE2fQ.A-O77eynxpVbUsaSnqUg1mDvyzFmq8rbZIeKl5rWuHw",
-        "Content-Type": "application/json",
+        Authorization: decodeURIComponent(token),
       },
       params: data,
     };
