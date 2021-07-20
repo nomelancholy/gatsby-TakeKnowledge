@@ -12,6 +12,37 @@ const Notice = (props) => {
   const { user, isLoggedIn, token } = props.auth;
 
   useEffect(() => {
+    // const data = JSON.stringify({
+    //   page: 1,
+    //   limit: 20,
+    // });
+
+    const data = {
+      page: 1,
+      limit: 20,
+    };
+
+    const config = {
+      method: "post",
+      url: `${process.env.BACKEND_API}/services/notices`,
+      headers: {
+        Authorization:
+          "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjgsInVzZXJfbG9naW4iOiJhbGxzcG90QGRtYWluLmlvIiwidXNlcl9uYW1lIjoiXHVjNjJjXHVjMmE0XHVkMzFmXHVkMTRjXHVjMmE0XHVkMmI4IiwidXNlcl9yb2xlIjoibWVtYmVyIiwicGhvbmUiOiIwMTAtODg5NS0zOTc2IiwibWFya2V0aW5nX2FncmVlIjowLCJncm91cF9pZCI6bnVsbCwiZXhwIjoxNjU4MjEwNzE2fQ.A-O77eynxpVbUsaSnqUg1mDvyzFmq8rbZIeKl5rWuHw",
+        "Content-Type": "application/json",
+      },
+      params: data,
+    };
+
+    axios(config)
+      .then(function (response) {
+        console.log(response.data);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }, []);
+
+  useEffect(() => {
     if (!isLoggedIn) {
       Router.push("/");
     }
@@ -20,19 +51,19 @@ const Notice = (props) => {
   const columns = [
     {
       title: "공지 ID",
-      dataIndex: "name",
+      dataIndex: "notice_id",
     },
     {
       title: "공지 제목",
-      dataIndex: "gender",
+      dataIndex: "title",
     },
     {
       title: "공지 유형",
-      dataIndex: "email",
+      dataIndex: "type",
     },
     {
       title: "상단 노출",
-      dataIndex: "email",
+      dataIndex: "sticky",
     },
     {
       title: "등록자",
@@ -40,11 +71,11 @@ const Notice = (props) => {
     },
     {
       title: "사용 여부",
-      dataIndex: "email",
+      dataIndex: "status",
     },
     {
       title: "생성 일시",
-      dataIndex: "email",
+      dataIndex: "regdate",
     },
   ];
 

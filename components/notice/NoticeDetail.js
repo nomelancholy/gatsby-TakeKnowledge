@@ -16,7 +16,7 @@ import { UploadOutlined } from "@ant-design/icons";
 import React, { useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
-import { useRouter } from "next/router";
+import Router, { useRouter } from "next/router";
 import NextHead from "next/head";
 import dynamic from "next/dynamic";
 
@@ -44,7 +44,8 @@ const NoticeDetail = (props) => {
 
   const [status, setStatus] = useState("");
   const [type, setType] = useState("");
-  const [isTop, setisTop] = useState(false);
+  const [sticky, setSticky] = useState(false);
+  const [content, setContent] = useState("");
 
   const [okModalVisible, setOkModalVisible] = useState(false);
   const [form] = Form.useForm();
@@ -87,81 +88,34 @@ const NoticeDetail = (props) => {
 
   // 저장 버튼 클릭
   const handleNoticeRegisterSubmit = (values) => {
-    // 전체 시설 정보
-    const facilityInfos = [
-      "lounge",
-      "meeting",
-      "coworking",
-      "qa",
-      "locker",
-      "fb",
-      "unmanned",
-      "phone",
-    ];
-    // 선택한 시설 정보
-    const validFacilityInfos = values.facilityInfos;
+    console.log(`values`, values);
 
-    // 객체 생성
-    let excerpt = {};
-    if (validFacilityInfos) {
-      facilityInfos.map((facilityInfo) => {
-        if (validFacilityInfos.includes(facilityInfo)) {
-          excerpt[facilityInfo] = true;
-        } else {
-          excerpt[facilityInfo] = false;
+    axios
+      .post(
+        `${process.env.BACKEND_API}/services/notice_add`,
+        {
+          type: values.type,
+          title: values.title,
+          content: values.content,
+          sticky: values.sticky,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization:
+              "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjUsInVzZXJfbG9naW4iOiJjc0BkbWFpbi5pbyIsInVzZXJfbmFtZSI6Ilx1Yzc3OFx1YzEzMSIsInVzZXJfcm9sZSI6ImZmYWRtaW4iLCJwaG9uZSI6IjAxMC0zNjc0LTc1NjMiLCJtYXJrZXRpbmdfYWdyZWUiOjEsImdyb3VwX2lkIjpudWxsLCJleHAiOjE2NTY5NDkzMTh9.TMNWMrhtKzYb0uCFLuqTbqKE19ZXVzT0nRBqsPN5N4I",
+          },
         }
-      });
-    }
-
-    const formData = new FormData();
-
-    formData.append("name", values.name);
-    formData.append("nickname", values.nickname);
-    formData.append("property", values.property);
-    formData.append("status", values.status);
-    formData.append("address", values.address);
-    formData.append("address_etc", values.address_etc);
-    formData.append("content", values.content);
-    formData.append("operation_time", values.operation_time);
-    formData.append("seat_capacity", values.seat_capacity);
-    formData.append("excerpt", JSON.stringify(excerpt));
-
-    // 파일 처리
-    if (values.images) {
-      values.images.map((image, index) => {
-        formData.append(`image${index + 1}`, image.originFileObj);
-      });
-    }
-
-    let url = "";
-
-    if (registerMode) {
-      url = `${process.env.BACKEND_API}/admin/spot/add`;
-    } else {
-      formData.append("spot_id", spotId);
-      url = `${process.env.BACKEND_API}/admin/spot/update`;
-    }
-
-    const config = {
-      method: "post",
-      url: url,
-      headers: {
-        Authorization:
-          "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjUsInVzZXJfbG9naW4iOiJjc0BkbWFpbi5pbyIsInVzZXJfbmFtZSI6Ilx1Yzc3OFx1YzEzMSIsInVzZXJfcm9sZSI6ImZmYWRtaW4iLCJwaG9uZSI6IjAxMC0zNjc0LTc1NjMiLCJtYXJrZXRpbmdfYWdyZWUiOjEsImdyb3VwX2lkIjpudWxsLCJleHAiOjE2NTY5NDkzMTh9.TMNWMrhtKzYb0uCFLuqTbqKE19ZXVzT0nRBqsPN5N4I",
-      },
-      data: formData,
-    };
-
-    axios(config)
-      .then(function (response) {
-        console.log(`response.data`, response.data);
-        setOkModalVisible(true);
-        if (registerMode) {
-          setGeneratedSpotId(response.data.item.spot_id);
+      )
+      .then((response) => {
+        if (response.status === 200) {
+          Router.push("/notice");
         }
+        console.log(`response`, response);
       })
-      .catch(function (error) {
-        console.log(error);
+      .catch((error) => {
+        console.log(`error`, error);
       });
   };
 
@@ -172,8 +126,12 @@ const NoticeDetail = (props) => {
   const handleTypeChange = (e) => {
     setType(e.target.value);
   };
-  const handleIsTopChange = (e) => {
-    setIsTop(e.target.value);
+  const handleStickyChange = (e) => {
+    setSticky(e.target.value);
+  };
+
+  const handleEditorChange = (content) => {
+    console.log(`content`, content);
   };
 
   return (
@@ -200,19 +158,19 @@ const NoticeDetail = (props) => {
           </Form.Item>
           <Form.Item name="type" label="공지 유형">
             <Radio.Group onChange={handleTypeChange} value={type}>
-              <Radio style={radioStyle} value={"active"}>
+              <Radio style={radioStyle} value={"normal"}>
                 일반 공지
               </Radio>
-              <Radio style={radioStyle} value={"inactive"}>
+              <Radio style={radioStyle} value={"group"}>
                 그룹 공지
               </Radio>
-              <Radio style={radioStyle} value={"inactive"}>
+              <Radio style={radioStyle} value={"spot"}>
                 지점 공지
               </Radio>
             </Radio.Group>
           </Form.Item>
           <Form.Item name="top" label="상단 노출">
-            <Radio.Group onChange={handleIsTopChange} value={isTop}>
+            <Radio.Group onChange={handleStickyChange} value={sticky}>
               <Radio style={radioStyle} value={true}>
                 노출
               </Radio>
@@ -224,7 +182,10 @@ const NoticeDetail = (props) => {
           <Form.Item name="title" label="제목">
             <Input />
           </Form.Item>
-          <PostEditor />
+          <Form.Item name="content" label="내용" value={content}>
+            <PostEditor onChange={handleEditorChange} />
+          </Form.Item>
+
           <Button type="primary" htmlType="submit">
             저장
           </Button>
