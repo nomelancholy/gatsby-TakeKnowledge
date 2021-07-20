@@ -30,7 +30,7 @@ const Space = (props) => {
         case "meeting":
           setTitle("미팅룸");
           break;
-        case "cowork":
+        case "coworking":
           setTitle("코워킹룸");
           break;
 

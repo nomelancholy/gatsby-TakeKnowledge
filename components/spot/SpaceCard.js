@@ -78,7 +78,7 @@ const SpaceCard = (props) => {
         setSettingSpaceOptions(meeting_options);
         setValidSpaceOptions(meeting_option_array);
         break;
-      case "cowork":
+      case "coworking":
         setSettingSpaceOptions(cowork_options);
         setValidSpaceOptions(coworkt_option_array);
         break;

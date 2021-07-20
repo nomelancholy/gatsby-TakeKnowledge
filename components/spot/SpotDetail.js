@@ -384,7 +384,7 @@ const SpotDetail = (props) => {
                 images={spotInfo.meeting_image}
               />
               <Space
-                type="cowork"
+                type="coworking"
                 spotId={spotId ? spotId : generatedSpotId}
                 desc={spotInfo.coworking_desc}
                 images={spotInfo.coworking_image}
