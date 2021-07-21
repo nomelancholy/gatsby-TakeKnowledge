@@ -2,7 +2,7 @@ import { Tag } from "antd";
 import React, { useState, useEffect } from "react";
 
 const CheckableTag = (props) => {
-  const { label, onChange, checked } = props;
+  const { id, label, onChange, checked } = props;
   const [isChecked, setIsChecked] = useState(false);
 
   useEffect(() => {
@@ -15,7 +15,7 @@ const CheckableTag = (props) => {
 
   const handleChange = (checked) => {
     setIsChecked(checked);
-    onChange(label, checked);
+    onChange(id, checked);
   };
 
   return (
