@@ -1,12 +1,14 @@
-import { Card, Divider } from 'antd';
+import { Card, Divider } from "antd";
 
-import Basic from './basic';
-import Checkable from './checkable';
-import Colorful from './colorful';
-import { Component } from 'react';
-import Control from './control';
-import Controlled from './controlled';
-import HotTags from './hot-tags';
+import Basic from "./basic";
+import Checkable from "./checkable";
+import Colorful from "./colorful";
+import { Component } from "react";
+import Control from "./control";
+import Controlled from "./controlled";
+import HotTags from "./hot-tags";
+import CheckableTag from "@components/elements/CheckableTag";
+import CheckableDemo from "./checkableDemo";
 
 class Demo extends Component {
   render() {
@@ -24,6 +26,13 @@ class Demo extends Component {
         </Divider>
         <div className="p-4">
           <Checkable />
+        </div>
+
+        <Divider orientation="left">
+          <small>CheckableTag</small>
+        </Divider>
+        <div className="p-4">
+          <CheckableDemo />
         </div>
 
         <Divider orientation="left">
