@@ -14,32 +14,61 @@ const Notice = (props) => {
   useEffect(() => {
     // const data = JSON.stringify({
     //   page: 1,
-    //   limit: 20,
+    //   size: 20,
     // });
 
-    const data = {
-      page: 1,
-      limit: 20,
-    };
+    // const data = {
+    //   page: 1,
+    //   size: 20,
+    // };
 
     const config = {
-      method: "post",
-      url: `${process.env.BACKEND_API}/services/notices`,
       headers: {
-        Authorization:
-          "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjgsInVzZXJfbG9naW4iOiJhbGxzcG90QGRtYWluLmlvIiwidXNlcl9uYW1lIjoiXHVjNjJjXHVjMmE0XHVkMzFmXHVkMTRjXHVjMmE0XHVkMmI4IiwidXNlcl9yb2xlIjoibWVtYmVyIiwicGhvbmUiOiIwMTAtODg5NS0zOTc2IiwibWFya2V0aW5nX2FncmVlIjowLCJncm91cF9pZCI6bnVsbCwiZXhwIjoxNjU4MjEwNzE2fQ.A-O77eynxpVbUsaSnqUg1mDvyzFmq8rbZIeKl5rWuHw",
-        "Content-Type": "application/json",
+        Authorization: decodeURIComponent(token),
       },
-      params: data,
+      data: JSON.stringify({
+        page: 1,
+        size: 20,
+        type: "normal",
+        sticky: 0,
+      }),
+      params: {
+        page: 1,
+        size: 20,
+        // type: "normal",
+      },
     };
 
-    axios(config)
+    axios
+      .get(`${process.env.BACKEND_API}/services/notices`, config)
       .then(function (response) {
         console.log(response.data);
       })
       .catch(function (error) {
         console.log(error);
       });
+
+    // var data = JSON.stringify({
+    //   page: 1,
+    //   size: 5,
+    // });
+
+    // var config = {
+    //   method: "get",
+    //   url: `${process.env.BACKEND_API}/services/notices`,
+    //   headers: {
+    //     Authorization: decodeURIComponent(token),
+    //   },
+    //   data: data,
+    // };
+
+    // axios(config)
+    //   .then(function (response) {
+    //     console.log(JSON.stringify(response.data));
+    //   })
+    //   .catch(function (error) {
+    //     console.log(error);
+    //   });
   }, []);
 
   useEffect(() => {
