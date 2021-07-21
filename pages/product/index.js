@@ -1,11 +1,7 @@
 import { Button, Table, Form, Input, Row, Select, Modal } from "antd";
-import {
-  SlidersOutlined,
-  SearchOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
+import { SlidersOutlined, PlusOutlined } from "@ant-design/icons";
 
-import React, { Component, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 import Router from "next/router";
