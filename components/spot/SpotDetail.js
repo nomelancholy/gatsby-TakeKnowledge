@@ -372,24 +372,28 @@ const SpotDetail = (props) => {
           {(spotId || generatedSpotId) && spotInfo && (
             <>
               <Space
+                key="lounge"
                 type="lounge"
                 spotId={spotId ? spotId : generatedSpotId}
                 desc={spotInfo.lounge_desc}
                 images={spotInfo.lounge_image}
               />
               <Space
+                key="meeting"
                 type="meeting"
                 spotId={spotId ? spotId : generatedSpotId}
                 desc={spotInfo.meeting_desc}
                 images={spotInfo.meeting_image}
               />
               <Space
+                key="coworking"
                 type="coworking"
                 spotId={spotId ? spotId : generatedSpotId}
                 desc={spotInfo.coworking_desc}
                 images={spotInfo.coworking_image}
               />
               <Space
+                key="locker"
                 type="locker"
                 spotId={spotId ? spotId : generatedSpotId}
                 desc={spotInfo.locker_desc}
