@@ -76,7 +76,7 @@ const Spot = (props) => {
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
-  const [pagination, setPagination] = useState({});
+  const [pagination, setPagination] = useState({ pageSize: 20 });
   const [loading, setLoading] = useState(false);
 
   const handleTableChange = (pagination, filters, sorter) => {
@@ -95,7 +95,7 @@ const Spot = (props) => {
     axios
       .post(
         `${process.env.BACKEND_API}/admin/spot/list`,
-        {},
+        { page: 1, size: 100 },
         {
           headers: {
             "Content-Type": "application/json;charset=UTF-8",
