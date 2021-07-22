@@ -165,7 +165,7 @@ const Payment = (props) => {
         <Button
           type="primary"
           onClick={() => {
-            setRegistrationModalOpen(true);
+            Router.push("/payment/new");
           }}
         >
           <PlusOutlined />
