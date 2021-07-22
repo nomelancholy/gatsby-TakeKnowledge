@@ -84,7 +84,10 @@ const Notice = (props) => {
     },
     {
       title: "등록자",
-      dataIndex: "email",
+      dataIndex: "user",
+      render: (text, record) => {
+        return text.user_name;
+      },
     },
     {
       title: "사용 여부",
@@ -94,10 +97,8 @@ const Notice = (props) => {
 
         if (text === "publish") {
           renderText = "발행";
-        } else if (text === "group") {
-          renderText = "그룹 공지";
-        } else if (text === "spot") {
-          renderText = "지점 공지";
+        } else if (text === "private") {
+          renderText = "미발행";
         }
 
         return renderText;
