@@ -3,8 +3,11 @@ import { connect } from "react-redux";
 import { useRouter } from "next/router";
 import SpaceDetail from "../../../../components/spot/SpaceDetail";
 import axios from "axios";
+import { wrapper } from "@state/stores";
+import initialize from "@utils/initialize";
 
 const Cowork = (props) => {
+  const { user, isLoggedIn, token } = props.auth;
   const router = useRouter();
   const { id } = router.query;
   const [type, setType] = useState("");
@@ -20,8 +23,7 @@ const Cowork = (props) => {
       method: "post",
       url: `${process.env.BACKEND_API}/spot/get`,
       headers: {
-        Authorization:
-          "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjUsInVzZXJfbG9naW4iOiJjc0BkbWFpbi5pbyIsInVzZXJfbmFtZSI6Ilx1Yzc3OFx1YzEzMSIsInVzZXJfcm9sZSI6ImZmYWRtaW4iLCJwaG9uZSI6IjAxMC0zNjc0LTc1NjMiLCJtYXJrZXRpbmdfYWdyZWUiOjEsImdyb3VwX2lkIjpudWxsLCJleHAiOjE2NTY5NDkzMTh9.TMNWMrhtKzYb0uCFLuqTbqKE19ZXVzT0nRBqsPN5N4I",
+        Authorization: decodeURIComponent(token),
       },
       data: {
         spot_id: id,
@@ -45,5 +47,9 @@ const Cowork = (props) => {
     </>
   );
 };
+
+export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
+  return { props: initialize(ctx) };
+});
 
 export default connect((state) => state)(Cowork);

@@ -1,144 +1,199 @@
 import { Button, Table, Form, Input, Row, Select, Modal } from "antd";
-import { SlidersOutlined, SearchOutlined } from "@ant-design/icons";
+import { SlidersOutlined, PlusOutlined } from "@ant-design/icons";
 
-import React, { Component, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 import Router from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
+import { Filter } from "@components/elements";
 
 const Product = (props) => {
   const { user, isLoggedIn, token } = props.auth;
+
+  // grid 요일 render 함수
+  const renderWorkingDays = (value, row, index) => {
+    let workingDays = [];
+
+    Object.entries(value).filter((obj) => {
+      if (obj[1]) {
+        workingDays.push(obj[0]);
+      }
+    });
+
+    const startDay = covertEngDayToKorDay(workingDays[0]);
+    const endDay = covertEngDayToKorDay(workingDays[workingDays.length - 1]);
+
+    const renderDay = `${startDay}~${endDay}`;
+
+    return renderDay;
+  };
+
+  const covertEngDayToKorDay = (value) => {
+    switch (value) {
+      case "mon":
+        return "월";
+      case "tue":
+        return "화";
+      case "wed":
+        return "수";
+      case "thu":
+        return "목";
+      case "fri":
+        return "금";
+      case "sat":
+        return "토";
+      case "sun":
+        return "일";
+      default:
+        break;
+    }
+  };
+
+  const columns = [
+    {
+      title: "상품 ID",
+      dataIndex: "product_id",
+    },
+    {
+      title: "상품 구분",
+      dataIndex: "type",
+      render: (text, record) => {
+        let renderText = "";
+        if (text === "membership") {
+          renderText = "멤버십";
+        } else if (text === "service") {
+          renderText = "부가서비스";
+        } else if (text === "voucher") {
+          renderText = "이용권";
+        }
+
+        return renderText;
+      },
+    },
+    {
+      title: "상품명",
+      dataIndex: "name",
+      render: (text, record) => {
+        return <a href={`/product/${record.product_id}`}>{text}</a>;
+      },
+    },
+    {
+      title: "멤버십 유형",
+      dataIndex: "service_type",
+      render: (text, record) => {
+        let renderText = "";
+        if (text === "accumulate") {
+          renderText = "기본형";
+        } else if (text === "deduction") {
+          renderText = "차감형";
+        }
+
+        return renderText;
+      },
+    },
+    {
+      title: "결제 유형",
+      dataIndex: "pay_demand",
+      render: (text, record) => {
+        let renderText = "";
+        if (text === "pre") {
+          renderText = "선불";
+        } else if (text === "deffered") {
+          renderText = "후불";
+        }
+
+        return renderText;
+      },
+    },
+    {
+      title: "요일",
+      dataIndex: "working_days",
+      render: renderWorkingDays,
+    },
+    {
+      title: "시작시간",
+      dataIndex: "start_time",
+    },
+    {
+      title: "종료시간",
+      dataIndex: "end_time",
+    },
+    {
+      title: "사용 가능 공간ID",
+      dataIndex: "spots",
+    },
+    {
+      title: "활성/비활성",
+      dataIndex: "status",
+      render: (text, record) => {
+        let renderText = "";
+        if (text === "active") {
+          renderText = "활성";
+        } else if (text === "inactive") {
+          renderText = "비활성";
+        }
+
+        return renderText;
+      },
+    },
+    {
+      title: "생성 일시",
+      dataIndex: "regdate",
+    },
+  ];
+
+  const [pagination, setPagination] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [productList, setProductList] = useState([]);
+
+  const [filterModalOpen, setFilterModalOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoggedIn) {
       Router.push("/");
     }
+
+    getProductList();
   }, []);
 
-  const columns = [
-    {
-      title: "상품 ID",
-      dataIndex: "name",
-    },
-    {
-      title: "상품 구분",
-      dataIndex: "gender",
-    },
-    {
-      title: "상품명",
-      dataIndex: "email",
-    },
-    {
-      title: "멤버십 유형",
-      dataIndex: "email",
-    },
-    {
-      title: "결제 유형",
-      dataIndex: "email",
-    },
-    {
-      title: "요일",
-      dataIndex: "email",
-    },
-    {
-      title: "시작시간",
-      dataIndex: "email",
-    },
-    {
-      title: "종료시간",
-      dataIndex: "email",
-    },
-    {
-      title: "사용 가능 공간ID",
-      dataIndex: "email",
-    },
-    {
-      title: "활성/비활성",
-      dataIndex: "email",
-    },
-    {
-      title: "생성 일시",
-      dataIndex: "email",
-    },
-  ];
-
-  const [data, setData] = useState([]);
-  const [pagination, setPagination] = useState({});
-  const [loading, setLoading] = useState(false);
-
-  const [registrationModalOpen, setRegistrationModalOpen] = useState(false);
-  const [filterModalOpen, setFilterModalOpen] = useState(false);
-
-  const [form] = Form.useForm();
-
-  const handleTableChange = (pagination, filters, sorter) => {
-    setPagination(2);
-
-    fetch({
-      results: pagination.pageSize,
-      page: pagination.current,
-      sortField: sorter.field,
-      sortOrder: sorter.order,
-      ...filters,
-    });
-  };
-
-  const fetch = (params = {}) => {
+  const getProductList = () => {
     setLoading(true);
     axios
-      .get(
-        "https://randomuser.me/api",
-        {
-          results: 10,
-          ...params,
-        },
+      .post(
+        `${process.env.BACKEND_API}/admin/product/list`,
+        {},
         {
           headers: {
             "Content-Type": "application/json;charset=UTF-8",
             "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
           },
         }
       )
       .then((response) => {
-        console.log(`response`, response);
         const data = response.data;
-        console.log(`data`, data);
-        // Read total count from server
-        // pagination.total = data.totalCount;
-        setPagination({ ...pagination, total: 200 });
+        setPagination({ ...pagination, total: data.total });
+        setProductList(data.items);
         setLoading(false);
-        setData(data.results);
       })
       .catch((error) => {
         console.log(`error`, error);
       });
   };
 
-  useEffect(() => {
-    // fetch();
-  }, []);
-
-  const handleGroupTypeChange = (value) => {
-    console.log(value);
-    form.setFieldsValue({
-      note: `Hi, ${value === "male" ? "man" : "lady"}!`,
-    });
-  };
-
-  const handlePaymentTypeChange = (value) => {
-    console.log(value);
-    form.setFieldsValue({
-      note: `Hi, ${value === "male" ? "man" : "lady"}!`,
-    });
+  const handleTableChange = (pagination, filters, sorter) => {
+    console.log(`pagination`, pagination);
+    console.log(`filters`, filters);
+    console.log(`sorter`, sorter);
   };
 
   return (
     <>
       <h3>상품 관리</h3>
 
-      <Row type="flex" align="middle" className="py-4">
+      <Row type="flex" align="middle" className="py-3">
         {/* <Button type="primary">
           <SearchOutlined></SearchOutlined>검색
         </Button> */}
@@ -148,37 +203,35 @@ const Product = (props) => {
             setFilterModalOpen(true);
           }}
         >
-          <SlidersOutlined></SlidersOutlined>필터
+          <SlidersOutlined />
+          <span>필터</span>
         </Button>
         <span className="px-2 w-10"></span>
         <Button
           type="primary"
           onClick={() => {
-            setRegistrationModalOpen(true);
+            Router.push("/product/new");
           }}
         >
-          + 등록
+          <PlusOutlined />
+          <span>등록</span>
         </Button>
       </Row>
 
       <Table
+        size="middle"
         columns={columns}
-        rowKey={(record) => record.login.uuid}
-        dataSource={data}
+        rowKey={(record) => record.product_id}
+        dataSource={productList}
         pagination={pagination}
         loading={loading}
         onChange={handleTableChange}
       />
       {/* 필터 모달 */}
-      <Modal
+      <Filter
         visible={filterModalOpen}
-        title="검색 항목"
-        okText="검색"
-        cancelText="취소"
-        onCancel={() => {
-          setFilterModalOpen(false);
-        }}
-        onOk={
+        onClose={() => setFilterModalOpen(false)}
+        onSearch={
           () => {
             console.log(`onOk`);
           }
@@ -214,86 +267,7 @@ const Product = (props) => {
             <Input />
           </Form.Item>
         </Form>
-      </Modal>
-      {/* 등록 모달 */}
-      <Modal
-        visible={registrationModalOpen}
-        title="그룹 등록"
-        okText="등록"
-        cancelText="취소"
-        onCancel={() => {
-          setRegistrationModalOpen(false);
-        }}
-        onOk={
-          () => {
-            console.log(`onOk`);
-          }
-          //     () => {
-          //   form
-          //     .validateFields()
-          //     .then((values) => {
-          //       form.resetFields();
-          //       onCreate(values);
-          //     })
-          //     .catch((info) => {
-          //       console.log("Validate Failed:", info);
-          //     });
-          // }
-        }
-      >
-        <Form
-          // form={form}
-          layout="vertical"
-          name="form_in_modal"
-          initialValues={{ modifier: "public" }}
-        >
-          <Form.Item
-            name="그룹 유형"
-            label="그룹 유형"
-            rules={[
-              { required: true, message: "그룹 유형은 필수 선택 사항입니다." },
-            ]}
-          >
-            <Select
-              placeholder="그룹 유형을 선택해주세요"
-              onChange={handleGroupTypeChange}
-            >
-              <Select.Option value="male">개인 사업자</Select.Option>
-              <Select.Option value="female">법인</Select.Option>
-            </Select>
-          </Form.Item>
-          <Form.Item
-            name="그룹명"
-            label="그룹명"
-            rules={[
-              {
-                required: true,
-                message: "그룹명은 필수 입력 사항입니다.",
-              },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="결제수단 선택"
-            label="결제수단 선택"
-            rules={[
-              {
-                required: true,
-                message: "결제 수단은은 필수 선택 사항입니다.",
-              },
-            ]}
-          >
-            <Select
-              placeholder="결제수단 선택"
-              onChange={handlePaymentTypeChange}
-            >
-              <Select.Option value="male">카드</Select.Option>
-              <Select.Option value="female">계좌이체</Select.Option>
-            </Select>
-          </Form.Item>
-        </Form>
-      </Modal>
+      </Filter>
     </>
   );
 };

@@ -16,8 +16,11 @@ import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 import { useForm } from "antd/lib/form/Form";
+import { wrapper } from "@state/stores";
+import initialize from "@utils/initialize";
 
 const SpaceCard = (props) => {
+  const { user, isLoggedIn, token } = props.auth;
   const { spaceInfo, title, spotId, type, handleSpaceDeleted } = props;
 
   // 등록 수정 flag state
@@ -75,7 +78,7 @@ const SpaceCard = (props) => {
         setSettingSpaceOptions(meeting_options);
         setValidSpaceOptions(meeting_option_array);
         break;
-      case "cowork":
+      case "coworking":
         setSettingSpaceOptions(cowork_options);
         setValidSpaceOptions(coworkt_option_array);
         break;
@@ -149,8 +152,7 @@ const SpaceCard = (props) => {
       method: "post",
       url: url,
       headers: {
-        Authorization:
-          "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjUsInVzZXJfbG9naW4iOiJjc0BkbWFpbi5pbyIsInVzZXJfbmFtZSI6Ilx1Yzc3OFx1YzEzMSIsInVzZXJfcm9sZSI6ImZmYWRtaW4iLCJwaG9uZSI6IjAxMC0zNjc0LTc1NjMiLCJtYXJrZXRpbmdfYWdyZWUiOjEsImdyb3VwX2lkIjpudWxsLCJleHAiOjE2NTY5NDkzMTh9.TMNWMrhtKzYb0uCFLuqTbqKE19ZXVzT0nRBqsPN5N4I",
+        Authorization: decodeURIComponent(token),
       },
       data: data,
     };
@@ -169,8 +171,7 @@ const SpaceCard = (props) => {
       method: "post",
       url: `${process.env.BACKEND_API}/admin/spot/space/delete`,
       headers: {
-        Authorization:
-          "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjUsInVzZXJfbG9naW4iOiJjc0BkbWFpbi5pbyIsInVzZXJfbmFtZSI6Ilx1Yzc3OFx1YzEzMSIsInVzZXJfcm9sZSI6ImZmYWRtaW4iLCJwaG9uZSI6IjAxMC0zNjc0LTc1NjMiLCJtYXJrZXRpbmdfYWdyZWUiOjEsImdyb3VwX2lkIjpudWxsLCJleHAiOjE2NTY5NDkzMTh9.TMNWMrhtKzYb0uCFLuqTbqKE19ZXVzT0nRBqsPN5N4I",
+        Authorization: decodeURIComponent(token),
       },
       data: { space_id: spaceInfo.space_id },
     };
@@ -286,5 +287,9 @@ const SpaceCard = (props) => {
     </Col>
   );
 };
+
+export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
+  return { props: initialize(ctx) };
+});
 
 export default connect((state) => state)(SpaceCard);

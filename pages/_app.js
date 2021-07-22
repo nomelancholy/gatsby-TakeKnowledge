@@ -48,12 +48,7 @@ class FSAdmin extends App {
           <meta charSet="utf-8" />
           <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
           <link rel="shortcut icon" href="/images/triangle.png" />
-          <title>One - React Next.js Ant Design Dashboard</title>
-          <link rel="preconnect" href="https://fonts.gstatic.com" />
-          <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900|Anonymous+Pro:400,700&display=swap"
-            rel="stylesheet"
-          />
+          <title>FIVESPOT 관리자</title>
           {pageProps.ieBrowser && (
             <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.2.5/polyfill.min.js" />
           )}

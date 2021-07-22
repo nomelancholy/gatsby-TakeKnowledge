@@ -5,9 +5,12 @@ import { connect } from "react-redux";
 import axios from "axios";
 import { useRouter } from "next/router";
 import SpaceCard from "./SpaceCard";
+import { wrapper } from "@state/stores";
+import initialize from "@utils/initialize";
 
 const SpaceDetail = (props) => {
   const { spotId, type, spotName } = props;
+  const { user, isLoggedIn, token } = props.auth;
   const router = useRouter();
 
   const [title, setTitle] = useState("");
@@ -22,7 +25,7 @@ const SpaceDetail = (props) => {
         case "meeting":
           setTitle("미팅룸");
           break;
-        case "cowork":
+        case "coworking":
           setTitle("코워킹룸");
           break;
 
@@ -37,8 +40,7 @@ const SpaceDetail = (props) => {
         method: "post",
         url: `${process.env.BACKEND_API}/spot/space/list`,
         headers: {
-          Authorization:
-            "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjUsInVzZXJfbG9naW4iOiJjc0BkbWFpbi5pbyIsInVzZXJfbmFtZSI6Ilx1Yzc3OFx1YzEzMSIsInVzZXJfcm9sZSI6ImZmYWRtaW4iLCJwaG9uZSI6IjAxMC0zNjc0LTc1NjMiLCJtYXJrZXRpbmdfYWdyZWUiOjEsImdyb3VwX2lkIjpudWxsLCJleHAiOjE2NTY5NDkzMTh9.TMNWMrhtKzYb0uCFLuqTbqKE19ZXVzT0nRBqsPN5N4I",
+          Authorization: decodeURIComponent(token),
         },
         data: {
           spot_id: spotId,
@@ -102,5 +104,9 @@ const SpaceDetail = (props) => {
     </>
   );
 };
+
+export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
+  return { props: initialize(ctx) };
+});
 
 export default connect((state) => state)(SpaceDetail);

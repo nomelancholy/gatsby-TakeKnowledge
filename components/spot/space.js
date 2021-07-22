@@ -5,8 +5,11 @@ import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 import Router from "next/router";
+import { wrapper } from "@state/stores";
+import initialize from "@utils/initialize";
 
 const Space = (props) => {
+  const { user, isLoggedIn, token } = props.auth;
   const { type, spotId, desc, images } = props;
 
   const [title, setTitle] = useState("");
@@ -27,7 +30,7 @@ const Space = (props) => {
         case "meeting":
           setTitle("미팅룸");
           break;
-        case "cowork":
+        case "coworking":
           setTitle("코워킹룸");
           break;
 
@@ -44,8 +47,7 @@ const Space = (props) => {
         method: "post",
         url: `${process.env.BACKEND_API}/spot/space/list`,
         headers: {
-          Authorization:
-            "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjUsInVzZXJfbG9naW4iOiJjc0BkbWFpbi5pbyIsInVzZXJfbmFtZSI6Ilx1Yzc3OFx1YzEzMSIsInVzZXJfcm9sZSI6ImZmYWRtaW4iLCJwaG9uZSI6IjAxMC0zNjc0LTc1NjMiLCJtYXJrZXRpbmdfYWdyZWUiOjEsImdyb3VwX2lkIjpudWxsLCJleHAiOjE2NTY5NDkzMTh9.TMNWMrhtKzYb0uCFLuqTbqKE19ZXVzT0nRBqsPN5N4I",
+          Authorization: decodeURIComponent(token),
         },
         data: {
           spot_id: spotId,
@@ -86,8 +88,7 @@ const Space = (props) => {
       method: "post",
       url: `${process.env.BACKEND_API}/admin/spot/update`,
       headers: {
-        Authorization:
-          "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjUsInVzZXJfbG9naW4iOiJjc0BkbWFpbi5pbyIsInVzZXJfbmFtZSI6Ilx1Yzc3OFx1YzEzMSIsInVzZXJfcm9sZSI6ImZmYWRtaW4iLCJwaG9uZSI6IjAxMC0zNjc0LTc1NjMiLCJtYXJrZXRpbmdfYWdyZWUiOjEsImdyb3VwX2lkIjpudWxsLCJleHAiOjE2NTY5NDkzMTh9.TMNWMrhtKzYb0uCFLuqTbqKE19ZXVzT0nRBqsPN5N4I",
+        Authorization: decodeURIComponent(token),
       },
       data: formData,
     };
@@ -164,5 +165,9 @@ const Space = (props) => {
     </>
   );
 };
+
+export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
+  return { props: initialize(ctx) };
+});
 
 export default connect((state) => state)(Space);

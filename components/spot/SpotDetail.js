@@ -19,9 +19,12 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import NextHead from "next/head";
 import Space from "./Space";
+import { wrapper } from "@state/stores";
+import initialize from "@utils/initialize";
 
 const SpotDetail = (props) => {
   const { spotId } = props;
+  const { token } = props.auth;
 
   const radioStyle = {
     display: "inline",
@@ -63,6 +66,7 @@ const SpotDetail = (props) => {
   useEffect(() => {
     if (spotId) {
       setRegisterMode(false);
+
       axios
         .post(
           `${process.env.BACKEND_API}/spot/get`,
@@ -71,8 +75,7 @@ const SpotDetail = (props) => {
             headers: {
               "Content-Type": "application/json;charset=UTF-8",
               "Access-Control-Allow-Origin": "*",
-              Authorization:
-                "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjUsInVzZXJfbG9naW4iOiJjc0BkbWFpbi5pbyIsInVzZXJfbmFtZSI6Ilx1Yzc3OFx1YzEzMSIsInVzZXJfcm9sZSI6ImZmYWRtaW4iLCJwaG9uZSI6IjAxMC0zNjc0LTc1NjMiLCJtYXJrZXRpbmdfYWdyZWUiOjEsImdyb3VwX2lkIjpudWxsLCJleHAiOjE2NTY5NDkzMTh9.TMNWMrhtKzYb0uCFLuqTbqKE19ZXVzT0nRBqsPN5N4I",
+              Authorization: decodeURIComponent(token),
             },
           }
         )
@@ -187,8 +190,7 @@ const SpotDetail = (props) => {
       method: "post",
       url: url,
       headers: {
-        Authorization:
-          "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjUsInVzZXJfbG9naW4iOiJjc0BkbWFpbi5pbyIsInVzZXJfbmFtZSI6Ilx1Yzc3OFx1YzEzMSIsInVzZXJfcm9sZSI6ImZmYWRtaW4iLCJwaG9uZSI6IjAxMC0zNjc0LTc1NjMiLCJtYXJrZXRpbmdfYWdyZWUiOjEsImdyb3VwX2lkIjpudWxsLCJleHAiOjE2NTY5NDkzMTh9.TMNWMrhtKzYb0uCFLuqTbqKE19ZXVzT0nRBqsPN5N4I",
+        Authorization: decodeURIComponent(token),
       },
       data: formData,
     };
@@ -263,7 +265,11 @@ const SpotDetail = (props) => {
             bodyStyle={{ padding: "1rem" }}
             className="mb-4"
           >
-            <Form form={form} onFinish={handleSpotRegisterSubmit}>
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={handleSpotRegisterSubmit}
+            >
               <Form.Item name="status" label="스팟 활성 / 비활성">
                 <Radio.Group onChange={handleStatusChange} value={status}>
                   <Radio style={radioStyle} value={"active"}>
@@ -366,24 +372,28 @@ const SpotDetail = (props) => {
           {(spotId || generatedSpotId) && spotInfo && (
             <>
               <Space
+                key="lounge"
                 type="lounge"
                 spotId={spotId ? spotId : generatedSpotId}
                 desc={spotInfo.lounge_desc}
                 images={spotInfo.lounge_image}
               />
               <Space
+                key="meeting"
                 type="meeting"
                 spotId={spotId ? spotId : generatedSpotId}
                 desc={spotInfo.meeting_desc}
                 images={spotInfo.meeting_image}
               />
               <Space
-                type="cowork"
+                key="coworking"
+                type="coworking"
                 spotId={spotId ? spotId : generatedSpotId}
                 desc={spotInfo.coworking_desc}
                 images={spotInfo.coworking_image}
               />
               <Space
+                key="locker"
                 type="locker"
                 spotId={spotId ? spotId : generatedSpotId}
                 desc={spotInfo.locker_desc}
@@ -407,5 +417,9 @@ const SpotDetail = (props) => {
     </>
   );
 };
+
+export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
+  return { props: initialize(ctx) };
+});
 
 export default connect((state) => state)(SpotDetail);

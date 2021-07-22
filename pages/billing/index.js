@@ -4,24 +4,17 @@ import { SlidersOutlined, SearchOutlined } from "@ant-design/icons";
 import React, { Component, useState, useEffect } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
+import { Filter } from "@components/elements";
 
 const Billing = () => {
   const columns = [
     {
       title: "청구 ID(계약 ID)",
       dataIndex: "name",
-      // sorter: true,
-      // render: (name) => `${name.first} ${name.last}`,
-      width: "20%",
     },
     {
       title: "계약자명(회원 id)",
       dataIndex: "gender",
-      // filters: [
-      //   { text: "Male", value: "male" },
-      //   { text: "Female", value: "female" },
-      // ],
-      width: "20%",
     },
     {
       title: "계약 상태",
@@ -132,7 +125,7 @@ const Billing = () => {
     <>
       <h3>청구/결제</h3>
 
-      <Row type="flex" align="middle" className="py-4">
+      <Row type="flex" align="middle" className="py-3">
         {/* <Button type="primary">
           <SearchOutlined></SearchOutlined>검색
         </Button> */}
@@ -142,12 +135,14 @@ const Billing = () => {
             setFilterModalOpen(true);
           }}
         >
-          <SlidersOutlined></SlidersOutlined>필터
+          <SlidersOutlined />
+          <span>필터</span>
         </Button>
         <span className="px-2 w-10"></span>
       </Row>
 
       <Table
+        size="middle"
         columns={columns}
         rowKey={(record) => record.login.uuid}
         dataSource={data}
@@ -155,19 +150,13 @@ const Billing = () => {
         loading={loading}
         onChange={handleTableChange}
       />
+
       {/* 필터 모달 */}
-      <Modal
+      <Filter
         visible={filterModalOpen}
-        title="검색 항목"
-        okText="검색"
-        cancelText="취소"
-        onCancel={() => {
-          setFilterModalOpen(false);
-        }}
-        onOk={
-          () => {
-            console.log(`onOk`);
-          }
+        onClose={() => setFilterModalOpen(false)}
+        onSearch={() => {
+          console.log(`onOk`);
           //     () => {
           //   form
           //     .validateFields()
@@ -179,7 +168,7 @@ const Billing = () => {
           //       console.log("Validate Failed:", info);
           //     });
           // }
-        }
+        }}
       >
         <Form
           // form={form}
@@ -200,7 +189,7 @@ const Billing = () => {
             <Input />
           </Form.Item>
         </Form>
-      </Modal>
+      </Filter>
     </>
   );
 };
