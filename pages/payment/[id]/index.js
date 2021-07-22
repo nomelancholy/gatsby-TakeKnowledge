@@ -1,12 +1,12 @@
 import React from "react";
 import { connect } from "react-redux";
+import { useRouter } from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import PaymentDetail from "@components/payment/PaymentDetail";
 
 const PaymentWithId = (props) => {
-  const { user, isLoggedIn, token } = props.auth;
-
+  const router = useRouter();
   const { id } = router.query;
   const { user, isLoggedIn, token } = props.auth;
 

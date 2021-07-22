@@ -54,6 +54,9 @@ const Payment = (props) => {
     {
       title: "요금제 이름",
       dataIndex: "name",
+      render: (text, record) => {
+        return <a href={`/payment/${record.rateplan_id}`}>{text}</a>;
+      },
     },
     {
       title: "이용 요금",

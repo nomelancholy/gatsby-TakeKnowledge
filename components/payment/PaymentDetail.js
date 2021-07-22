@@ -20,6 +20,8 @@ import { connect } from "react-redux";
 import axios from "axios";
 import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
+import moment from "moment";
+import Router from "next/dist/next-server/server/router";
 // import ProductSpot from "./productSpot";
 
 const PostEditor = dynamic(() => import("@utils/Editor"), {
@@ -44,24 +46,54 @@ const PaymentDetail = (props) => {
   // new / detial 구분 state
   const [registerMode, setRegisterMode] = useState(true);
 
-  // detail로 들어온 경우 product info 저장 state
+  // detail로 들어온 경우 요금제 정보 저장 state
   const [rateplanInfo, setRateplanInfo] = useState(undefined);
 
-  // 생성된 product ID 저장 state
-  const [generatedRateplanId, setGeneratedRateplanId] = useState(undefined);
+  // 요금제에 붙어있는 상품 정보 저장 state
+  const [productInfo, setProductInfo] = useState(undefined);
+  // 상품 구분에 따라 달라지는 상품 리스트 저장 state
+  const [optionProductList, setOptionProductList] = useState([]);
 
   const [okModalVisible, setOkModalVisible] = useState(false);
 
   const [form] = Form.useForm();
 
-  // product 정도 조회
+  // 요금제 조회
   useEffect(() => {
     if (rateplanId) {
       setRegisterMode(false);
+
+      const config = {
+        headers: {
+          Authorization: decodeURIComponent(token),
+        },
+      };
+
+      axios
+        .get(
+          `${process.env.BACKEND_API}/admin/product/rateplan/get/${rateplanId}`,
+          config
+        )
+        .then(function (response) {
+          const rateplanInfo = response.data.item;
+          setRateplanInfo(rateplanInfo);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    } else {
+      setRegisterMode(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    // 요금제 정보 세팅되면
+    if (rateplanInfo) {
+      // 요금제에 붙어있는 상품 조회
       axios
         .post(
           `${process.env.BACKEND_API}/product/get`,
-          { product_id: rateplanId },
+          { product_id: rateplanInfo.product_id },
           {
             headers: {
               "Content-Type": "application/json;charset=UTF-8",
@@ -77,128 +109,47 @@ const PaymentDetail = (props) => {
         .catch((error) => {
           console.log(`error`, error);
         });
-    } else {
-      setRegisterMode(true);
-    }
-  }, []);
 
-  // productData 세팅되면 알맞는 엘리먼트에 binding
-  useEffect(() => {
-    if (rateplanInfo) {
       form.setFieldsValue({
-        // 상품 구분
-        type: rateplanInfo.type,
-        // 상품 옵션
-        plan_spot: rateplanInfo.plan_spot,
-        // 메모
-        memo: rateplanInfo.memo,
-        // 활성 / 비활성
+        // 노출 여부
         status: rateplanInfo.status,
-        // 상품명
+        // 요금제 이름
         name: rateplanInfo.name,
-        // 결제 유형
-        pay_demand: rateplanInfo.pay_demand,
-        // 멤버십 유형
-        service_type: rateplanInfo.service_type,
-        // 체크인 단위
-        time_unit: rateplanInfo.time_unit,
-        // 주간 이용 한도
-        week_limit: rateplanInfo.week_limit,
+        // 이용 요금
+        price: rateplanInfo.price,
+        // 할인 요금
+        dc_price: rateplanInfo.dc_price,
+        // // 시작일
+        start_date: moment(rateplanInfo.start_date),
+        // // 종료일
+        end_date: moment(rateplanInfo.end_date),
+        // 게스트 요금
+        guest_price: rateplanInfo.guest_price,
       });
 
-      // 옵션으로 내려줄 spot list 조회
-      getOptionsSpotList();
+      // 전송용 state에도 세팅
+      setStartDate(rateplanInfo.start_date.replace(/\./gi, "-"));
+      setEndDate(rateplanInfo.end_date.replace(/\./gi, "-"));
+      // 상품 구분
+
+      // 상품명
     }
   }, [rateplanInfo]);
 
-  // 상품 생성 되면 바로 공간 추가할 수 있게 option spot list 조회
   useEffect(() => {
-    if (generatedRateplanId) {
-      getOptionsSpotList();
-    }
-  }, [generatedRateplanId]);
-
-  const getOptionsSpotList = () => {
-    axios
-      .post(
-        `${process.env.BACKEND_API}/admin/spot/list`,
-        { page: 1, size: 100 },
-        {
-          headers: {
-            "Content-Type": "application/json;charset=UTF-8",
-            "Access-Control-Allow-Origin": "*",
-            Authorization: decodeURIComponent(token),
-          },
-        }
-      )
-      .then((response) => {
-        const data = response.data.items;
-        // 활성화된 스팟들만 사용 가능 스팟으로 세팅 -> 다 불러서 disabled 시키는 쪽으로 변경
-        // const activeSpotList = data.filter((spot) => spot.status === "active");
-        setOptionSpotList(data);
-      })
-      .catch((error) => {
-        console.log(`error`, error);
+    // 요금제에 붙어있는 상품 정보 세팅되면
+    if (productInfo) {
+      // 요금제 - 상품의 값 상품 구분에 세팅하고
+      form.setFieldsValue({
+        product_type: productInfo.type,
       });
-  };
-
-  // 저장 버튼 클릭
-  const handleSpotRegisterSubmit = (values) => {
-    console.log(`values.status`, values.status);
-    console.log(`values.name`, values.name);
-    console.log(`values.product_id`, values.product_id);
-    console.log(`values.price`, values.price);
-    console.log(`values.dc_price`, values.dc_price);
-    console.log(`values.guest_price`, values.guest_price);
-    console.log(`values.memo`, values.memo);
-    console.log(`startDate`, startDate);
-    console.log(`endDate`, endDate);
-
-    let url = "";
-
-    if (registerMode) {
-      url = `${process.env.BACKEND_API}/admin/product/rateplan/add`;
-    } else {
-      console.log(`rateplan_id`, rateplan_id);
-      url = `${process.env.BACKEND_API}/admin/product/rateplan/update`;
+      // 그에 해당하는 옵션 리스트 조회
+      getOptionProductList(productInfo.type);
     }
+  }, [productInfo]);
 
-    const config = {
-      method: "post",
-      url: url,
-      headers: {
-        Authorization: decodeURIComponent(token),
-      },
-      data: {
-        status: values.status,
-        name: values.name,
-        product_id: values.product_id,
-        price: values.price,
-        dc_price: values.dc_price,
-        start_date: startDate,
-        end_date: endDate,
-        guest_price: values.guest_price,
-      },
-    };
-
-    axios(config)
-      .then(function (response) {
-        console.log(`response`, response);
-        setOkModalVisible(true);
-        // if (registerMode) {
-        //   // 등록한 상품 ID 값 세팅
-        //   setGeneratedRateplanId(response.data.item.product_id);
-        // }
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-  };
-
-  const [optionProductList, setOptionProductList] = useState([]);
-
-  // input value change handle
-  const handleProductTypeChange = (type) => {
+  // 상품 구분에 따라 option 상품 리스트 조회
+  const getOptionProductList = (type) => {
     axios
       .post(
         `${process.env.BACKEND_API}/admin/product/list`,
@@ -213,7 +164,6 @@ const PaymentDetail = (props) => {
       )
       .then((response) => {
         const productList = response.data.items;
-
         setOptionProductList(productList);
       })
       .catch((error) => {
@@ -221,30 +171,70 @@ const PaymentDetail = (props) => {
       });
   };
 
-  const handleFileChange = ({ fileList }) => {
-    form.setFieldsValue({ images: fileList });
-    setFileList(fileList);
+  useEffect(() => {
+    // 옵션 상품 리스트가 조회되었고, detail로 들어와서 상품 정보도 있는 경우면
+    if (optionProductList && productInfo) {
+      form.setFieldsValue({
+        product_id: productInfo.product_id,
+      });
+    }
+  }, [optionProductList]);
+
+  // 저장 버튼 클릭
+  const handleSpotRegisterSubmit = (values) => {
+    let url = "";
+
+    if (registerMode) {
+      url = `${process.env.BACKEND_API}/admin/product/rateplan/add`;
+    } else {
+      url = `${process.env.BACKEND_API}/admin/product/rateplan/update`;
+    }
+
+    let data = {
+      status: values.status,
+      name: values.name,
+      product_id: values.product_id,
+      price: values.price,
+      dc_price: values.dc_price,
+      start_date: startDate,
+      end_date: endDate,
+      guest_price: values.guest_price,
+    };
+
+    // 수정일 경우
+    if (!registerMode) {
+      data.rateplan_id = Number(rateplanId);
+    }
+
+    const config = {
+      method: "post",
+      url: url,
+      headers: {
+        Authorization: decodeURIComponent(token),
+      },
+      data: data,
+    };
+
+    axios(config)
+      .then(function (response) {
+        if (response.status === 200) {
+          setOkModalVisible(true);
+        }
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
   };
 
-  const handlePreview = (file) => {
-    setPreviewVisible(true);
-    setPreviewImage(file.url || file.thumbUrl);
-  };
-
-  const handleStartTimeChange = (values) => {
-    setStartTime(values);
-  };
-
-  const handleEndTimeChange = (values) => {
-    setEndTime(values);
-  };
-
-  const handleIntroChange = (values) => {
-    setIntro(values);
-  };
-
-  const handleContentChange = (values) => {
-    setContent(values);
+  // input value change handle
+  const handleProductTypeChange = (type) => {
+    // 상품명 value 초기화
+    form.setFieldsValue({
+      product_id: null,
+    });
+    form.resetFields([product_id]);
+    // 상품 구분에 따른 option list 재호출
+    getOptionProductList(type);
   };
 
   const handleStartDateChange = (date, dateString) => {
@@ -253,25 +243,6 @@ const PaymentDetail = (props) => {
 
   const handleEndDateChange = (date, dateString) => {
     setEndDate(dateString);
-  };
-
-  // 사용 가능한 스팟 추가
-  const handleAddSpot = () => {
-    const newList = spotList.concat({});
-    setSpotList(newList);
-  };
-
-  // 사용 가능한 스팟 삭제
-  const handleSpotDeleted = (spotId) => {
-    let newSpotList;
-    if (spotId) {
-      newSpotList = spotList.filter((spot) => spot.spot.spot_id !== spotId);
-    }
-    // else {
-    //   newSpotList = spotList.pop();
-    // }
-
-    setSpotList(newSpotList);
   };
 
   return (
@@ -308,7 +279,6 @@ const PaymentDetail = (props) => {
               </Form.Item>
               <Form.Item name="product_type" label="상품 구분">
                 <Select
-                  defaultValue="-"
                   style={{ width: 120 }}
                   onChange={handleProductTypeChange}
                 >
@@ -318,7 +288,7 @@ const PaymentDetail = (props) => {
                 </Select>
               </Form.Item>
               <Form.Item name="product_id" label="상품 명">
-                <Select defaultValue="-" style={{ width: 120 }}>
+                <Select initialValue="-" style={{ width: 120 }}>
                   {optionProductList.map((product) => (
                     <Select.Option
                       key={product.product_id}
@@ -354,40 +324,13 @@ const PaymentDetail = (props) => {
             <Modal
               visible={okModalVisible}
               okText="확인"
-              onOk={() => setOkModalVisible(false)}
+              onOk={() => {
+                router.push("/payment");
+              }}
             >
-              스팟 등록 완료
+              {registerMode ? "스팟 등록 완료" : "스팟 수정 완료"}
             </Modal>
           </Card>
-
-          {/* 공간 정보 */}
-          {(rateplanId || generatedRateplanId) && spotList && optionSpotList && (
-            <Card
-              title="사용 가능 스팟"
-              extra={
-                <>
-                  <a onClick={handleAddSpot}>+</a>
-                </>
-              }
-              bodyStyle={{ padding: "1rem" }}
-              className="mb-4"
-            >
-              <>
-                {/* {spotList.map((spot, index) => (
-                  <ProductSpot
-                    key={spot.spot ? spot.spot.spot_id : `new${index}`}
-                    spotInfo={spot}
-                    handleSpotDeleted={handleSpotDeleted}
-                    optionSpotList={optionSpotList}
-                    token={token}
-                    rateplanId={
-                      generatedrateplanId ? generatedrateplanId : rateplanId
-                    }
-                  />
-                ))} */}
-              </>
-            </Card>
-          )}
 
           <Row type="flex" align="middle" className="py-4">
             <span className="px-2 w-10"></span>
