@@ -15,54 +15,29 @@ import { Filter } from "@components/elements";
 
 const Notice = (props) => {
   const { user, isLoggedIn, token } = props.auth;
+  const [noticeList, setNoticeList] = useState([]);
 
   useEffect(() => {
-    // const data = JSON.stringify({
-    //   page: 1,
-    //   size: 20,
-    // });
-
-    // const data = {
-    //   page: 1,
-    //   size: 20,
-    // };
-
-    const config = {
-      headers: {
-        Authorization: decodeURIComponent(token),
-      },
-    };
-
     axios
-      .get(`${process.env.BACKEND_API}/services/notices`, config)
-      .then(function (response) {
-        console.log(response.data);
+      .post(
+        `${process.env.BACKEND_API}/services/notices`,
+        { page: 1, size: 20, type: "normal", sticky: 0 },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        console.log(`response.data`, response.data);
+        const noticeList = response.data.items;
+        setNoticeList(noticeList);
       })
-      .catch(function (error) {
-        console.log(error);
+      .catch((error) => {
+        console.log(`error`, error);
       });
-
-    // var data = JSON.stringify({
-    //   page: 1,
-    //   size: 5,
-    // });
-
-    // var config = {
-    //   method: "get",
-    //   url: `${process.env.BACKEND_API}/services/notices`,
-    //   headers: {
-    //     Authorization: decodeURIComponent(token),
-    //   },
-    //   data: data,
-    // };
-
-    // axios(config)
-    //   .then(function (response) {
-    //     console.log(JSON.stringify(response.data));
-    //   })
-    //   .catch(function (error) {
-    //     console.log(error);
-    //   });
   }, []);
 
   useEffect(() => {
@@ -79,14 +54,33 @@ const Notice = (props) => {
     {
       title: "공지 제목",
       dataIndex: "title",
+      render: (text, record) => {
+        return <a href={`/notice/${record.notice_id}`}>{text}</a>;
+      },
     },
     {
       title: "공지 유형",
       dataIndex: "type",
+      render: (text, record) => {
+        let renderText = "";
+
+        if (text === "normal") {
+          renderText = "일반 공지";
+        } else if (text === "group") {
+          renderText = "그룹 공지";
+        } else if (text === "spot") {
+          renderText = "지점 공지";
+        }
+
+        return renderText;
+      },
     },
     {
       title: "상단 노출",
       dataIndex: "sticky",
+      render: (text, record) => {
+        return text === 0 ? "O" : "X";
+      },
     },
     {
       title: "등록자",
@@ -95,6 +89,19 @@ const Notice = (props) => {
     {
       title: "사용 여부",
       dataIndex: "status",
+      render: (text, record) => {
+        let renderText = "";
+
+        if (text === "publish") {
+          renderText = "발행";
+        } else if (text === "group") {
+          renderText = "그룹 공지";
+        } else if (text === "spot") {
+          renderText = "지점 공지";
+        }
+
+        return renderText;
+      },
     },
     {
       title: "생성 일시",
@@ -102,7 +109,6 @@ const Notice = (props) => {
     },
   ];
 
-  const [data, setData] = useState([]);
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(false);
 
@@ -112,45 +118,6 @@ const Notice = (props) => {
 
   const handleTableChange = (pagination, filters, sorter) => {
     setPagination(2);
-
-    fetch({
-      results: pagination.pageSize,
-      page: pagination.current,
-      sortField: sorter.field,
-      sortOrder: sorter.order,
-      ...filters,
-    });
-  };
-
-  const fetch = (params = {}) => {
-    setLoading(true);
-    axios
-      .get(
-        "https://randomuser.me/api",
-        {
-          results: 10,
-          ...params,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json;charset=UTF-8",
-            "Access-Control-Allow-Origin": "*",
-          },
-        }
-      )
-      .then((response) => {
-        console.log(`response`, response);
-        const data = response.data;
-        console.log(`data`, data);
-        // Read total count from server
-        // pagination.total = data.totalCount;
-        setPagination({ ...pagination, total: 200 });
-        setLoading(false);
-        setData(data.results);
-      })
-      .catch((error) => {
-        console.log(`error`, error);
-      });
   };
 
   return (
@@ -185,8 +152,8 @@ const Notice = (props) => {
       <Table
         size="middle"
         columns={columns}
-        rowKey={(record) => record.login.uuid}
-        dataSource={data}
+        rowKey={(record) => record.notice_id}
+        dataSource={noticeList}
         pagination={pagination}
         loading={loading}
         onChange={handleTableChange}
