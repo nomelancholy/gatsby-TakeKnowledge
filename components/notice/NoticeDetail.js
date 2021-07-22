@@ -25,7 +25,7 @@ const NoticeDetail = (props) => {
 
   const [noticeInfo, setNoticeInfo] = useState(undefined);
 
-  // spot 관련 state
+  // 에디터 관련 state
   const [content, setContent] = useState("");
 
   const [okModalVisible, setOkModalVisible] = useState(false);
@@ -58,7 +58,7 @@ const NoticeDetail = (props) => {
     }
   }, []);
 
-  // spotData 세팅되면 알맞는 엘리먼트에 binding
+  // noticeInfo 세팅되면 알맞는 엘리먼트에 binding
   useEffect(() => {
     if (noticeInfo) {
       form.setFieldsValue({
@@ -69,10 +69,6 @@ const NoticeDetail = (props) => {
       });
 
       setContent(noticeInfo.content);
-
-      if (noticeInfo.images) {
-        // 이미지 추가되면 작업 필요
-      }
     }
   }, [noticeInfo]);
 
