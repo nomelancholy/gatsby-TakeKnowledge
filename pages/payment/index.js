@@ -25,51 +25,81 @@ const Payment = (props) => {
   const columns = [
     {
       title: "요금제 ID",
-      dataIndex: "name",
+      dataIndex: "rateplan_id",
     },
     {
       title: "상품 그룹",
-      dataIndex: "gender",
+      dataIndex: "product",
+      render: (text, record) => {
+        let renderText = "";
+
+        if (text.type === "membership") {
+          renderText = "멤버십";
+        } else if (text.type === "service") {
+          renderText = "부가서비스";
+        } else if (text.type === "voucher") {
+          renderText = "이용권";
+        }
+
+        return renderText;
+      },
     },
     {
       title: "상품 명",
-      dataIndex: "email",
+      dataIndex: "product",
+      render: (text, record) => {
+        return text.name;
+      },
     },
     {
-      title: "메모",
-      dataIndex: "email",
+      title: "요금제 이름",
+      dataIndex: "name",
     },
     {
       title: "이용 요금",
-      dataIndex: "email",
+      dataIndex: "price",
+      render: (text, record) => {
+        return text.toLocaleString("ko-KR");
+      },
     },
     {
       title: "기본 할인 요금",
-      dataIndex: "email",
+      dataIndex: "dc_price",
+      render: (text, record) => {
+        return text.toLocaleString("ko-KR");
+      },
     },
     {
       title: "시작일",
-      dataIndex: "email",
+      dataIndex: "start_date",
     },
     {
       title: "종료일",
-      dataIndex: "email",
+      dataIndex: "end_date",
     },
     {
       title: "노출 여부",
-      dataIndex: "email",
+      dataIndex: "status",
+      render: (text, record) => {
+        let renderText = "";
+        if (text === "active") {
+          renderText = "노출";
+        } else if (text === "inactive") {
+          renderText = "미노출";
+        }
+
+        return renderText;
+      },
     },
     {
       title: "생성 일시",
-      dataIndex: "email",
+      dataIndex: "regdate",
     },
   ];
 
-  const [data, setData] = useState([]);
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const [registrationModalOpen, setRegistrationModalOpen] = useState(false);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
   const [form] = Form.useForm();
@@ -86,63 +116,42 @@ const Payment = (props) => {
     });
   };
 
-  const fetch = (params = {}) => {
-    setLoading(true);
+  const [rateplanList, setRateplanList] = useState([]);
+
+  useEffect(() => {
     axios
-      .get(
-        "https://randomuser.me/api",
+      .post(
+        `${process.env.BACKEND_API}/admin/product/rateplan/list`,
         {
-          results: 10,
-          ...params,
+          page: 1,
+          limit: 100,
         },
         {
           headers: {
             "Content-Type": "application/json;charset=UTF-8",
             "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
           },
         }
       )
       .then((response) => {
-        console.log(`response`, response);
-        const data = response.data;
+        const data = response.data.items;
+        setRateplanList(data);
         console.log(`data`, data);
-        // Read total count from server
-        // pagination.total = data.totalCount;
-        setPagination({ ...pagination, total: 200 });
-        setLoading(false);
-        setData(data.results);
+        // setPagination({ ...pagination, total: data.total });
+        // setProductList(data.items);
+        // setLoading(false);
       })
       .catch((error) => {
         console.log(`error`, error);
       });
-  };
-
-  useEffect(() => {
-    // fetch();
   }, []);
-
-  const handleGroupTypeChange = (value) => {
-    console.log(value);
-    form.setFieldsValue({
-      note: `Hi, ${value === "male" ? "man" : "lady"}!`,
-    });
-  };
-
-  const handlePaymentTypeChange = (value) => {
-    console.log(value);
-    form.setFieldsValue({
-      note: `Hi, ${value === "male" ? "man" : "lady"}!`,
-    });
-  };
 
   return (
     <>
       <h3>요금제 관리</h3>
 
       <Row type="flex" align="middle" className="py-3">
-        {/* <Button type="primary">
-          <SearchOutlined></SearchOutlined>검색
-        </Button> */}
         <Button
           type="primary"
           onClick={() => {
@@ -167,8 +176,8 @@ const Payment = (props) => {
       <Table
         size="middle"
         columns={columns}
-        rowKey={(record) => record.login.uuid}
-        dataSource={data}
+        rowKey={(record) => record.rateplan_id}
+        dataSource={rateplanList}
         pagination={pagination}
         loading={loading}
         onChange={handleTableChange}
@@ -214,85 +223,6 @@ const Payment = (props) => {
           </Form.Item>
         </Form>
       </Filter>
-      {/* 등록 모달 */}
-      <Modal
-        visible={registrationModalOpen}
-        title="그룹 등록"
-        okText="등록"
-        cancelText="취소"
-        onCancel={() => {
-          setRegistrationModalOpen(false);
-        }}
-        onOk={
-          () => {
-            console.log(`onOk`);
-          }
-          //     () => {
-          //   form
-          //     .validateFields()
-          //     .then((values) => {
-          //       form.resetFields();
-          //       onCreate(values);
-          //     })
-          //     .catch((info) => {
-          //       console.log("Validate Failed:", info);
-          //     });
-          // }
-        }
-      >
-        <Form
-          // form={form}
-          layout="vertical"
-          name="form_in_modal"
-          initialValues={{ modifier: "public" }}
-        >
-          <Form.Item
-            name="그룹 유형"
-            label="그룹 유형"
-            rules={[
-              { required: true, message: "그룹 유형은 필수 선택 사항입니다." },
-            ]}
-          >
-            <Select
-              placeholder="그룹 유형을 선택해주세요"
-              onChange={handleGroupTypeChange}
-            >
-              <Select.Option value="male">개인 사업자</Select.Option>
-              <Select.Option value="female">법인</Select.Option>
-            </Select>
-          </Form.Item>
-          <Form.Item
-            name="그룹명"
-            label="그룹명"
-            rules={[
-              {
-                required: true,
-                message: "그룹명은 필수 입력 사항입니다.",
-              },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="결제수단 선택"
-            label="결제수단 선택"
-            rules={[
-              {
-                required: true,
-                message: "결제 수단은은 필수 선택 사항입니다.",
-              },
-            ]}
-          >
-            <Select
-              placeholder="결제수단 선택"
-              onChange={handlePaymentTypeChange}
-            >
-              <Select.Option value="male">카드</Select.Option>
-              <Select.Option value="female">계좌이체</Select.Option>
-            </Select>
-          </Form.Item>
-        </Form>
-      </Modal>
     </>
   );
 };
