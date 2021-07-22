@@ -1,23 +1,8 @@
-import {
-  Button,
-  Form,
-  Input,
-  InputNumber,
-  Row,
-  Modal,
-  Tabs,
-  Card,
-  Radio,
-  Upload,
-  Checkbox,
-} from "antd";
-import { UploadOutlined } from "@ant-design/icons";
-
+import { Button, Form, Input, Row, Modal, Card, Radio } from "antd";
 import React, { useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 import Router, { useRouter } from "next/router";
-import NextHead from "next/head";
 import dynamic from "next/dynamic";
 
 const PostEditor = dynamic(() => import("../../utils/Editor"), {
@@ -25,8 +10,7 @@ const PostEditor = dynamic(() => import("../../utils/Editor"), {
 });
 
 const NoticeDetail = (props) => {
-  const { user, isLoggedIn, token } = props.auth;
-  const { spotId } = props;
+  const { noticeId, token } = props;
 
   const radioStyle = {
     display: "inline",
@@ -42,122 +26,119 @@ const NoticeDetail = (props) => {
   const [noticeInfo, setNoticeInfo] = useState(undefined);
 
   // spot 관련 state
-
-  const [status, setStatus] = useState("");
-  const [type, setType] = useState("");
-  const [sticky, setSticky] = useState(false);
   const [content, setContent] = useState("");
 
   const [okModalVisible, setOkModalVisible] = useState(false);
   const [form] = Form.useForm();
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    if (noticeId) {
+      setRegisterMode(false);
+
+      const config = {
+        headers: {
+          Authorization: decodeURIComponent(token),
+        },
+      };
+
+      axios
+        .get(
+          `${process.env.BACKEND_API}/services/notice_get/${noticeId}`,
+          config
+        )
+        .then(function (response) {
+          const noticeInfo = response.data.item;
+          setNoticeInfo(noticeInfo);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    } else {
+      setRegisterMode(true);
+    }
+  }, []);
 
   // spotData 세팅되면 알맞는 엘리먼트에 binding
   useEffect(() => {
-    // if (spotInfo) {
-    //   form.setFieldsValue({
-    //     status: spotInfo.status,
-    //     name: spotInfo.name,
-    //     spot_id: spotInfo.spot_id,
-    //     nickname: spotInfo.nickname,
-    //     address: spotInfo.address,
-    //     address_etc: spotInfo.address_etc,
-    //     operation_time: spotInfo.operation_time,
-    //     seat_capacity: spotInfo.seat_capacity,
-    //     content: spotInfo.content,
-    //     property: spotInfo.property,
-    //     max_seat_capacity: Math.floor(spotInfo.seat_capacity * 1.5),
-    //   });
-    //   // 시설 정보 binding
-    //   let checkExcerpt = [];
-    //   if (spotInfo.excerpt) {
-    //     Object.entries(spotInfo.excerpt).filter((obj) => {
-    //       if (obj[1]) {
-    //         checkExcerpt.push(obj[0]);
-    //       }
-    //     });
-    //     form.setFieldsValue({
-    //       facilityInfos: checkExcerpt,
-    //     });
-    //   }
-    //   if (spotInfo.images) {
-    //     // 이미지 추가되면 작업 필요
-    //   }
-    // }
+    if (noticeInfo) {
+      form.setFieldsValue({
+        status: noticeInfo.status,
+        type: noticeInfo.type,
+        sticky: String(noticeInfo.sticky),
+        title: noticeInfo.title,
+      });
+
+      setContent(noticeInfo.content);
+
+      if (noticeInfo.images) {
+        // 이미지 추가되면 작업 필요
+      }
+    }
   }, [noticeInfo]);
 
   // 저장 버튼 클릭
   const handleNoticeRegisterSubmit = (values) => {
-    console.log(`values`, values);
+    let data = {
+      type: values.type,
+      title: values.title,
+      content: content,
+      sticky: values.sticky,
+    };
 
-    axios
-      .post(
-        `${process.env.BACKEND_API}/services/notice_add`,
-        {
-          type: values.type,
-          title: values.title,
-          content: values.content,
-          sticky: values.sticky,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json;charset=UTF-8",
-            "Access-Control-Allow-Origin": "*",
-            Authorization: decodeURIComponent(token),
-          },
-        }
-      )
-      .then((response) => {
+    let url = "";
+
+    if (registerMode) {
+      url = `${process.env.BACKEND_API}/services/notice_add`;
+    } else {
+      url = `${process.env.BACKEND_API}/services/notice_update`;
+      data.notice_id = Number(noticeId);
+    }
+
+    const config = {
+      method: "post",
+      url: url,
+      headers: {
+        Authorization: decodeURIComponent(token),
+      },
+      data: data,
+    };
+
+    axios(config)
+      .then(function (response) {
         if (response.status === 200) {
-          Router.push("/notice");
+          setOkModalVisible(true);
         }
-        console.log(`response`, response);
       })
-      .catch((error) => {
-        console.log(`error`, error);
+      .catch(function (error) {
+        console.log(error);
       });
   };
 
-  const handleStatusChange = (e) => {
-    setStatus(e.target.value);
-  };
-
-  const handleTypeChange = (e) => {
-    setType(e.target.value);
-  };
-  const handleStickyChange = (e) => {
-    setSticky(e.target.value);
-  };
-
   const handleEditorChange = (content) => {
-    console.log(`content`, content);
+    setContent(content);
   };
 
   return (
     <>
-      <NextHead>
-        <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-      </NextHead>
-
       <Card
+        title={noticeId && noticeId !== null ? `공지 ${noticeId}` : "공지 등록"}
         extra={<a onClick={() => router.back()}>뒤로 가기</a>}
         bodyStyle={{ padding: "1rem" }}
         className="mb-4"
       >
         <Form form={form} onFinish={handleNoticeRegisterSubmit}>
           <Form.Item name="status" label="공지 노출 여부">
-            <Radio.Group onChange={handleStatusChange} value={status}>
-              <Radio style={radioStyle} value={"active"}>
+            <Radio.Group>
+              <Radio style={radioStyle} value={"publish"}>
                 노출
               </Radio>
-              <Radio style={radioStyle} value={"inactive"}>
+              <Radio style={radioStyle} value={"private"}>
                 미노출
               </Radio>
             </Radio.Group>
           </Form.Item>
           <Form.Item name="type" label="공지 유형">
-            <Radio.Group onChange={handleTypeChange} value={type}>
+            <Radio.Group>
               <Radio style={radioStyle} value={"normal"}>
                 일반 공지
               </Radio>
@@ -169,12 +150,12 @@ const NoticeDetail = (props) => {
               </Radio>
             </Radio.Group>
           </Form.Item>
-          <Form.Item name="top" label="상단 노출">
-            <Radio.Group onChange={handleStickyChange} value={sticky}>
-              <Radio style={radioStyle} value={true}>
+          <Form.Item name="sticky" label="상단 노출">
+            <Radio.Group>
+              <Radio style={radioStyle} value="1">
                 노출
               </Radio>
-              <Radio style={radioStyle} value={false}>
+              <Radio style={radioStyle} value="0">
                 미노출
               </Radio>
             </Radio.Group>
@@ -182,8 +163,8 @@ const NoticeDetail = (props) => {
           <Form.Item name="title" label="제목">
             <Input />
           </Form.Item>
-          <Form.Item name="content" label="내용" value={content}>
-            <PostEditor onChange={handleEditorChange} />
+          <Form.Item name="content" label="내용">
+            <PostEditor onChange={handleEditorChange} setContents={content} />
           </Form.Item>
 
           <Button type="primary" htmlType="submit">
@@ -193,9 +174,11 @@ const NoticeDetail = (props) => {
         <Modal
           visible={okModalVisible}
           okText="확인"
-          onOk={() => setOkModalVisible(false)}
+          onOk={() => {
+            router.push("/notice");
+          }}
         >
-          스팟 등록 완료
+          {registerMode ? "공지 등록 완료" : "공지 수정 완료"}
         </Modal>
       </Card>
 
