@@ -21,39 +21,63 @@ const User = (props) => {
   const columns = [
     {
       title: "회원 ID",
-      dataIndex: "name",
+      dataIndex: "uid",
     },
     {
       title: "계약자명",
-      dataIndex: "gender",
+      dataIndex: "user_name",
+      render: (text, record) => {
+        return <a href={`/user/${record.uid}`}>{text}</a>;
+      },
     },
     {
       title: "회원 구분",
-      dataIndex: "email",
+      dataIndex: "user_role",
+      render: (text, record) => {
+        let renderText = "";
+        if (text === "ffadmin") {
+          renderText = "관리자";
+        } else if (text === "member") {
+          renderText = "멤버";
+        } else if (text === "group") {
+          renderText = "그룹";
+        } else if (text === "user") {
+          renderText = "회원";
+        }
+
+        return renderText;
+      },
     },
     {
       title: "계약자 타입",
-      dataIndex: "email",
+      dataIndex: "-",
     },
     {
       title: "그룹명(그룹id)",
-      dataIndex: "email",
+      dataIndex: "-",
     },
     {
       title: "카드 등록 여부",
-      dataIndex: "email",
+      dataIndex: "registed_card",
+      render: (text, record) => {
+        return text ? "등록" : "미등록";
+      },
     },
     {
       title: "활성/휴면 여부",
-      dataIndex: "email",
+      dataIndex: "user_status",
+      render: (text, record) => {
+        return text === "active" ? "활성" : "휴면";
+      },
     },
     {
       title: "생성 일시",
-      dataIndex: "email",
+      dataIndex: "regdate",
     },
   ];
 
-  const [data, setData] = useState([]);
+  const [userList, setUserList] = useState([]);
+
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(false);
 
@@ -70,40 +94,34 @@ const User = (props) => {
       ...filters,
     });
   };
-
-  const fetch = (params = {}) => {
-    setLoading(true);
+  useEffect(() => {
     axios
-      .get(
-        "https://randomuser.me/api",
+      .post(
+        `${process.env.BACKEND_API}/admin/user/list`,
         {
-          results: 10,
-          ...params,
+          page: 1,
+          limit: 100,
         },
         {
           headers: {
             "Content-Type": "application/json;charset=UTF-8",
             "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
           },
         }
       )
       .then((response) => {
-        console.log(`response`, response);
-        const data = response.data;
+        const data = response.data.items;
+        setUserList(data);
+
         console.log(`data`, data);
-        // Read total count from server
-        // pagination.total = data.totalCount;
-        setPagination({ ...pagination, total: 200 });
-        setLoading(false);
-        setData(data.results);
+        // setPagination({ ...pagination, total: data.total });
+        // setProductList(data.items);
+        // setLoading(false);
       })
       .catch((error) => {
         console.log(`error`, error);
       });
-  };
-
-  useEffect(() => {
-    // fetch();
   }, []);
 
   return (
@@ -129,8 +147,8 @@ const User = (props) => {
       <Table
         size="middle"
         columns={columns}
-        rowKey={(record) => record.login.uuid}
-        dataSource={data}
+        rowKey={(record) => record.uid}
+        dataSource={userList}
         pagination={pagination}
         loading={loading}
         onChange={handleTableChange}
