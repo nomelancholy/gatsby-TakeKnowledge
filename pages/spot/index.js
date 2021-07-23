@@ -1,12 +1,23 @@
 import { Button, Table, Form, Input, Row, Modal } from "antd";
-import { SlidersOutlined } from "@ant-design/icons";
+import { SlidersOutlined, PlusOutlined } from "@ant-design/icons";
 
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 import Router from "next/router";
+import { wrapper } from "@state/stores";
+import initialize from "@utils/initialize";
+import { Filter } from "@components/elements";
 
-const Spot = () => {
+const Spot = (props) => {
+  const { user, isLoggedIn, token } = props.auth;
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+  }, []);
+
   // Grid Column 정의
   const columns = [
     {
@@ -65,19 +76,13 @@ const Spot = () => {
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
-  const [pagination, setPagination] = useState({});
+  const [pagination, setPagination] = useState({ pageSize: 20 });
   const [loading, setLoading] = useState(false);
 
   const handleTableChange = (pagination, filters, sorter) => {
-    setPagination(2);
-
-    fetch({
-      results: pagination.pageSize,
-      page: pagination.current,
-      sortField: sorter.field,
-      sortOrder: sorter.order,
-      ...filters,
-    });
+    console.log(`pagination`, pagination);
+    console.log(`filters`, filters);
+    console.log(`sorter`, sorter);
   };
 
   useEffect(() => {
@@ -90,19 +95,18 @@ const Spot = () => {
     axios
       .post(
         `${process.env.BACKEND_API}/admin/spot/list`,
-        {},
+        { page: 1, size: 100 },
         {
           headers: {
             "Content-Type": "application/json;charset=UTF-8",
             "Access-Control-Allow-Origin": "*",
-            Authorization:
-              "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjUsInVzZXJfbG9naW4iOiJjc0BkbWFpbi5pbyIsInVzZXJfbmFtZSI6Ilx1Yzc3OFx1YzEzMSIsInVzZXJfcm9sZSI6ImZmYWRtaW4iLCJwaG9uZSI6IjAxMC0zNjc0LTc1NjMiLCJtYXJrZXRpbmdfYWdyZWUiOjEsImdyb3VwX2lkIjpudWxsLCJleHAiOjE2NTY5NDkzMTh9.TMNWMrhtKzYb0uCFLuqTbqKE19ZXVzT0nRBqsPN5N4I",
+            Authorization: decodeURIComponent(token),
           },
         }
       )
       .then((response) => {
         const data = response.data;
-        setPagination({ ...pagination, total: 200 });
+        setPagination({ ...pagination, total: data.total });
         setSpotList(data.items);
       })
       .catch((error) => {
@@ -150,8 +154,7 @@ const Spot = () => {
               headers: {
                 "Content-Type": "application/json;charset=UTF-8",
                 "Access-Control-Allow-Origin": "*",
-                Authorization:
-                  "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjUsInVzZXJfbG9naW4iOiJjc0BkbWFpbi5pbyIsInVzZXJfbmFtZSI6Ilx1Yzc3OFx1YzEzMSIsInVzZXJfcm9sZSI6ImZmYWRtaW4iLCJwaG9uZSI6IjAxMC0zNjc0LTc1NjMiLCJtYXJrZXRpbmdfYWdyZWUiOjEsImdyb3VwX2lkIjpudWxsLCJleHAiOjE2NTY5NDkzMTh9.TMNWMrhtKzYb0uCFLuqTbqKE19ZXVzT0nRBqsPN5N4I",
+                Authorization: decodeURIComponent(token),
               },
             }
           )
@@ -197,14 +200,15 @@ const Spot = () => {
     <>
       <h3>스팟 관리</h3>
 
-      <Row type="flex" align="middle" className="py-4">
+      <Row type="flex" align="middle" className="py-3">
         <Button
           type="primary"
           onClick={() => {
             setFilterModalOpen(true);
           }}
         >
-          <SlidersOutlined></SlidersOutlined>필터
+          <SlidersOutlined />
+          <span>필터</span>
         </Button>
         <span className="px-2 w-10"></span>
         <Button
@@ -213,11 +217,13 @@ const Spot = () => {
             Router.push(`/spot/new`);
           }}
         >
-          + 등록
+          <PlusOutlined />
+          <span>등록</span>
         </Button>
       </Row>
 
       <Table
+        size="middle"
         columns={columns}
         rowKey={(record) => record.spot_id}
         dataSource={spotData}
@@ -225,8 +231,37 @@ const Spot = () => {
         loading={loading}
         onChange={handleTableChange}
       />
-      {/* 필터 모달 */}
-      <Modal
+
+      {/* 필터 */}
+      <Filter
+        visible={filterModalOpen}
+        onClose={() => setFilterModalOpen(false)}
+        onSearch={() => {
+          console.log(`onOk`);
+        }}
+      >
+        <Form
+          // form={form}
+          layout="vertical"
+          name="form_in_modal"
+          initialValues={{ modifier: "public" }}
+        >
+          <Form.Item name="그룹 ID" label="그룹 ID">
+            <Input />
+          </Form.Item>
+          <Form.Item name="그룹명" label="그룹명">
+            <Input />
+          </Form.Item>
+          <Form.Item name="회원 상태" label="회원 상태">
+            <Input />
+          </Form.Item>
+          <Form.Item name="활성/휴면 여부" label="활성/휴면 여부">
+            <Input />
+          </Form.Item>
+        </Form>
+      </Filter>
+
+      {/* <Modal
         visible={filterModalOpen}
         title="검색 항목"
         okText="검색"
@@ -251,28 +286,13 @@ const Spot = () => {
           // }
         }
       >
-        <Form
-          // form={form}
-          layout="vertical"
-          name="form_in_modal"
-          initialValues={{ modifier: "public" }}
-        >
-          <Form.Item name="그룹 ID" label="그룹 ID">
-            <Input />
-          </Form.Item>
-          <Form.Item name="그룹명" label="그룹명">
-            <Input />
-          </Form.Item>
-          <Form.Item name="회원 상태" label="회원 상태">
-            <Input />
-          </Form.Item>
-          <Form.Item name="활성/휴면 여부" label="활성/휴면 여부">
-            <Input />
-          </Form.Item>
-        </Form>
-      </Modal>
+      </Modal> */}
     </>
   );
 };
+
+export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
+  return { props: initialize(ctx) };
+});
 
 export default connect((state) => state)(Spot);

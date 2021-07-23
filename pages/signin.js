@@ -1,5 +1,6 @@
-import Signin from '../components/Signin';
+import { connect } from "react-redux";
+import Signin from "../components/Signin";
 
-const SigninPage = () => <Signin />;
+const SigninPage = (props) => <Signin {...props} />;
 
-export default SigninPage;
+export default connect((state) => state)(SigninPage);

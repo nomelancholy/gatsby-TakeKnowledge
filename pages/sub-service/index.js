@@ -1,27 +1,35 @@
 import { Button, Table, Form, Input, Row, Select, Modal } from "antd";
-import { SlidersOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  SlidersOutlined,
+  SearchOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 
 import React, { Component, useState, useEffect } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
+import Router from "next/router";
+import { wrapper } from "@state/stores";
+import initialize from "@utils/initialize";
+import { Filter } from "@components/elements";
 
-const SubService = () => {
+const SubService = (props) => {
+  const { user, isLoggedIn, token } = props.auth;
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+  }, []);
+
   const columns = [
     {
       title: "예약 ID",
       dataIndex: "name",
-      // sorter: true,
-      // render: (name) => `${name.first} ${name.last}`,
-      width: "20%",
     },
     {
       title: "계약자명(회원 id)",
       dataIndex: "gender",
-      // filters: [
-      //   { text: "Male", value: "male" },
-      //   { text: "Female", value: "female" },
-      // ],
-      width: "20%",
     },
     {
       title: "예약 상태",
@@ -139,7 +147,7 @@ const SubService = () => {
     <>
       <h3>부가서비스 예약 관리</h3>
 
-      <Row type="flex" align="middle" className="py-4">
+      <Row type="flex" align="middle" className="py-3">
         {/* <Button type="primary">
           <SearchOutlined></SearchOutlined>검색
         </Button> */}
@@ -149,7 +157,8 @@ const SubService = () => {
             setFilterModalOpen(true);
           }}
         >
-          <SlidersOutlined></SlidersOutlined>필터
+          <SlidersOutlined />
+          <span>필터</span>
         </Button>
         <span className="px-2 w-10"></span>
         <Button
@@ -158,11 +167,13 @@ const SubService = () => {
             setRegistrationModalOpen(true);
           }}
         >
-          + 등록
+          <PlusOutlined />
+          <span>등록</span>
         </Button>
       </Row>
 
       <Table
+        size="middle"
         columns={columns}
         rowKey={(record) => record.login.uuid}
         dataSource={data}
@@ -171,15 +182,10 @@ const SubService = () => {
         onChange={handleTableChange}
       />
       {/* 필터 모달 */}
-      <Modal
+      <Filter
         visible={filterModalOpen}
-        title="검색 항목"
-        okText="검색"
-        cancelText="취소"
-        onCancel={() => {
-          setFilterModalOpen(false);
-        }}
-        onOk={
+        onClose={() => setFilterModalOpen(false)}
+        onSearch={
           () => {
             console.log(`onOk`);
           }
@@ -215,7 +221,7 @@ const SubService = () => {
             <Input />
           </Form.Item>
         </Form>
-      </Modal>
+      </Filter>
       {/* 등록 모달 */}
       <Modal
         visible={registrationModalOpen}
@@ -298,5 +304,9 @@ const SubService = () => {
     </>
   );
 };
+
+export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
+  return { props: initialize(ctx) };
+});
 
 export default connect((state) => state)(SubService);

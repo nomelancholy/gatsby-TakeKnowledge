@@ -1,27 +1,35 @@
 import { Button, Table, Form, Input, Row, Select, Modal } from "antd";
-import { SlidersOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  SlidersOutlined,
+  SearchOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 
 import React, { Component, useState, useEffect } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
+import Router from "next/router";
+import { wrapper } from "@state/stores";
+import initialize from "@utils/initialize";
+import { Filter } from "@components/elements";
 
-const Group = () => {
+const Group = (props) => {
+  const { user, isLoggedIn, token } = props.auth;
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+  }, []);
+
   const columns = [
     {
       title: "그룹 ID",
       dataIndex: "name",
-      // sorter: true,
-      // render: (name) => `${name.first} ${name.last}`,
-      width: "20%",
     },
     {
       title: "그룹명",
       dataIndex: "gender",
-      // filters: [
-      //   { text: "Male", value: "male" },
-      //   { text: "Female", value: "female" },
-      // ],
-      width: "20%",
     },
     {
       title: "그룹 회원 상태",
@@ -101,10 +109,6 @@ const Group = () => {
       });
   };
 
-  useEffect(() => {
-    // fetch();
-  }, []);
-
   const handleGroupTypeChange = (value) => {
     console.log(value);
     form.setFieldsValue({
@@ -123,7 +127,7 @@ const Group = () => {
     <>
       <h3>그룹 관리</h3>
 
-      <Row type="flex" align="middle" className="py-4">
+      <Row type="flex" align="middle" className="py-3">
         {/* <Button type="primary">
           <SearchOutlined></SearchOutlined>검색
         </Button> */}
@@ -133,7 +137,8 @@ const Group = () => {
             setFilterModalOpen(true);
           }}
         >
-          <SlidersOutlined></SlidersOutlined>필터
+          <SlidersOutlined />
+          <span>필터</span>
         </Button>
         <span className="px-2 w-10"></span>
         <Button
@@ -142,11 +147,13 @@ const Group = () => {
             setRegistrationModalOpen(true);
           }}
         >
-          + 등록
+          <PlusOutlined />
+          <span>등록</span>
         </Button>
       </Row>
 
       <Table
+        size="middle"
         columns={columns}
         rowKey={(record) => record.login.uuid}
         dataSource={data}
@@ -155,18 +162,11 @@ const Group = () => {
         onChange={handleTableChange}
       />
       {/* 필터 모달 */}
-      <Modal
+      <Filter
         visible={filterModalOpen}
-        title="검색 항목"
-        okText="검색"
-        cancelText="취소"
-        onCancel={() => {
-          setFilterModalOpen(false);
-        }}
-        onOk={
-          () => {
-            console.log(`onOk`);
-          }
+        onClose={() => setFilterModalOpen(false)}
+        onSearch={() => {
+          console.log(`onOk`);
           //     () => {
           //   form
           //     .validateFields()
@@ -178,7 +178,7 @@ const Group = () => {
           //       console.log("Validate Failed:", info);
           //     });
           // }
-        }
+        }}
       >
         <Form
           // form={form}
@@ -199,7 +199,7 @@ const Group = () => {
             <Input />
           </Form.Item>
         </Form>
-      </Modal>
+      </Filter>
       {/* 등록 모달 */}
       <Modal
         visible={registrationModalOpen}
@@ -282,5 +282,9 @@ const Group = () => {
     </>
   );
 };
+
+export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
+  return { props: initialize(ctx) };
+});
 
 export default connect((state) => state)(Group);

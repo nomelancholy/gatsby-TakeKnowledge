@@ -1,13 +1,32 @@
-import Head from 'next/head';
-import Overview from '../components/Overview';
+import Head from "next/head";
+import initialize from "@utils/initialize";
+import { wrapper } from "../state/stores";
+import React, { useEffect } from "react";
+import Router from "next/router";
+import { connect } from "react-redux";
 
-const OverviewPage = () => (
-  <>
-    <Head>
-      <link rel="stylesheet" href="/react-vis.css" />
-    </Head>
-    <Overview />
-  </>
-);
+const Index = (props) => {
+  const { user, isLoggedIn } = props.auth;
 
-export default OverviewPage;
+  useEffect(() => {
+    if (isLoggedIn && user) {
+      Router.push("/contract");
+    } else {
+      Router.push("/signin");
+    }
+  }, []);
+
+  return (
+    <>
+      <Head>
+        <link rel="stylesheet" href="/react-vis.css" />
+      </Head>
+    </>
+  );
+};
+
+export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
+  return { props: initialize(ctx) };
+});
+
+export default connect((state) => state)(Index);

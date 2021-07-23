@@ -12,11 +12,12 @@ import { withRouter } from "next/router";
 const { Content } = Layout;
 
 const NonDashboardRoutes = [
+  "/",
   "/signin",
   "/signup",
   "/forgot",
   "/lockscreen",
-  "/_error"
+  "/_error",
 ];
 
 const Page = ({ router, children }) => {
