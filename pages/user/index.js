@@ -50,7 +50,30 @@ const User = (props) => {
     },
     {
       title: "계약자 타입",
-      dataIndex: "-",
+      dataIndex: "contract",
+      render: (text, record) => {
+        let renderText = "";
+
+        if (text === null) {
+          renderText = "계약 없음";
+        } else if (text.status === "wait") {
+          renderText = "구매 대기";
+        } else if (text.status === "buy") {
+          renderText = "구매";
+        } else if (text.status === "pay") {
+          renderText = "계약중";
+        } else if (text.status === "refund") {
+          renderText = "환불";
+        } else if (text.status === "expired") {
+          renderText = "종료";
+        } else if (text.status === "terminate") {
+          renderText = "해지";
+        } else if (text.status === "canceled") {
+          renderText = "취소";
+        }
+
+        return renderText;
+      },
     },
     {
       title: "그룹명(그룹id)",
