@@ -149,17 +149,7 @@ const Order = (props) => {
       title: "청구 금액",
       dataIndex: "order",
       render: (text, record) => {
-        let renderText = "";
-
-        if (text.status == "purchase") {
-          renderText = "성공";
-        } else if (text.status == "canceled") {
-          renderText = "취소";
-        } else if (text.status == "end") {
-          renderText = "종료";
-        }
-
-        return renderText;
+        return text.amount.toLocaleString("ko-KR");
       },
     },
     {
