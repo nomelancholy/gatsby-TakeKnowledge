@@ -21,51 +21,80 @@ const Contract = (props) => {
   const columns = [
     {
       title: "계약 ID",
-      dataIndex: "name",
+      dataIndex: "contract_id",
     },
     {
       title: "계약자명",
-      dataIndex: "gender",
+      dataIndex: "user",
+      render: (text, record) => {
+        console.log(`record`, record);
+        return (
+          <a href={`/contract/${record.contract_id}`}>
+            {`${text.user_name}(${text.uid})`}
+          </a>
+        );
+      },
     },
     {
       title: "계약 상태",
-      dataIndex: "email",
+      dataIndex: "status",
+      render: (text, record) => {
+        let renderText = "";
+
+        if (text === "wait") {
+          renderText = "계약 신청(입금전)";
+        } else if (text === "buy") {
+          renderText = "계약 신청(이용전)";
+        } else if (text === "pay") {
+          renderText = "계약 완료(이용중)";
+        } else if (text === "refund") {
+          renderText = "계약 해지(환불)";
+        } else if (text === "expired") {
+          renderText = "계약 해지(만료)";
+        } else if (text === "terminate") {
+          renderText = "계약 해지(중도)";
+        } else if (text === "canceled") {
+          renderText = "계약 해지(취소)";
+        }
+
+        return renderText;
+      },
     },
     {
       title: "그룹",
-      dataIndex: "email",
+      dataIndex: "group_id",
     },
     {
       title: "상품",
-      dataIndex: "email",
+      dataIndex: "-",
     },
     {
       title: "선호 지점",
-      dataIndex: "email",
+      dataIndex: "-",
     },
     {
       title: "시작일",
-      dataIndex: "email",
+      dataIndex: "start_date",
     },
     {
       title: "종료일",
-      dataIndex: "email",
+      dataIndex: "end_date",
     },
     {
       title: "취소일",
-      dataIndex: "email",
+      dataIndex: "cancel_date",
     },
     {
       title: "해지일",
-      dataIndex: "email",
+      dataIndex: "expired_date",
     },
     {
       title: "생성 일시",
-      dataIndex: "email",
+      dataIndex: "regdate",
     },
   ];
 
-  const [data, setData] = useState([]);
+  const [contractList, setContractList] = useState([]);
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(false);
 
@@ -83,36 +112,32 @@ const Contract = (props) => {
     });
   };
 
-  const fetch = (params = {}) => {
-    setLoading(true);
+  useEffect(() => {
     axios
-      .get(
-        "https://randomuser.me/api",
+      .post(
+        `${process.env.BACKEND_API}/admin/contract/list`,
         {
-          results: 10,
-          ...params,
+          page: 1,
+          size: 100,
         },
         {
           headers: {
             "Content-Type": "application/json;charset=UTF-8",
             "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
           },
         }
       )
       .then((response) => {
-        console.log(`response`, response);
-        const data = response.data;
-        console.log(`data`, data);
-        // Read total count from server
-        // pagination.total = data.totalCount;
-        setPagination({ ...pagination, total: 200 });
-        setLoading(false);
-        setData(data.results);
+        const data = response.data.items;
+        setContractList(data);
+        // setPagination({ ...pagination, total: data.total });
+        // setLoading(false);
       })
       .catch((error) => {
         console.log(`error`, error);
       });
-  };
+  }, []);
 
   return (
     <>
@@ -137,8 +162,8 @@ const Contract = (props) => {
       <Table
         size="middle"
         columns={columns}
-        rowKey={(record) => record.login.uuid}
-        dataSource={data}
+        rowKey={(record) => record.contract_id}
+        dataSource={contractList}
         pagination={pagination}
         loading={loading}
         onChange={handleTableChange}
