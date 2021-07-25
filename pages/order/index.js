@@ -29,7 +29,7 @@ const Order = (props) => {
       render: (text, record) => {
         console.log(`record`, record);
         return (
-          <a href={`/order/${record.order_id}`}>
+          <a href={`/order/${record.contract.contract_id}`}>
             {`${text.user_name}(${text.uid})`}
           </a>
         );
@@ -196,6 +196,8 @@ const Order = (props) => {
   const [form] = Form.useForm();
 
   const handleTableChange = (pagination, filters, sorter) => {
+    console.log(`tablechange`);
+
     setPagination(2);
 
     fetch({
@@ -214,7 +216,6 @@ const Order = (props) => {
         {
           page: 1,
           limit: 100,
-          contract_id: 10,
         },
         {
           headers: {
@@ -228,7 +229,7 @@ const Order = (props) => {
         const data = response.data.items;
         setOrderList(data);
         console.log(`data`, data);
-        // setPagination({ ...pagination, total: data.total });
+        setPagination({ ...pagination, total: response.data.total });
         // setProductList(data.items);
         // setLoading(false);
       })
