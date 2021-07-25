@@ -21,35 +21,82 @@ const Qna = (props) => {
   const columns = [
     {
       title: "문의 ID",
-      dataIndex: "name",
+      dataIndex: "qid",
     },
     {
       title: "문의 유형",
-      dataIndex: "gender",
+      dataIndex: "classification",
     },
     {
       title: "제목",
-      dataIndex: "email",
+      dataIndex: "title",
+      render: (text, record) => {
+        return <a href={`/qna/${record.qid}`}>{text}</a>;
+      },
     },
     {
       title: "요청자(멤버 ID)",
-      dataIndex: "email",
+      dataIndex: "user",
+      render: (text, record) => {
+        console.log(`text`, text);
+        return text.user_name;
+      },
     },
     {
       title: "처리 상태",
-      dataIndex: "email",
+      dataIndex: "state",
+      render: (text, record) => {
+        let renderText = "";
+
+        if (text === "wait") {
+          renderText = "대기";
+        } else if (text === "done") {
+          renderText = "해결";
+        } else if (text === "trash") {
+          renderText = "삭제";
+        }
+
+        return renderText;
+      },
     },
     {
       title: "생성 일시",
-      dataIndex: "email",
+      dataIndex: "regdate",
     },
   ];
 
-  const [data, setData] = useState([]);
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(false);
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
+
+  const [qnaList, setQnaList] = useState([]);
+
+  useEffect(() => {
+    const data = JSON.stringify({
+      status: "publish",
+      page: 1,
+      limit: 10,
+    });
+
+    var config = {
+      method: "post",
+      url: `${process.env.BACKEND_API}/user/qna-list`,
+      headers: {
+        Authorization: decodeURIComponent(token),
+        "Content-Type": "application/json",
+      },
+      data: data,
+    };
+
+    axios(config)
+      .then(function (response) {
+        setQnaList(response.data.items);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }, []);
 
   const handleTableChange = (pagination, filters, sorter) => {
     setPagination(2);
@@ -62,41 +109,6 @@ const Qna = (props) => {
       ...filters,
     });
   };
-
-  const fetch = (params = {}) => {
-    setLoading(true);
-    axios
-      .get(
-        "https://randomuser.me/api",
-        {
-          results: 10,
-          ...params,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json;charset=UTF-8",
-            "Access-Control-Allow-Origin": "*",
-          },
-        }
-      )
-      .then((response) => {
-        console.log(`response`, response);
-        const data = response.data;
-        console.log(`data`, data);
-        // Read total count from server
-        // pagination.total = data.totalCount;
-        setPagination({ ...pagination, total: 200 });
-        setLoading(false);
-        setData(data.results);
-      })
-      .catch((error) => {
-        console.log(`error`, error);
-      });
-  };
-
-  useEffect(() => {
-    // fetch();
-  }, []);
 
   return (
     <>
@@ -121,8 +133,8 @@ const Qna = (props) => {
       <Table
         size="middle"
         columns={columns}
-        rowKey={(record) => record.login.uuid}
-        dataSource={data}
+        rowKey={(record) => record.qid}
+        dataSource={qnaList}
         pagination={pagination}
         loading={loading}
         onChange={handleTableChange}
