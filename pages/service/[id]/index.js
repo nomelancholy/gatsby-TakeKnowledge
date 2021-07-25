@@ -314,12 +314,37 @@ const ContractDetail = (props) => {
   return (
     <>
       <Card
-        title={`회원 ID ${id}`}
+        title={`부가서비스 예약 상세`}
         extra={<a onClick={() => router.back()}>뒤로 가기</a>}
         bodyStyle={{ padding: "1rem" }}
         className="mb-4"
       >
-        <Form
+        <Card title={`예약 번호 ${id}`}
+        bodyStyle={{ padding: "1rem" }}
+        className="mb-4">
+<Form>
+<Form.Item name="status" label="예약 상태">
+            <Radio.Group>
+              <Radio style={radioStyle} value={"active"}>
+                예약
+              </Radio>
+              <Radio style={radioStyle} value={"inactive"}>
+                이용중
+              </Radio>
+              <Radio style={radioStyle} value={"inactive"}>
+                취소
+              </Radio>
+              <Radio style={radioStyle} value={"inactive"}>
+                만료
+              </Radio>
+            </Radio.Group>
+          </Form.Item>
+</Form>
+        </Card>
+        <Card title={`그룹 정보`}
+        bodyStyle={{ padding: "1rem" }}
+        className="mb-4">
+          <Form
           form={groupForm}
           layout="vertical"
           onFinish={handleReplyRegisterSubmit}
@@ -327,16 +352,16 @@ const ContractDetail = (props) => {
           <Form.Item name="classification" label="소속 그룹">
             <Input disabled />
           </Form.Item>
-          <Form.Item name="group_id" label="그룹 ID">
-            <Input disabled />
-          </Form.Item>
           <Form.Item name="group_name" label="그룹 명 (법인명)">
             <Input disabled />
           </Form.Item>
-          <Form.Item name="number" label="사업자 등록 번호">
+          <Form.Item name="group_id" label="그룹 ID">
             <Input disabled />
           </Form.Item>
           <Form.Item name="address" label="사업자 주소">
+            <Input disabled />
+          </Form.Item>
+          <Form.Item name="number" label="사업자 등록 번호">
             <Input disabled />
           </Form.Item>
           <Form.Item name="pay_demand" label="결제 방식">
@@ -345,60 +370,35 @@ const ContractDetail = (props) => {
           <Form.Item name="card" label="대표 결제 카드">
             <Input disabled />
           </Form.Item>
-          <Form.Item name="certification" label="사업자 등록증">
-            <Input disabled />
-          </Form.Item>
-
-          <Button type="primary" htmlType="submit">
-            저장
-          </Button>
-        </Form>
+        </Form>  
+        </Card>
+        <Card title={`멤버 정보`}
+        bodyStyle={{ padding: "1rem" }}
+        className="mb-4">
         <Form
           form={userForm}
           layout="vertical"
           onFinish={handleReplyRegisterSubmit}
         >
-          <Form.Item name="status" label="회원 상태">
-            <Radio.Group>
-              <Radio style={radioStyle} value={"active"}>
-                멤버
-              </Radio>
-              <Radio style={radioStyle} value={"inactive"}>
-                회원
-              </Radio>
-              <Radio style={radioStyle} value={"inactive"}>
-                탈퇴 회원
-              </Radio>
-              <Radio style={radioStyle} value={"inactive"}>
-                휴면 회원
-              </Radio>
-              <Radio style={radioStyle} value={"inactive"}>
-                그룹 멤버
-              </Radio>
-              <Radio style={radioStyle} value={"inactive"}>
-                그룹 관리자 회원
-              </Radio>
-              <Radio style={radioStyle} value={"inactive"}>
-                그룹 관리자 멤버
-              </Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item name="uid" label="회원 ID">
+          <Form.Item name="user_role" label="회원 타입">
             <Input disabled />
           </Form.Item>
-          <Form.Item name="user_role" label="회원 타입">
+          <Form.Item name="user_login" label="아이디">
             <Input disabled />
           </Form.Item>
           <Form.Item name="user_name" label="멤버 이름">
             <Input disabled />
           </Form.Item>
-          <Form.Item name="user_login" label="아이디">
+          <Form.Item name="uid" label="회원 ID">
             <Input disabled />
           </Form.Item>
           <Form.Item name="phone" label="핸드폰 번호">
             <Input disabled />
           </Form.Item>
           <Form.Item name="user_birthday" label="생년 월일">
+            <Input disabled />
+          </Form.Item>
+          <Form.Item name="job" label="직무">
             <Input disabled />
           </Form.Item>
           <Form.Item name="address" label="주소지">
@@ -417,10 +417,23 @@ const ContractDetail = (props) => {
             <Input disabled />
           </Form.Item>
 
-          <Button type="primary" htmlType="submit">
-            저장
-          </Button>
         </Form>
+        </Card>
+        <Card title={`계약 정보`}
+        bodyStyle={{ padding: "1rem" }}
+        className="mb-4">
+          </Card>
+          <Card title={`부가서비스 예약 정보`}
+        bodyStyle={{ padding: "1rem" }}
+        className="mb-4">
+          </Card>
+          <Card title={`부가서비스 이용 요금 정보`}
+        bodyStyle={{ padding: "1rem" }}
+        className="mb-4">
+          </Card>                    
+        <Card title={`청구/결제 정보`}
+        bodyStyle={{ padding: "1rem" }}
+        className="mb-4">
         <Table
           size="middle"
           columns={contractColumns}
@@ -430,6 +443,7 @@ const ContractDetail = (props) => {
           loading={loading}
           onChange={handleTableChange}
         />
+        </Card>
         <Table
           size="middle"
           columns={orderColumns}
