@@ -7,3 +7,5 @@ haters/
 layout.md
 variables.env
 .vercel
+.idea*
+
