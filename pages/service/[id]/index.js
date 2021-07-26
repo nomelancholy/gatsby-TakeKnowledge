@@ -319,130 +319,140 @@ const ContractDetail = (props) => {
         bodyStyle={{ padding: "1rem" }}
         className="mb-4"
       >
-        <Card title={`예약 번호 ${id}`}
-        bodyStyle={{ padding: "1rem" }}
-        className="mb-4">
-<Form>
-<Form.Item name="status" label="예약 상태">
-            <Radio.Group>
-              <Radio style={radioStyle} value={"active"}>
-                예약
-              </Radio>
-              <Radio style={radioStyle} value={"inactive"}>
-                이용중
-              </Radio>
-              <Radio style={radioStyle} value={"inactive"}>
-                취소
-              </Radio>
-              <Radio style={radioStyle} value={"inactive"}>
-                만료
-              </Radio>
-            </Radio.Group>
-          </Form.Item>
-</Form>
+        <Card
+          title={`예약 번호 ${id}`}
+          bodyStyle={{ padding: "1rem" }}
+          className="mb-4"
+        >
+          <Form>
+            <Form.Item name="status" label="예약 상태">
+              <Radio.Group>
+                <Radio style={radioStyle} value={"active"}>
+                  예약
+                </Radio>
+                <Radio style={radioStyle} value={"inactive"}>
+                  이용중
+                </Radio>
+                <Radio style={radioStyle} value={"inactive"}>
+                  취소
+                </Radio>
+                <Radio style={radioStyle} value={"inactive"}>
+                  만료
+                </Radio>
+              </Radio.Group>
+            </Form.Item>
+          </Form>
         </Card>
-        <Card title={`그룹 정보`}
-        bodyStyle={{ padding: "1rem" }}
-        className="mb-4">
+        <Card
+          title={`그룹 정보`}
+          bodyStyle={{ padding: "1rem" }}
+          className="mb-4"
+        >
           <Form
-          form={groupForm}
-          layout="vertical"
-          onFinish={handleReplyRegisterSubmit}
-        >
-          <Form.Item name="classification" label="소속 그룹">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="group_name" label="그룹 명 (법인명)">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="group_id" label="그룹 ID">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="address" label="사업자 주소">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="number" label="사업자 등록 번호">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="pay_demand" label="결제 방식">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="card" label="대표 결제 카드">
-            <Input disabled />
-          </Form.Item>
-        </Form>  
+            form={groupForm}
+            layout="vertical"
+            onFinish={handleReplyRegisterSubmit}
+          >
+            <Form.Item name="classification" label="소속 그룹">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="group_name" label="그룹 명 (법인명)">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="group_id" label="그룹 ID">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="address" label="사업자 주소">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="number" label="사업자 등록 번호">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="pay_demand" label="결제 방식">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="card" label="대표 결제 카드">
+              <Input disabled />
+            </Form.Item>
+          </Form>
         </Card>
-        <Card title={`멤버 정보`}
-        bodyStyle={{ padding: "1rem" }}
-        className="mb-4">
-        <Form
-          form={userForm}
-          layout="vertical"
-          onFinish={handleReplyRegisterSubmit}
+        <Card
+          title={`멤버 정보`}
+          bodyStyle={{ padding: "1rem" }}
+          className="mb-4"
         >
-          <Form.Item name="user_role" label="회원 타입">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="user_login" label="아이디">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="user_name" label="멤버 이름">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="uid" label="회원 ID">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="phone" label="핸드폰 번호">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="user_birthday" label="생년 월일">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="job" label="직무">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="address" label="주소지">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="address1" label="주소1">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="address2" label="주소2">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="card" label="대표 결제 카드">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="favorite_spot" label="선호 지점">
-            <Input disabled />
-          </Form.Item>
-
-        </Form>
+          <Form
+            form={userForm}
+            layout="vertical"
+            onFinish={handleReplyRegisterSubmit}
+          >
+            <Form.Item name="user_role" label="회원 타입">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="user_login" label="아이디">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="user_name" label="멤버 이름">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="uid" label="회원 ID">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="phone" label="핸드폰 번호">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="user_birthday" label="생년 월일">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="job" label="직무">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="address" label="주소지">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="address1" label="주소1">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="address2" label="주소2">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="card" label="대표 결제 카드">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="favorite_spot" label="선호 지점">
+              <Input disabled />
+            </Form.Item>
+          </Form>
         </Card>
-        <Card title={`계약 정보`}
-        bodyStyle={{ padding: "1rem" }}
-        className="mb-4">
-          </Card>
-          <Card title={`부가서비스 예약 정보`}
-        bodyStyle={{ padding: "1rem" }}
-        className="mb-4">
-          </Card>
-          <Card title={`부가서비스 이용 요금 정보`}
-        bodyStyle={{ padding: "1rem" }}
-        className="mb-4">
-          </Card>                    
-        <Card title={`청구/결제 정보`}
-        bodyStyle={{ padding: "1rem" }}
-        className="mb-4">
-        <Table
-          size="middle"
-          columns={contractColumns}
-          rowKey={(record) => record.contract_id}
-          dataSource={userContractList}
-          pagination={pagination}
-          loading={loading}
-          onChange={handleTableChange}
-        />
+        <Card
+          title={`계약 정보`}
+          bodyStyle={{ padding: "1rem" }}
+          className="mb-4"
+        ></Card>
+        <Card
+          title={`부가서비스 예약 정보`}
+          bodyStyle={{ padding: "1rem" }}
+          className="mb-4"
+        ></Card>
+        <Card
+          title={`부가서비스 이용 요금 정보`}
+          bodyStyle={{ padding: "1rem" }}
+          className="mb-4"
+        ></Card>
+        <Card
+          title={`청구/결제 정보`}
+          bodyStyle={{ padding: "1rem" }}
+          className="mb-4"
+        >
+          <Table
+            size="middle"
+            columns={contractColumns}
+            rowKey={(record) => record.contract_id}
+            dataSource={userContractList}
+            pagination={pagination}
+            loading={loading}
+            onChange={handleTableChange}
+          />
         </Card>
         <Table
           size="middle"
