@@ -1,9 +1,5 @@
-import { Button, Table, Form, Input, Row, Select, Modal } from "antd";
-import { SlidersOutlined, SearchOutlined } from "@ant-design/icons";
-
-import React, { Component, useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
-import axios from "axios";
 import Router from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
@@ -18,13 +14,7 @@ const NoticeWrite = (props) => {
     }
   }, []);
 
-  return (
-    <>
-      <h3>알림(공지) 상세 페이지</h3>
-
-      <NoticeDetail />
-    </>
-  );
+  return <NoticeDetail noticeId={null} token={token} />;
 };
 
 export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
