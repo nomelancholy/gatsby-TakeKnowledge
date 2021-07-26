@@ -20,16 +20,7 @@ import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
 
 const Qna = (props) => {
-  const { user, isLoggedIn, token } = props.auth;
-
-  const [searchForm] = useForm();
-
-  useEffect(() => {
-    if (!isLoggedIn) {
-      Router.push("/");
-    }
-  }, []);
-
+  // 공지 컬럼 정의
   const columns = [
     {
       title: "문의 ID",
@@ -38,6 +29,94 @@ const Qna = (props) => {
     {
       title: "문의 유형",
       dataIndex: "classification",
+      render: (text, record) => {
+        let renderText = "";
+
+        // console.log(`text`, text);
+
+        switch (text) {
+          case "0":
+            renderText = "멤버십 상품 문의";
+            break;
+          case "1":
+            renderText = "그룹형(기업형) 상품 문의";
+            break;
+          case "2":
+            renderText = "신청 및 변경";
+            break;
+          case "3":
+            renderText = "결제 관련";
+            break;
+          case "4":
+            renderText = "변경 관련(멤버십 상품 결제 수단,시작일 등)";
+            break;
+          case "5":
+            renderText = "출입 관련";
+            break;
+          case "6":
+            renderText = "종료 및 해지";
+            break;
+          case "7":
+            renderText = "부가서비스(미팅룸, 코워킹룸, 사물함)";
+            break;
+          case "8":
+            renderText = "OA(복합기, 사무용품)";
+            break;
+          case "9":
+            renderText = "기타";
+            break;
+          default:
+            break;
+        }
+
+        return renderText;
+      },
+    },
+    {
+      title: "카테고리",
+      dataIndex: "category",
+      render: (text, record) => {
+        let renderText = "";
+
+        // console.log(`text`, text);
+
+        switch (text) {
+          case "0":
+            renderText = "멤버십 상품 문의";
+            break;
+          case "1":
+            renderText = "그룹형(기업형) 상품 문의";
+            break;
+          case "2":
+            renderText = "신청 및 변경";
+            break;
+          case "3":
+            renderText = "결제 관련";
+            break;
+          case "4":
+            renderText = "변경 관련(멤버십 상품 결제 수단,시작일 등)";
+            break;
+          case "5":
+            renderText = "출입 관련";
+            break;
+          case "6":
+            renderText = "종료 및 해지";
+            break;
+          case "7":
+            renderText = "부가서비스(미팅룸, 코워킹룸, 사물함)";
+            break;
+          case "8":
+            renderText = "OA(복합기, 사무용품)";
+            break;
+          case "9":
+            renderText = "기타";
+            break;
+          default:
+            break;
+        }
+
+        return renderText;
+      },
     },
     {
       title: "제목",
@@ -50,7 +129,6 @@ const Qna = (props) => {
       title: "요청자(멤버 ID)",
       dataIndex: "user",
       render: (text, record) => {
-        console.log(`text`, text);
         return text.user_name;
       },
     },
@@ -77,20 +155,30 @@ const Qna = (props) => {
     },
   ];
 
-  const [pagination, setPagination] = useState({});
+  const { user, isLoggedIn, token } = props.auth;
+
+  const [qnaList, setQnaList] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({});
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
-  const [qnaList, setQnaList] = useState([]);
+  const [searchForm] = useForm();
 
-  useEffect(() => {
-    const data = JSON.stringify({
-      status: "publish",
-      page: 1,
-      limit: 10,
-    });
+  // 페이지 사이즈
+  const PAGE_SIZE = 20;
 
+  // 파라미터 state - 초기엔 초기값, 이후엔 바로 직전의 params 저장
+  const [params, setParams] = useState({
+    status: null,
+    classification: null,
+    state: null,
+    regdate: null,
+    page: 1,
+    size: PAGE_SIZE,
+  });
+
+  const getNoticeList = (params) => {
     var config = {
       method: "post",
       url: `${process.env.BACKEND_API}/user/qna-list`,
@@ -98,36 +186,87 @@ const Qna = (props) => {
         Authorization: decodeURIComponent(token),
         "Content-Type": "application/json",
       },
-      data: data,
+      data: params,
     };
 
     axios(config)
       .then(function (response) {
-        setQnaList(response.data.items);
+        const data = response.data;
+
+        // 데이터 바인딩
+        setQnaList(data.items);
+
+        // 페이지 네이션 정보 세팅
+        const pageInfo = {
+          current: data.page,
+          total: data.total,
+          pageSize: data.size,
+        };
+
+        // pageInfo 세팅
+        setPagination(pageInfo);
+
+        // 로딩바 세팅
+        setLoading(false);
+
+        // 테이블 페이지 변경을 위해 방금 사용한 params 저장
+        setParams(params);
       })
       .catch(function (error) {
         console.log(error);
       });
+  };
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      // 로그인 되어 있지 않으면 홈으로
+      Router.push("/");
+    }
+    // 로딩바 세팅
+    setLoading(true);
+
+    // 파라미터 없이 호출
+    getNoticeList(params);
   }, []);
 
-  const handleTableChange = (pagination, filters, sorter) => {
-    setPagination(2);
+  // 테이블 페이지 변경시
+  const handleTableChange = (pagination) => {
+    setPagination(pagination);
 
-    fetch({
-      results: pagination.pageSize,
-      page: pagination.current,
-      sortField: sorter.field,
-      sortOrder: sorter.order,
-      ...filters,
-    });
+    // 호출
+    getNoticeList({ ...params, page: pagination.current });
   };
 
-  const handleStartDateChange = (date, dateString) => {
-    // setStartDate(dateString);
+  const handleSearch = () => {
+    const searchFormValues = searchForm.getFieldsValue();
+
+    const searchParams = {
+      qid: searchFormValues.qid,
+      classification: searchFormValues.classification,
+      state: searchFormValues.state,
+      regdate: searchFormValues.regdate
+        ? searchFormValues.regdate.format().substring(0, 10)
+        : null,
+      page: 1,
+    };
+
+    getNoticeList({ ...params, ...searchParams });
   };
 
-  const handleEndDateChange = (date, dateString) => {
-    // setEndDate(dateString);
+  const handleReset = () => {
+    // form Item reset
+    searchForm.resetFields();
+
+    // params state reset
+    const searchParams = {
+      qid: null,
+      classification: null,
+      state: null,
+      regdate: null,
+      page: 1,
+    };
+
+    getNoticeList({ ...params, ...searchParams });
   };
 
   return (
@@ -135,9 +274,6 @@ const Qna = (props) => {
       <h3>문의 관리</h3>
 
       <Row type="flex" align="middle" className="py-3">
-        {/* <Button type="primary">
-          <SearchOutlined></SearchOutlined>검색
-        </Button> */}
         <Button
           type="primary"
           onClick={() => {
@@ -163,23 +299,8 @@ const Qna = (props) => {
       <Filter
         visible={filterModalOpen}
         onClose={() => setFilterModalOpen(false)}
-        onReset={() => console.log(`reset`)}
-        onSearch={
-          () => {
-            console.log(`onOk`);
-          }
-          //     () => {
-          //   form
-          //     .validateFields()
-          //     .then((values) => {
-          //       form.resetFields();
-          //       onCreate(values);
-          //     })
-          //     .catch((info) => {
-          //       console.log("Validate Failed:", info);
-          //     });
-          // }
-        }
+        onReset={handleReset}
+        onSearch={handleSearch}
       >
         <Form
           form={searchForm}
@@ -192,8 +313,22 @@ const Qna = (props) => {
           </Form.Item>
           <Form.Item name="classification" label="문의 유형">
             <Select style={{ width: 120 }}>
-              {/* <Select.Option value={0}>미노출</Select.Option>
-              <Select.Option value={1}>노출</Select.Option> */}
+              <Select.Option value={"0"}>멤버십 상품 문의</Select.Option>
+              <Select.Option value={"1"}>
+                그룹형(기업형) 상품 문의
+              </Select.Option>
+              <Select.Option value={"2"}>신청 및 변경</Select.Option>
+              <Select.Option value={"3"}>결제 관련</Select.Option>
+              <Select.Option value={"4"}>
+                변경 관련(멤버십 상품 결제 수단,시작일 등)
+              </Select.Option>
+              <Select.Option value={"5"}>출입 관련</Select.Option>
+              <Select.Option value={"6"}>종료 및 해지</Select.Option>
+              <Select.Option value={"7"}>
+                부가서비스(미팅룸, 코워킹룸, 사물함)
+              </Select.Option>
+              <Select.Option value={"8"}>OA(복합기, 사무용품)</Select.Option>
+              <Select.Option value={"9"}>기타</Select.Option>
             </Select>
           </Form.Item>
           <Form.Item name="state" label="회원 상태">
@@ -204,8 +339,7 @@ const Qna = (props) => {
             </Select>
           </Form.Item>
           <Form.Item name="regdate" label="생성 일시">
-            <DatePicker onChange={handleStartDateChange} />
-            <DatePicker onChange={handleEndDateChange} />
+            <DatePicker />
           </Form.Item>
         </Form>
       </Filter>
