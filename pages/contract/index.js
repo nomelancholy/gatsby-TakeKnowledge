@@ -1,4 +1,13 @@
-import { Button, Table, Form, Input, Row, Select, Modal } from "antd";
+import {
+  Button,
+  Table,
+  Form,
+  Input,
+  Row,
+  Select,
+  Modal,
+  DatePicker,
+} from "antd";
 import { SlidersOutlined, SearchOutlined } from "@ant-design/icons";
 
 import React, { Component, useState, useEffect } from "react";
@@ -8,6 +17,7 @@ import Router from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import { Filter } from "@components/elements";
+import { useForm } from "antd/lib/form/Form";
 
 const Contract = (props) => {
   const { user, isLoggedIn, token } = props.auth;
@@ -17,6 +27,8 @@ const Contract = (props) => {
       Router.push("/");
     }
   }, []);
+
+  const [searchForm] = useForm();
 
   const columns = [
     {
@@ -139,6 +151,14 @@ const Contract = (props) => {
       });
   }, []);
 
+  const handleStartDateChange = (date, dateString) => {
+    // setStartDate(dateString);
+  };
+
+  const handleEndDateChange = (date, dateString) => {
+    // setEndDate(dateString);
+  };
+
   return (
     <>
       <h3>계약</h3>
@@ -172,6 +192,7 @@ const Contract = (props) => {
       <Filter
         visible={filterModalOpen}
         onClose={() => setFilterModalOpen(false)}
+        onReset={() => console.log(`reset`)}
         onSearch={
           () => {
             console.log(`onOk`);
@@ -190,22 +211,69 @@ const Contract = (props) => {
         }
       >
         <Form
-          // form={form}
+          form={searchForm}
           layout="vertical"
           name="form_in_modal"
           initialValues={{ modifier: "public" }}
         >
-          <Form.Item name="그룹 ID" label="그룹 ID">
+          <Form.Item name="contract_id" label="계약 ID">
             <Input />
           </Form.Item>
-          <Form.Item name="그룹명" label="그룹명">
+          <Form.Item name="user_id" label="멤버 ID">
             <Input />
           </Form.Item>
-          <Form.Item name="회원 상태" label="회원 상태">
+          <Form.Item name="group_id" label="그룹 ID">
             <Input />
           </Form.Item>
-          <Form.Item name="활성/휴면 여부" label="활성/휴면 여부">
+          <Form.Item name="user_name" label="계약자명">
             <Input />
+          </Form.Item>
+          <Form.Item name="group_name" label="그룹명">
+            <Input />
+          </Form.Item>
+          <Form.Item name="contract_status" label="계약 상태">
+            <Select style={{ width: 160 }}>
+              <Select.Option value="wait">계약 신청</Select.Option>
+              <Select.Option value="canceled">계약 취소</Select.Option>
+              <Select.Option value="pay">계약 완료(이용중)</Select.Option>
+              <Select.Option value="expired">계약 해지(만료)</Select.Option>
+              <Select.Option value="terminate">계약 해지(중도)</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="membership_type" label="멤버십 상품">
+            <Select style={{ width: 160 }}>
+              <Select.Option value="all_spot">ALL SPOT</Select.Option>
+              <Select.Option value="one_spot">ONE_SPOT</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="expiration_scheduled" label="만료 예정">
+            <Select style={{ width: 160 }}>
+              <Select.Option value="true">해당</Select.Option>
+              <Select.Option value="false">미해당</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="terminatation_scheduled" label="해지 예정">
+            <Select style={{ width: 160 }}>
+              <Select.Option value="true">해당</Select.Option>
+              <Select.Option value="false">미해당</Select.Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item name="start_date" label="계약 시작 일자">
+            <DatePicker onChange={handleStartDateChange} />
+            <DatePicker onChange={handleEndDateChange} />
+          </Form.Item>
+          <Form.Item name="end_date" label="계약 종료 일자">
+            <DatePicker onChange={handleStartDateChange} />
+            <DatePicker onChange={handleEndDateChange} />
+          </Form.Item>
+          <Form.Item name="cancel_date" label="계약 취소 일자">
+            <DatePicker onChange={handleStartDateChange} />
+            <DatePicker onChange={handleEndDateChange} />
+          </Form.Item>
+          <Form.Item name="terminate_date" label="계약 해지 일자">
+            <DatePicker onChange={handleStartDateChange} />
+            <DatePicker onChange={handleEndDateChange} />
           </Form.Item>
         </Form>
       </Filter>

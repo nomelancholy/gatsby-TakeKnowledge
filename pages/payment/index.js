@@ -1,4 +1,13 @@
-import { Button, Table, Form, Input, Row, Select, Modal } from "antd";
+import {
+  Button,
+  Table,
+  Form,
+  Input,
+  Row,
+  Select,
+  Modal,
+  DatePicker,
+} from "antd";
 import {
   SlidersOutlined,
   SearchOutlined,
@@ -12,6 +21,7 @@ import Router from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import { Filter } from "@components/elements";
+import { useForm } from "antd/lib/form/Form";
 
 const Payment = (props) => {
   const { user, isLoggedIn, token } = props.auth;
@@ -150,6 +160,16 @@ const Payment = (props) => {
       });
   }, []);
 
+  const [searchForm] = useForm();
+
+  const handleStartDateChange = (date, dateString) => {
+    // setStartDate(dateString);
+  };
+
+  const handleEndDateChange = (date, dateString) => {
+    // setEndDate(dateString);
+  };
+
   return (
     <>
       <h3>요금제 관리</h3>
@@ -189,6 +209,7 @@ const Payment = (props) => {
       <Filter
         visible={filterModalOpen}
         onClose={() => setFilterModalOpen(false)}
+        onReset={() => console.log(`reset`)}
         onSearch={
           () => {
             console.log(`onOk`);
@@ -207,22 +228,42 @@ const Payment = (props) => {
         }
       >
         <Form
-          // form={form}
+          form={searchForm}
           layout="vertical"
           name="form_in_modal"
           initialValues={{ modifier: "public" }}
         >
-          <Form.Item name="그룹 ID" label="그룹 ID">
+          <Form.Item name="rateplan_id" label="요금제 ID">
             <Input />
           </Form.Item>
-          <Form.Item name="그룹명" label="그룹명">
-            <Input />
+          <Form.Item name="prodct_type" label="상품 그룹">
+            <Select style={{ width: 160 }}>
+              <Select.Option value="membership">멤버십</Select.Option>
+              <Select.Option value="service">부가서비스</Select.Option>
+              <Select.Option value="voucher">이용권</Select.Option>
+            </Select>
           </Form.Item>
-          <Form.Item name="회원 상태" label="회원 상태">
-            <Input />
+          <Form.Item name="product_id" label="상품명">
+            {/*  멤버십 - all/on spot / 부가서비스 - 코워킹룸, 미팅룸.. / 이용권 - spot 100.. */}
+            <Select style={{ width: 160 }}>
+              {/* <Select.Option value="all_spot">ALL SPOT</Select.Option>
+              <Select.Option value="one_spot">ONE_SPOT</Select.Option> */}
+            </Select>
           </Form.Item>
-          <Form.Item name="활성/휴면 여부" label="활성/휴면 여부">
-            <Input />
+          <Form.Item name="status" label="사용 여부">
+            <Select style={{ width: 160 }}>
+              <Select.Option value="active">사용</Select.Option>
+              <Select.Option value="inactive">미사용</Select.Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item name="start_date" label="시작 일자">
+            <DatePicker onChange={handleStartDateChange} />
+            <DatePicker onChange={handleEndDateChange} />
+          </Form.Item>
+          <Form.Item name="end_date" label="종료 일자">
+            <DatePicker onChange={handleStartDateChange} />
+            <DatePicker onChange={handleEndDateChange} />
           </Form.Item>
         </Form>
       </Filter>

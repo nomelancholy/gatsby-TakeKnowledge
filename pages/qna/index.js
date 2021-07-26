@@ -1,4 +1,13 @@
-import { Button, Table, Form, Input, Row, Select, Modal } from "antd";
+import {
+  Button,
+  Table,
+  Form,
+  Input,
+  Row,
+  Select,
+  Modal,
+  DatePicker,
+} from "antd";
 import { SlidersOutlined, SearchOutlined } from "@ant-design/icons";
 
 import React, { Component, useState, useEffect } from "react";
@@ -8,9 +17,12 @@ import Router from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import { Filter } from "@components/elements";
+import { useForm } from "antd/lib/form/Form";
 
 const Qna = (props) => {
   const { user, isLoggedIn, token } = props.auth;
+
+  const [searchForm] = useForm();
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -110,6 +122,14 @@ const Qna = (props) => {
     });
   };
 
+  const handleStartDateChange = (date, dateString) => {
+    // setStartDate(dateString);
+  };
+
+  const handleEndDateChange = (date, dateString) => {
+    // setEndDate(dateString);
+  };
+
   return (
     <>
       <h3>문의 관리</h3>
@@ -143,6 +163,7 @@ const Qna = (props) => {
       <Filter
         visible={filterModalOpen}
         onClose={() => setFilterModalOpen(false)}
+        onReset={() => console.log(`reset`)}
         onSearch={
           () => {
             console.log(`onOk`);
@@ -161,22 +182,30 @@ const Qna = (props) => {
         }
       >
         <Form
-          // form={form}
+          form={searchForm}
           layout="vertical"
           name="form_in_modal"
           initialValues={{ modifier: "public" }}
         >
-          <Form.Item name="그룹 ID" label="그룹 ID">
+          <Form.Item name="qid" label="문의 ID">
             <Input />
           </Form.Item>
-          <Form.Item name="그룹명" label="그룹명">
-            <Input />
+          <Form.Item name="classification" label="문의 유형">
+            <Select style={{ width: 120 }}>
+              {/* <Select.Option value={0}>미노출</Select.Option>
+              <Select.Option value={1}>노출</Select.Option> */}
+            </Select>
           </Form.Item>
-          <Form.Item name="회원 상태" label="회원 상태">
-            <Input />
+          <Form.Item name="state" label="회원 상태">
+            <Select style={{ width: 120 }}>
+              <Select.Option value="wait">대기</Select.Option>
+              <Select.Option value="done">해결</Select.Option>
+              <Select.Option value="trash">삭제</Select.Option>
+            </Select>
           </Form.Item>
-          <Form.Item name="활성/휴면 여부" label="활성/휴면 여부">
-            <Input />
+          <Form.Item name="regdate" label="생성 일시">
+            <DatePicker onChange={handleStartDateChange} />
+            <DatePicker onChange={handleEndDateChange} />
           </Form.Item>
         </Form>
       </Filter>

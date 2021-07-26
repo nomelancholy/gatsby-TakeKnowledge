@@ -1,4 +1,13 @@
-import { Button, Table, Form, Input, Row, Select, Modal } from "antd";
+import {
+  Button,
+  Table,
+  Form,
+  Input,
+  Row,
+  Select,
+  Modal,
+  DatePicker,
+} from "antd";
 import { SlidersOutlined, SearchOutlined } from "@ant-design/icons";
 
 import React, { Component, useState, useEffect } from "react";
@@ -8,6 +17,7 @@ import Router from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import { Filter } from "@components/elements";
+import { useForm } from "antd/lib/form/Form";
 
 const Order = (props) => {
   const { user, isLoggedIn, token } = props.auth;
@@ -209,6 +219,16 @@ const Order = (props) => {
     });
   };
 
+  const [searchForm] = useForm();
+
+  const handleStartDateChange = (date, dateString) => {
+    // setStartDate(dateString);
+  };
+
+  const handleEndDateChange = (date, dateString) => {
+    // setEndDate(dateString);
+  };
+
   useEffect(() => {
     axios
       .post(
@@ -267,13 +287,15 @@ const Order = (props) => {
         loading={loading}
         onChange={handleTableChange}
       />
-
       {/* 필터 모달 */}
       <Filter
         visible={filterModalOpen}
         onClose={() => setFilterModalOpen(false)}
-        onSearch={() => {
-          console.log(`onOk`);
+        onReset={() => console.log(`reset`)}
+        onSearch={
+          () => {
+            console.log(`onOk`);
+          }
           //     () => {
           //   form
           //     .validateFields()
@@ -285,25 +307,63 @@ const Order = (props) => {
           //       console.log("Validate Failed:", info);
           //     });
           // }
-        }}
+        }
       >
         <Form
-          // form={form}
+          form={searchForm}
           layout="vertical"
           name="form_in_modal"
           initialValues={{ modifier: "public" }}
         >
-          <Form.Item name="그룹 ID" label="그룹 ID">
+          <Form.Item name="order_id" label="청구 ID">
             <Input />
           </Form.Item>
-          <Form.Item name="그룹명" label="그룹명">
+          <Form.Item name="contract_id" label="계약 ID">
             <Input />
           </Form.Item>
-          <Form.Item name="회원 상태" label="회원 상태">
+          <Form.Item name="user_id" label="멤버 ID">
             <Input />
           </Form.Item>
-          <Form.Item name="활성/휴면 여부" label="활성/휴면 여부">
+          <Form.Item name="group_id" label="그룹 ID">
             <Input />
+          </Form.Item>
+          <Form.Item name="user_name" label="회원명">
+            <Input />
+          </Form.Item>
+          <Form.Item name="group_type" label="그룹 유형">
+            <Select style={{ width: 160 }}>
+              {/* <Select.Option value="meeting">미팅룸</Select.Option>
+              <Select.Option value="coworking">코워킹룸</Select.Option>
+              <Select.Option value="locker">락커</Select.Option>
+              <Select.Option value="lounge">라운지</Select.Option> */}
+            </Select>
+          </Form.Item>
+          <Form.Item name="payment_status" label="결제 상태">
+            <Select style={{ width: 160 }}>
+              <Select.Option value="wait">대기</Select.Option>
+              <Select.Option value="buy">결제</Select.Option>
+              <Select.Option value="unpaid">미납</Select.Option>
+              <Select.Option value="canceled">취소</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="pay_method" label="결제 방식">
+            <Select style={{ width: 160 }}>
+              <Select.Option value="personal">개인 카드결제</Select.Option>
+              <Select.Option value="coporation">법인 카드결제</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="pay_demand" label="결제 유형">
+            <Select style={{ width: 160 }}>
+              {/* 활성화 된 spot 리스트 가져와서  map */}
+              <Select.Option value="pre">선불</Select.Option>
+              <Select.Option value="deffered">후불</Select.Option>
+              <Select.Option value="last">말일결제</Select.Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item name="next_paydate" label="정기 결제 일자">
+            <DatePicker onChange={handleStartDateChange} />
+            <DatePicker onChange={handleEndDateChange} />
           </Form.Item>
         </Form>
       </Filter>

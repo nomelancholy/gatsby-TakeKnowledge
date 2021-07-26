@@ -1,4 +1,13 @@
-import { Button, Table, Form, Input, Row, Select, Modal } from "antd";
+import {
+  Button,
+  Table,
+  Form,
+  Input,
+  Row,
+  Select,
+  Modal,
+  DatePicker,
+} from "antd";
 import {
   SlidersOutlined,
   SearchOutlined,
@@ -12,11 +21,14 @@ import Router from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import { Filter } from "@components/elements";
+import { useForm } from "antd/lib/form/Form";
 
 const Service = (props) => {
   const { user, isLoggedIn, token } = props.auth;
 
   const [serviceList, setServiceList] = useState([]);
+
+  const [searchForm] = useForm();
 
   useEffect(() => {
     axios
@@ -162,6 +174,14 @@ const Service = (props) => {
 
   const [form] = Form.useForm();
 
+  const handleStartDateChange = (date, dateString) => {
+    // setStartDate(dateString);
+  };
+
+  const handleEndDateChange = (date, dateString) => {
+    // setEndDate(dateString);
+  };
+
   const handleTableChange = (pagination, filters, sorter) => {
     setPagination(2);
 
@@ -179,9 +199,6 @@ const Service = (props) => {
       <h3>부가서비스 예약 관리</h3>
 
       <Row type="flex" align="middle" className="py-3">
-        {/* <Button type="primary">
-          <SearchOutlined></SearchOutlined>검색
-        </Button> */}
         <Button
           type="primary"
           onClick={() => {
@@ -192,7 +209,8 @@ const Service = (props) => {
           <span>필터</span>
         </Button>
         <span className="px-2 w-10"></span>
-        <Button
+        {/* 2차 분량 */}
+        {/* <Button
           type="primary"
           onClick={() => {
             setRegistrationModalOpen(true);
@@ -200,7 +218,7 @@ const Service = (props) => {
         >
           <PlusOutlined />
           <span>등록</span>
-        </Button>
+        </Button> */}
       </Row>
 
       <Table
@@ -216,6 +234,7 @@ const Service = (props) => {
       <Filter
         visible={filterModalOpen}
         onClose={() => setFilterModalOpen(false)}
+        onReset={() => console.log(`reset`)}
         onSearch={
           () => {
             console.log(`onOk`);
@@ -234,22 +253,53 @@ const Service = (props) => {
         }
       >
         <Form
-          // form={form}
+          form={searchForm}
           layout="vertical"
           name="form_in_modal"
           initialValues={{ modifier: "public" }}
         >
-          <Form.Item name="그룹 ID" label="그룹 ID">
+          <Form.Item name="contract_id" label="예약 ID">
             <Input />
           </Form.Item>
-          <Form.Item name="그룹명" label="그룹명">
+          <Form.Item name="user_id" label="멤버 ID">
             <Input />
           </Form.Item>
-          <Form.Item name="회원 상태" label="회원 상태">
+          <Form.Item name="user_name" label="계약자명">
             <Input />
           </Form.Item>
-          <Form.Item name="활성/휴면 여부" label="활성/휴면 여부">
-            <Input />
+          <Form.Item name="contract_type" label="부가서비스">
+            <Select style={{ width: 160 }}>
+              <Select.Option value="meeting">미팅룸</Select.Option>
+              <Select.Option value="coworking">코워킹룸</Select.Option>
+              <Select.Option value="locker">락커</Select.Option>
+              <Select.Option value="lounge">라운지</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="contract_status" label="예약 상태">
+            <Select style={{ width: 160 }}>
+              <Select.Option value="all_spot">ALL SPOT</Select.Option>
+              <Select.Option value="one_spot">ONE_SPOT</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="spot" label="사용 지점">
+            <Select style={{ width: 160 }}>
+              {/* 활성화 된 spot 리스트 가져와서  map */}
+              {/* <Select.Option value="true">해당</Select.Option>
+              <Select.Option value="false">미해당</Select.Option> */}
+            </Select>
+          </Form.Item>
+
+          <Form.Item name="start_date" label="예약 시작 일자">
+            <DatePicker onChange={handleStartDateChange} />
+            <DatePicker onChange={handleEndDateChange} />
+          </Form.Item>
+          <Form.Item name="end_date" label="예약 종료 일자">
+            <DatePicker onChange={handleStartDateChange} />
+            <DatePicker onChange={handleEndDateChange} />
+          </Form.Item>
+          <Form.Item name="cancel_date" label="예약 취소 일자">
+            <DatePicker onChange={handleStartDateChange} />
+            <DatePicker onChange={handleEndDateChange} />
           </Form.Item>
         </Form>
       </Filter>

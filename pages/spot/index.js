@@ -1,4 +1,4 @@
-import { Button, Table, Form, Input, Row, Modal } from "antd";
+import { Button, Table, Form, Input, Row, Modal, Select } from "antd";
 import { SlidersOutlined, PlusOutlined } from "@ant-design/icons";
 
 import React, { useState, useEffect } from "react";
@@ -8,6 +8,7 @@ import Router from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import { Filter } from "@components/elements";
+import { useForm } from "antd/lib/form/Form";
 
 const Spot = (props) => {
   const { user, isLoggedIn, token } = props.auth;
@@ -196,6 +197,8 @@ const Spot = (props) => {
     }
   }, [spotData]);
 
+  const [searchForm] = useForm();
+
   return (
     <>
       <h3>스팟 관리</h3>
@@ -236,40 +239,8 @@ const Spot = (props) => {
       <Filter
         visible={filterModalOpen}
         onClose={() => setFilterModalOpen(false)}
-        onSearch={() => {
-          console.log(`onOk`);
-        }}
-      >
-        <Form
-          // form={form}
-          layout="vertical"
-          name="form_in_modal"
-          initialValues={{ modifier: "public" }}
-        >
-          <Form.Item name="그룹 ID" label="그룹 ID">
-            <Input />
-          </Form.Item>
-          <Form.Item name="그룹명" label="그룹명">
-            <Input />
-          </Form.Item>
-          <Form.Item name="회원 상태" label="회원 상태">
-            <Input />
-          </Form.Item>
-          <Form.Item name="활성/휴면 여부" label="활성/휴면 여부">
-            <Input />
-          </Form.Item>
-        </Form>
-      </Filter>
-
-      {/* <Modal
-        visible={filterModalOpen}
-        title="검색 항목"
-        okText="검색"
-        cancelText="취소"
-        onCancel={() => {
-          setFilterModalOpen(false);
-        }}
-        onOk={
+        onReset={() => console.log(`reset`)}
+        onSearch={
           () => {
             console.log(`onOk`);
           }
@@ -286,7 +257,26 @@ const Spot = (props) => {
           // }
         }
       >
-      </Modal> */}
+        <Form
+          form={searchForm}
+          layout="vertical"
+          name="form_in_modal"
+          initialValues={{ modifier: "public" }}
+        >
+          <Form.Item name="spot_id" label="스팟 ID">
+            <Input />
+          </Form.Item>
+          <Form.Item name="spot_name" label="스팟명">
+            <Input />
+          </Form.Item>
+          <Form.Item name="status" label="사용 여부">
+            <Select style={{ width: 160 }}>
+              <Select.Option value="active">사용</Select.Option>
+              <Select.Option value="inactive">미사용</Select.Option>
+            </Select>
+          </Form.Item>
+        </Form>
+      </Filter>
     </>
   );
 };

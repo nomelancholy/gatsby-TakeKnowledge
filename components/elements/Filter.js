@@ -2,7 +2,7 @@ import React from "react";
 import { Button, Drawer } from "antd";
 
 const Filter = (props) => {
-  const { onClose, onSearch, children, ...rest } = props;
+  const { onSearch, onReset, onClose, children, ...rest } = props;
   return (
     <Drawer
       title="검색 항목"
@@ -19,7 +19,7 @@ const Filter = (props) => {
           >
             검색
           </Button>
-          <Button onClick={onClose}>취소</Button>
+          <Button onClick={onReset}>초기화</Button>
         </>
       }
       onClose={onClose}

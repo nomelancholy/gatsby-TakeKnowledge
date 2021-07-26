@@ -8,6 +8,7 @@ import Router from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import { Filter } from "@components/elements";
+import { useForm } from "antd/lib/form/Form";
 
 const Product = (props) => {
   const { user, isLoggedIn, token } = props.auth;
@@ -189,6 +190,8 @@ const Product = (props) => {
     console.log(`sorter`, sorter);
   };
 
+  const [searchForm] = useForm();
+
   return (
     <>
       <h3>상품 관리</h3>
@@ -227,10 +230,11 @@ const Product = (props) => {
         loading={loading}
         onChange={handleTableChange}
       />
-      {/* 필터 모달 */}
+      {/* 필터 */}
       <Filter
         visible={filterModalOpen}
         onClose={() => setFilterModalOpen(false)}
+        onReset={() => console.log(`reset`)}
         onSearch={
           () => {
             console.log(`onOk`);
@@ -249,22 +253,48 @@ const Product = (props) => {
         }
       >
         <Form
-          // form={form}
+          form={searchForm}
           layout="vertical"
           name="form_in_modal"
           initialValues={{ modifier: "public" }}
         >
-          <Form.Item name="그룹 ID" label="그룹 ID">
+          <Form.Item name="product_id" label="상품 ID">
             <Input />
           </Form.Item>
-          <Form.Item name="그룹명" label="그룹명">
-            <Input />
+          <Form.Item name="prodct_type" label="상품 그룹">
+            <Select style={{ width: 160 }}>
+              <Select.Option value="membership">멤버십</Select.Option>
+              <Select.Option value="service">부가서비스</Select.Option>
+              <Select.Option value="voucher">이용권</Select.Option>
+            </Select>
           </Form.Item>
-          <Form.Item name="회원 상태" label="회원 상태">
-            <Input />
+          <Form.Item name="product_name" label="상품명">
+            {/* 그룹에서 선택한 상품명 찾아서 세팅 */}
+            <Select style={{ width: 160 }}>
+              {/* <Select.Option value="membership">멤버십</Select.Option>
+              <Select.Option value="service">부가서비스</Select.Option>
+              <Select.Option value="voucher">이용권</Select.Option> */}
+            </Select>
           </Form.Item>
-          <Form.Item name="활성/휴면 여부" label="활성/휴면 여부">
-            <Input />
+          <Form.Item name="pay_demand" label="결제 유형">
+            <Select style={{ width: 160 }}>
+              {/* 활성화 된 spot 리스트 가져와서  map */}
+              <Select.Option value="pre">선불</Select.Option>
+              <Select.Option value="deffered">후불</Select.Option>
+              <Select.Option value="last">말일결제</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="pay_method" label="결제 방식">
+            <Select style={{ width: 160 }}>
+              <Select.Option value="personal">개인 카드결제</Select.Option>
+              <Select.Option value="coporation">법인 카드결제</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="status" label="사용 여부">
+            <Select style={{ width: 160 }}>
+              <Select.Option value="active">사용</Select.Option>
+              <Select.Option value="inactive">미사용</Select.Option>
+            </Select>
           </Form.Item>
         </Form>
       </Filter>

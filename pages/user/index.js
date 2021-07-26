@@ -8,6 +8,7 @@ import Router from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import { Filter } from "@components/elements";
+import { useForm } from "antd/lib/form/Form";
 
 const User = (props) => {
   const { user, isLoggedIn, token } = props.auth;
@@ -17,6 +18,8 @@ const User = (props) => {
       Router.push("/");
     }
   }, []);
+
+  const [searchForm] = useForm();
 
   const columns = [
     {
@@ -176,12 +179,15 @@ const User = (props) => {
         loading={loading}
         onChange={handleTableChange}
       />
-      {/* 필터 모달 */}
+      {/* 필터 */}
       <Filter
         visible={filterModalOpen}
         onClose={() => setFilterModalOpen(false)}
-        onSearch={() => {
-          console.log(`onOk`);
+        onReset={() => console.log(`reset`)}
+        onSearch={
+          () => {
+            console.log(`onOk`);
+          }
           //     () => {
           //   form
           //     .validateFields()
@@ -193,25 +199,62 @@ const User = (props) => {
           //       console.log("Validate Failed:", info);
           //     });
           // }
-        }}
+        }
       >
         <Form
-          // form={form}
+          form={searchForm}
           layout="vertical"
           name="form_in_modal"
           initialValues={{ modifier: "public" }}
         >
-          <Form.Item name="그룹 ID" label="그룹 ID">
+          <Form.Item name="uid" label="멤버 ID">
             <Input />
           </Form.Item>
-          <Form.Item name="그룹명" label="그룹명">
+          <Form.Item name="user_name" label="계약자명">
             <Input />
           </Form.Item>
-          <Form.Item name="회원 상태" label="회원 상태">
+          <Form.Item name="user_role" label="회원 구분">
+            <Select style={{ width: 160 }}>
+              <Select.Option value="ffadmin">관리자</Select.Option>
+              <Select.Option value="member">멤버</Select.Option>
+              <Select.Option value="group">그룹</Select.Option>
+              <Select.Option value="user">회원</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="contract_status" label="계약자 타입">
+            <Select style={{ width: 160 }}>
+              <Select.Option value="">계약 없음</Select.Option>
+              <Select.Option value="wait">구매 대기</Select.Option>
+              <Select.Option value="buy">구매</Select.Option>
+              <Select.Option value="pay">계약중</Select.Option>
+              <Select.Option value="refund">환불</Select.Option>
+              <Select.Option value="expired">종료</Select.Option>
+              <Select.Option value="terminate">해지</Select.Option>
+              <Select.Option value="canceled">취소</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="group_id" label="그룹 ID">
             <Input />
           </Form.Item>
-          <Form.Item name="활성/휴면 여부" label="활성/휴면 여부">
-            <Input />
+          <Form.Item name="group_name" label="그룹명">
+            <Select style={{ width: 160 }}>
+              {/* <Select.Option value="ffadmin">관리자</Select.Option>
+              <Select.Option value="member">멤버</Select.Option>
+              <Select.Option value="group">그룹</Select.Option>
+              <Select.Option value="user">회원</Select.Option> */}
+            </Select>
+          </Form.Item>
+          <Form.Item name="registed_card" label="카드 등록 여부">
+            <Select style={{ width: 160 }}>
+              <Select.Option value={true}>등록</Select.Option>
+              <Select.Option value={false}>미등록</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="user_status" label="활성/휴면 여부">
+            <Select style={{ width: 160 }}>
+              <Select.Option value="active">활성</Select.Option>
+              <Select.Option value="inactive">휴면</Select.Option>
+            </Select>
           </Form.Item>
         </Form>
       </Filter>

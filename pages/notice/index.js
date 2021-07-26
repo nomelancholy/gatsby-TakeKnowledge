@@ -12,10 +12,13 @@ import Router from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import { Filter } from "@components/elements";
+import { useForm } from "antd/lib/form/Form";
 
 const Notice = (props) => {
   const { user, isLoggedIn, token } = props.auth;
   const [noticeList, setNoticeList] = useState([]);
+
+  const [searchForm] = useForm();
 
   useEffect(() => {
     axios
@@ -163,8 +166,11 @@ const Notice = (props) => {
       <Filter
         visible={filterModalOpen}
         onClose={() => setFilterModalOpen(false)}
-        onSearch={() => {
-          console.log(`onOk`);
+        onReset={() => console.log(`reset`)}
+        onSearch={
+          () => {
+            console.log(`onOk`);
+          }
           //     () => {
           //   form
           //     .validateFields()
@@ -176,24 +182,37 @@ const Notice = (props) => {
           //       console.log("Validate Failed:", info);
           //     });
           // }
-        }}
+        }
       >
         <Form
-          // form={form}
+          form={searchForm}
           layout="vertical"
           name="form_in_modal"
           initialValues={{ modifier: "public" }}
         >
-          <Form.Item name="그룹 ID" label="그룹 ID">
+          <Form.Item name="notice_id" label="공지 ID">
             <Input />
           </Form.Item>
-          <Form.Item name="그룹명" label="그룹명">
-            <Input />
+          <Form.Item name="type" label="공지 유형">
+            <Select style={{ width: 160 }}>
+              <Select.Option value="normal">일반 공지</Select.Option>
+              <Select.Option value="group">그룹 공지</Select.Option>
+              <Select.Option value="spot">지점 공지</Select.Option>
+            </Select>
           </Form.Item>
-          <Form.Item name="회원 상태" label="회원 상태">
-            <Input />
+          <Form.Item name="status" label="사용 여부">
+            <Select style={{ width: 120 }}>
+              <Select.Option value="publish">발행</Select.Option>
+              <Select.Option value="private">미발행</Select.Option>
+            </Select>
           </Form.Item>
-          <Form.Item name="활성/휴면 여부" label="활성/휴면 여부">
+          <Form.Item name="sticky" label="상단 노출">
+            <Select style={{ width: 120 }}>
+              <Select.Option value={0}>미노출</Select.Option>
+              <Select.Option value={1}>노출</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="title" label="공지 제목">
             <Input />
           </Form.Item>
         </Form>
