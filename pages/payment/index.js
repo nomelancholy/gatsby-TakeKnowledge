@@ -214,10 +214,10 @@ const Payment = (props) => {
     // form Item reset
     searchForm.resetFields();
 
-    setStartDateStart("");
-    setStartDateEnd("");
-    setEndDateStart("");
-    setEndDateEnd("");
+    setStartDateStart(undefined);
+    setStartDateEnd(undefined);
+    setEndDateStart(undefined);
+    setEndDateEnd(undefined);
 
     // params state reset
     const searchParams = {

@@ -262,7 +262,6 @@ const Product = (props) => {
 
   // 상품 그룹 변경시 상품명 리스트 변경
   const handleProductTypeChange = (value) => {
-    console.log(`value`, value);
     axios
       .post(
         `${process.env.BACKEND_API}/admin/product/list`,
