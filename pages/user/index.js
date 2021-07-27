@@ -11,16 +11,7 @@ import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
 
 const User = (props) => {
-  const { user, isLoggedIn, token } = props.auth;
-
-  useEffect(() => {
-    if (!isLoggedIn) {
-      Router.push("/");
-    }
-  }, []);
-
-  const [searchForm] = useForm();
-
+  // grid 컬럼 정의
   const columns = [
     {
       title: "회원 ID",
@@ -78,10 +69,10 @@ const User = (props) => {
         return renderText;
       },
     },
-    {
-      title: "그룹명(그룹id)",
-      dataIndex: "-",
-    },
+    // {
+    //   title: "그룹명(그룹id)",
+    //   dataIndex: "-",
+    // },
     {
       title: "카드 등록 여부",
       dataIndex: "registed_card",
@@ -93,7 +84,26 @@ const User = (props) => {
       title: "활성/휴면 여부",
       dataIndex: "user_status",
       render: (text, record) => {
-        return text === "active" ? "활성" : "휴면";
+        let renderText = "";
+
+        switch (text) {
+          case "active":
+            renderText = "활성";
+            break;
+          case "inactive":
+            renderText = "비활성";
+            break;
+          case "sleep":
+            renderText = "휴면";
+            break;
+          case "leave":
+            renderText = "탈퇴";
+            break;
+          default:
+            break;
+        }
+
+        return renderText;
       },
     },
     {
@@ -102,6 +112,8 @@ const User = (props) => {
     },
   ];
 
+  const { user, isLoggedIn, token } = props.auth;
+
   const [userList, setUserList] = useState([]);
 
   const [pagination, setPagination] = useState({});
@@ -109,25 +121,29 @@ const User = (props) => {
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
-  const handleTableChange = (pagination, filters, sorter) => {
-    setPagination(2);
+  const [searchForm] = useForm();
 
-    fetch({
-      results: pagination.pageSize,
-      page: pagination.current,
-      sortField: sorter.field,
-      sortOrder: sorter.order,
-      ...filters,
-    });
-  };
-  useEffect(() => {
+  // 페이지 사이즈
+  const PAGE_SIZE = 20;
+
+  const [params, setParams] = useState({
+    uid: undefined,
+    user_name: undefined,
+    user_role: undefined,
+    contract_status: undefined,
+    registed_card: undefined,
+    user_status: undefined,
+    page: 1,
+    size: PAGE_SIZE,
+  });
+
+  const getUserList = (params) => {
+    setLoading(true);
+
     axios
       .post(
         `${process.env.BACKEND_API}/admin/user/list`,
-        {
-          page: 1,
-          limit: 100,
-        },
+        { ...params },
         {
           headers: {
             "Content-Type": "application/json;charset=UTF-8",
@@ -137,27 +153,84 @@ const User = (props) => {
         }
       )
       .then((response) => {
-        const data = response.data.items;
-        setUserList(data);
+        const data = response.data;
+        setUserList(data.items);
 
-        console.log(`data`, data);
-        // setPagination({ ...pagination, total: data.total });
-        // setProductList(data.items);
-        // setLoading(false);
+        // 페이지 네이션 정보 세팅
+        const pageInfo = {
+          current: data.page,
+          total: data.total,
+          pageSize: data.size,
+        };
+
+        // pageInfo 세팅
+        setPagination(pageInfo);
+
+        // 로딩바 세팅
+        setLoading(false);
+
+        setParams(params);
       })
       .catch((error) => {
         console.log(`error`, error);
       });
+  };
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+
+    getUserList(params);
   }, []);
+
+  // 테이블 페이지 변경시
+  const handleTableChange = (pagination) => {
+    setPagination(pagination);
+
+    // 호출
+    getUserList({ ...params, page: pagination.current });
+  };
+
+  const handleSearch = () => {
+    const searchFormValues = searchForm.getFieldsValue();
+
+    const searchParams = {
+      uid: searchFormValues.uid,
+      user_name: searchFormValues.user_name,
+      user_role: searchFormValues.user_role,
+      contract_status: searchFormValues.contract_status,
+      registed_card: searchFormValues.registed_card,
+      user_status: searchFormValues.user_status,
+      page: 1,
+    };
+
+    getUserList({ ...params, ...searchParams });
+  };
+
+  const handleReset = () => {
+    // form Item reset
+    searchForm.resetFields();
+
+    // params state reset
+    const searchParams = {
+      uid: undefined,
+      user_name: undefined,
+      user_role: undefined,
+      contract_status: undefined,
+      registed_card: undefined,
+      user_status: undefined,
+      page: 1,
+    };
+
+    getUserList({ ...params, ...searchParams });
+  };
 
   return (
     <>
       <h3>회원 관리</h3>
 
       <Row type="flex" align="middle" className="py-3">
-        {/* <Button type="primary">
-          <SearchOutlined></SearchOutlined>검색
-        </Button> */}
         <Button
           type="primary"
           onClick={() => {
@@ -183,23 +256,8 @@ const User = (props) => {
       <Filter
         visible={filterModalOpen}
         onClose={() => setFilterModalOpen(false)}
-        onReset={() => console.log(`reset`)}
-        onSearch={
-          () => {
-            console.log(`onOk`);
-          }
-          //     () => {
-          //   form
-          //     .validateFields()
-          //     .then((values) => {
-          //       form.resetFields();
-          //       onCreate(values);
-          //     })
-          //     .catch((info) => {
-          //       console.log("Validate Failed:", info);
-          //     });
-          // }
-        }
+        onReset={handleReset}
+        onSearch={handleSearch}
       >
         <Form
           form={searchForm}
@@ -233,17 +291,13 @@ const User = (props) => {
               <Select.Option value="canceled">취소</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item name="group_id" label="그룹 ID">
+          {/* <Form.Item name="group_id" label="그룹 ID">
             <Input />
           </Form.Item>
           <Form.Item name="group_name" label="그룹명">
             <Select style={{ width: 160 }}>
-              {/* <Select.Option value="ffadmin">관리자</Select.Option>
-              <Select.Option value="member">멤버</Select.Option>
-              <Select.Option value="group">그룹</Select.Option>
-              <Select.Option value="user">회원</Select.Option> */}
             </Select>
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item name="registed_card" label="카드 등록 여부">
             <Select style={{ width: 160 }}>
               <Select.Option value={true}>등록</Select.Option>
@@ -254,6 +308,8 @@ const User = (props) => {
             <Select style={{ width: 160 }}>
               <Select.Option value="active">활성</Select.Option>
               <Select.Option value="inactive">휴면</Select.Option>
+              <Select.Option value="sleep">휴면</Select.Option>
+              <Select.Option value="leave">탈퇴</Select.Option>
             </Select>
           </Form.Item>
         </Form>
