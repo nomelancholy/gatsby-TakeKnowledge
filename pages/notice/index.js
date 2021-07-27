@@ -95,11 +95,11 @@ const Notice = (props) => {
   const PAGE_SIZE = 20;
 
   const [params, setParams] = useState({
-    notice_id: null,
-    status: null,
-    type: null,
-    sticky: null,
-    title: null,
+    notice_id: undefined,
+    status: undefined,
+    type: undefined,
+    sticky: undefined,
+    title: undefined,
     page: 1,
     size: PAGE_SIZE,
   });
@@ -108,7 +108,7 @@ const Notice = (props) => {
     axios
       .post(
         `${process.env.BACKEND_API}/services/notices`,
-        { params },
+        { ...params },
         {
           headers: {
             "Content-Type": "application/json;charset=UTF-8",
@@ -118,7 +118,6 @@ const Notice = (props) => {
         }
       )
       .then((response) => {
-        console.log(`response.data`, response.data);
         const data = response.data;
 
         setNoticeList(data.items);

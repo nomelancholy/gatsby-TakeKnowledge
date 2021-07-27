@@ -176,10 +176,10 @@ const Qna = (props) => {
 
   // 파라미터 state - 초기엔 초기값, 이후엔 바로 직전의 params 저장
   const [params, setParams] = useState({
-    status: null,
-    classification: null,
-    category: null,
-    regdate: null,
+    status: undefined,
+    classification: undefined,
+    category: undefined,
+    regdate: undefined,
     page: 1,
     size: PAGE_SIZE,
   });
