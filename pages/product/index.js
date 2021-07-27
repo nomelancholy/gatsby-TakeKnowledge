@@ -11,8 +11,6 @@ import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
 
 const Product = (props) => {
-  const { user, isLoggedIn, token } = props.auth;
-
   // grid 요일 render 함수
   const renderWorkingDays = (value, row, index) => {
     let workingDays = [];
@@ -52,6 +50,7 @@ const Product = (props) => {
     }
   };
 
+  // 그리드 컬럼 정의
   const columns = [
     {
       title: "상품 ID",
@@ -123,7 +122,10 @@ const Product = (props) => {
     },
     {
       title: "사용 가능 공간ID",
-      dataIndex: "spots",
+      dataIndex: "spaces",
+      render: (text, record) => {
+        return text.join(", ");
+      },
     },
     {
       title: "활성/비활성",
@@ -145,26 +147,39 @@ const Product = (props) => {
     },
   ];
 
+  const { user, isLoggedIn, token } = props.auth;
+
+  const [productList, setProductList] = useState([]);
+
+  // 필터 옵션에 사용하는 상품 리스트
+  const [optionProductList, setOptionProductList] = useState([]);
+
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(false);
-  const [productList, setProductList] = useState([]);
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
-  useEffect(() => {
-    if (!isLoggedIn) {
-      Router.push("/");
-    }
+  const [searchForm] = useForm();
 
-    getProductList();
-  }, []);
+  // 페이지 사이즈
+  const PAGE_SIZE = 20;
 
-  const getProductList = () => {
+  const [params, setParams] = useState({
+    product_id: undefined,
+    type: undefined,
+    name: undefined,
+    status: undefined,
+    pay_demand: undefined,
+    page: 1,
+    size: PAGE_SIZE,
+  });
+
+  const getProductList = (params) => {
     setLoading(true);
     axios
       .post(
         `${process.env.BACKEND_API}/admin/product/list`,
-        {},
+        { ...params },
         {
           headers: {
             "Content-Type": "application/json;charset=UTF-8",
@@ -175,22 +190,99 @@ const Product = (props) => {
       )
       .then((response) => {
         const data = response.data;
-        setPagination({ ...pagination, total: data.total });
         setProductList(data.items);
+
+        // 페이지 네이션 정보 세팅
+        const pageInfo = {
+          current: data.page,
+          total: data.total,
+          pageSize: data.size,
+        };
+
+        // pageInfo 세팅
+        setPagination(pageInfo);
+
+        // 로딩바 세팅
         setLoading(false);
+
+        setParams(params);
       })
       .catch((error) => {
         console.log(`error`, error);
       });
   };
 
-  const handleTableChange = (pagination, filters, sorter) => {
-    console.log(`pagination`, pagination);
-    console.log(`filters`, filters);
-    console.log(`sorter`, sorter);
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+
+    getProductList(params);
+  }, []);
+
+  // 테이블 페이지 변경시
+  const handleTableChange = (pagination) => {
+    setPagination(pagination);
+
+    // 호출
+    getProductList({ ...params, page: pagination.current });
   };
 
-  const [searchForm] = useForm();
+  const handleSearch = () => {
+    const searchFormValues = searchForm.getFieldsValue();
+
+    const searchParams = {
+      product_id: searchFormValues.product_id,
+      type: searchFormValues.type,
+      name: searchFormValues.name,
+      status: searchFormValues.status,
+      pay_demand: searchFormValues.pay_demand,
+      page: 1,
+    };
+
+    getProductList({ ...params, ...searchParams });
+  };
+
+  const handleReset = () => {
+    // form Item reset
+    searchForm.resetFields();
+
+    // params state reset
+    const searchParams = {
+      product_id: undefined,
+      type: undefined,
+      name: undefined,
+      status: undefined,
+      pay_demand: undefined,
+      page: 1,
+    };
+
+    getProductList({ ...params, ...searchParams });
+  };
+
+  // 상품 그룹 변경시 상품명 리스트 변경
+  const handleProductTypeChange = (value) => {
+    console.log(`value`, value);
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/product/list`,
+        { page: 1, size: 20, status: "active", type: value },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        const productList = response.data.items;
+        setOptionProductList(productList);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
 
   return (
     <>
@@ -234,23 +326,8 @@ const Product = (props) => {
       <Filter
         visible={filterModalOpen}
         onClose={() => setFilterModalOpen(false)}
-        onReset={() => console.log(`reset`)}
-        onSearch={
-          () => {
-            console.log(`onOk`);
-          }
-          //     () => {
-          //   form
-          //     .validateFields()
-          //     .then((values) => {
-          //       form.resetFields();
-          //       onCreate(values);
-          //     })
-          //     .catch((info) => {
-          //       console.log("Validate Failed:", info);
-          //     });
-          // }
-        }
+        onReset={handleReset}
+        onSearch={handleSearch}
       >
         <Form
           form={searchForm}
@@ -261,19 +338,21 @@ const Product = (props) => {
           <Form.Item name="product_id" label="상품 ID">
             <Input />
           </Form.Item>
-          <Form.Item name="prodct_type" label="상품 그룹">
-            <Select style={{ width: 160 }}>
+          <Form.Item name="type" label="상품 그룹">
+            <Select style={{ width: 160 }} onChange={handleProductTypeChange}>
               <Select.Option value="membership">멤버십</Select.Option>
               <Select.Option value="service">부가서비스</Select.Option>
               <Select.Option value="voucher">이용권</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item name="product_name" label="상품명">
+          <Form.Item name="name" label="상품명">
             {/* 그룹에서 선택한 상품명 찾아서 세팅 */}
             <Select style={{ width: 160 }}>
-              {/* <Select.Option value="membership">멤버십</Select.Option>
-              <Select.Option value="service">부가서비스</Select.Option>
-              <Select.Option value="voucher">이용권</Select.Option> */}
+              {optionProductList.map((product) => (
+                <Select.Option value={product.name}>
+                  {product.name}
+                </Select.Option>
+              ))}
             </Select>
           </Form.Item>
           <Form.Item name="pay_demand" label="결제 유형">
