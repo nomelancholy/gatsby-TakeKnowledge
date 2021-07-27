@@ -30,17 +30,13 @@ const QnaDetail = (props) => {
   // 문의 상세 조회
   useEffect(() => {
     axios
-      .post(
-        `${process.env.BACKEND_API}/user/qna-get`,
-        { qid: id },
-        {
-          headers: {
-            "Content-Type": "application/json;charset=UTF-8",
-            "Access-Control-Allow-Origin": "*",
-            Authorization: decodeURIComponent(token),
-          },
-        }
-      )
+      .get(`${process.env.BACKEND_API}/user/qna/get/${id}`, {
+        headers: {
+          "Content-Type": "application/json;charset=UTF-8",
+          "Access-Control-Allow-Origin": "*",
+          Authorization: decodeURIComponent(token),
+        },
+      })
       .then((response) => {
         const qnaDetail = response.data.item;
         setQnaDetail(qnaDetail);
@@ -57,7 +53,7 @@ const QnaDetail = (props) => {
 
       form.setFieldsValue({
         // 노출 여부
-        state: qnaDetail.state,
+        status: qnaDetail.status,
         // 카테고리 1
         classification: qnaDetail.classification,
         // 카테고리 2
@@ -87,7 +83,7 @@ const QnaDetail = (props) => {
   const handleReplyRegisterSubmit = (values) => {
     let url = "";
 
-    url = `${process.env.BACKEND_API}/user/qna-write`;
+    url = `${process.env.BACKEND_API}/user/qna/write`;
 
     let data = {
       title: values.title,
@@ -95,7 +91,6 @@ const QnaDetail = (props) => {
       category: values.category,
       content: values.reply,
       parent: Number(id),
-      status: "publish",
     };
 
     const config = {
@@ -131,7 +126,7 @@ const QnaDetail = (props) => {
           layout="vertical"
           onFinish={handleReplyRegisterSubmit}
         >
-          <Form.Item name="state" label="처리 상태">
+          <Form.Item name="status" label="처리 상태">
             <Radio.Group>
               <Radio style={radioStyle} value={"wait"}>
                 대기

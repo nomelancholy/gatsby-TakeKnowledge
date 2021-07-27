@@ -280,7 +280,7 @@ const ContractDetail = (props) => {
   const handleReplyRegisterSubmit = (values) => {
     let url = "";
 
-    url = `${process.env.BACKEND_API}/user/qna-write`;
+    url = `${process.env.BACKEND_API}/user/qna/write`;
 
     let data = {
       title: values.title,

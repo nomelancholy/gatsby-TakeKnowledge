@@ -29,94 +29,10 @@ const Qna = (props) => {
     {
       title: "문의 유형",
       dataIndex: "classification",
-      render: (text, record) => {
-        let renderText = "";
-
-        // console.log(`text`, text);
-
-        switch (text) {
-          case "0":
-            renderText = "멤버십 상품 문의";
-            break;
-          case "1":
-            renderText = "그룹형(기업형) 상품 문의";
-            break;
-          case "2":
-            renderText = "신청 및 변경";
-            break;
-          case "3":
-            renderText = "결제 관련";
-            break;
-          case "4":
-            renderText = "변경 관련(멤버십 상품 결제 수단,시작일 등)";
-            break;
-          case "5":
-            renderText = "출입 관련";
-            break;
-          case "6":
-            renderText = "종료 및 해지";
-            break;
-          case "7":
-            renderText = "부가서비스(미팅룸, 코워킹룸, 사물함)";
-            break;
-          case "8":
-            renderText = "OA(복합기, 사무용품)";
-            break;
-          case "9":
-            renderText = "기타";
-            break;
-          default:
-            break;
-        }
-
-        return renderText;
-      },
     },
     {
       title: "카테고리",
       dataIndex: "category",
-      render: (text, record) => {
-        let renderText = "";
-
-        // console.log(`text`, text);
-
-        switch (text) {
-          case "0":
-            renderText = "멤버십 상품 문의";
-            break;
-          case "1":
-            renderText = "그룹형(기업형) 상품 문의";
-            break;
-          case "2":
-            renderText = "신청 및 변경";
-            break;
-          case "3":
-            renderText = "결제 관련";
-            break;
-          case "4":
-            renderText = "변경 관련(멤버십 상품 결제 수단,시작일 등)";
-            break;
-          case "5":
-            renderText = "출입 관련";
-            break;
-          case "6":
-            renderText = "종료 및 해지";
-            break;
-          case "7":
-            renderText = "부가서비스(미팅룸, 코워킹룸, 사물함)";
-            break;
-          case "8":
-            renderText = "OA(복합기, 사무용품)";
-            break;
-          case "9":
-            renderText = "기타";
-            break;
-          default:
-            break;
-        }
-
-        return renderText;
-      },
     },
     {
       title: "제목",
@@ -134,7 +50,7 @@ const Qna = (props) => {
     },
     {
       title: "처리 상태",
-      dataIndex: "state",
+      dataIndex: "status",
       render: (text, record) => {
         let renderText = "";
 
@@ -155,6 +71,93 @@ const Qna = (props) => {
     },
   ];
 
+  // 1차 유형, 2차 유형 하이라키 구조
+  const qnaSelectOptions = [
+    {
+      label: "멤버십",
+      category: [
+        "멤버십 상품 문의",
+        "멤버십 상품 변경",
+        "멤버십 결제, 시작일 정보 변경",
+        "멤버십 해지",
+        "멤버십 이용 방법",
+      ],
+    },
+    {
+      label: "이용권",
+      category: [
+        "상품 문의",
+        "이용권 구매",
+        "이용권 결제 정보 변경",
+        "이용 방법",
+        "환불/해지",
+      ],
+    },
+    {
+      label: "결제",
+      category: ["결제 수단 변경", "결제 실패", "결제 내역/금액 확인"],
+    },
+    {
+      label: "회원 정보",
+      category: ["회원 정보 변경", "회원 탈퇴"],
+    },
+    {
+      label: "출입",
+      category: [
+        "모바일 출입 카드 오류",
+        "모바일 출입카드 재발급",
+        "출입 방법/시간",
+      ],
+    },
+    {
+      label: "라운지 시설",
+      category: ["OA(복합기, 사무용품)", "좌석", "BAR(스낵/커피 등)"],
+    },
+    {
+      label: "미팅룸/코워킹룸",
+      category: [
+        "예약 방법",
+        "결제 방법",
+        "결제 오류",
+        "이용 방법",
+        "환불 문의",
+        "모니터 연결 방법",
+        "시설 관리",
+      ],
+    },
+    {
+      label: "스마트 락커",
+      category: ["결제 방법", "결제 오류", "이용 방법", "환불 문의"],
+    },
+    {
+      label: "게스트 초대",
+      category: [
+        "게스트 초대 방법",
+        "게스트 초대 예약/결제/가격",
+        "게스트 출입/퇴장",
+        "게스트 초대 환불",
+      ],
+    },
+    {
+      label: "쿠폰",
+      category: ["쿠폰 발급 요청", "쿠폰 사용 방법", "쿠폰 등록/사용 오류"],
+    },
+    {
+      label: "기업 고객",
+      category: [
+        "가입 방법",
+        "기업 상품 구매",
+        "기업 상품 결제",
+        "기업 상품 해지/변경",
+        "멤버 초대",
+      ],
+    },
+    {
+      label: "기타",
+      category: ["웹 서비스 오류/건의", "기타 문의"],
+    },
+  ];
+
   const { user, isLoggedIn, token } = props.auth;
 
   const [qnaList, setQnaList] = useState([]);
@@ -172,7 +175,7 @@ const Qna = (props) => {
   const [params, setParams] = useState({
     status: null,
     classification: null,
-    state: null,
+    category: null,
     regdate: null,
     page: 1,
     size: PAGE_SIZE,
@@ -181,7 +184,7 @@ const Qna = (props) => {
   const getNoticeList = (params) => {
     var config = {
       method: "post",
-      url: `${process.env.BACKEND_API}/user/qna-list`,
+      url: `${process.env.BACKEND_API}/user/qna/list`,
       headers: {
         Authorization: decodeURIComponent(token),
         "Content-Type": "application/json",
@@ -237,13 +240,24 @@ const Qna = (props) => {
     getNoticeList({ ...params, page: pagination.current });
   };
 
+  const [categoryOptions, setCategoryOptions] = useState([]);
+
+  const handleClassificationChange = (value) => {
+    const selectedArray = qnaSelectOptions.filter((option) => {
+      return option.label === value;
+    });
+
+    setCategoryOptions(selectedArray[0].category);
+  };
+
   const handleSearch = () => {
     const searchFormValues = searchForm.getFieldsValue();
 
     const searchParams = {
       qid: searchFormValues.qid,
       classification: searchFormValues.classification,
-      state: searchFormValues.state,
+      category: searchFormValues.category,
+      status: searchFormValues.status,
       regdate: searchFormValues.regdate
         ? searchFormValues.regdate.format().substring(0, 10)
         : null,
@@ -261,7 +275,8 @@ const Qna = (props) => {
     const searchParams = {
       qid: null,
       classification: null,
-      state: null,
+      category: null,
+      status: null,
       regdate: null,
       page: 1,
     };
@@ -312,30 +327,28 @@ const Qna = (props) => {
             <Input />
           </Form.Item>
           <Form.Item name="classification" label="문의 유형">
-            <Select style={{ width: 120 }}>
-              <Select.Option value={"0"}>멤버십 상품 문의</Select.Option>
-              <Select.Option value={"1"}>
-                그룹형(기업형) 상품 문의
-              </Select.Option>
-              <Select.Option value={"2"}>신청 및 변경</Select.Option>
-              <Select.Option value={"3"}>결제 관련</Select.Option>
-              <Select.Option value={"4"}>
-                변경 관련(멤버십 상품 결제 수단,시작일 등)
-              </Select.Option>
-              <Select.Option value={"5"}>출입 관련</Select.Option>
-              <Select.Option value={"6"}>종료 및 해지</Select.Option>
-              <Select.Option value={"7"}>
-                부가서비스(미팅룸, 코워킹룸, 사물함)
-              </Select.Option>
-              <Select.Option value={"8"}>OA(복합기, 사무용품)</Select.Option>
-              <Select.Option value={"9"}>기타</Select.Option>
+            <Select
+              style={{ width: 120 }}
+              onChange={handleClassificationChange}
+            >
+              {qnaSelectOptions.map((option) => (
+                <Select.Option value={option.label}>
+                  {option.label}
+                </Select.Option>
+              ))}
             </Select>
           </Form.Item>
-          <Form.Item name="state" label="회원 상태">
+          <Form.Item name="category" label="카테고리">
+            <Select style={{ width: 120 }}>
+              {categoryOptions.map((option) => (
+                <Select.Option value={option}>{option}</Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item name="status" label="처리 상태">
             <Select style={{ width: 120 }}>
               <Select.Option value="wait">대기</Select.Option>
               <Select.Option value="done">해결</Select.Option>
-              <Select.Option value="trash">삭제</Select.Option>
             </Select>
           </Form.Item>
           <Form.Item name="regdate" label="생성 일시">
