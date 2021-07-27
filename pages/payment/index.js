@@ -24,14 +24,7 @@ import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
 
 const Payment = (props) => {
-  const { user, isLoggedIn, token } = props.auth;
-
-  useEffect(() => {
-    if (!isLoggedIn) {
-      Router.push("/");
-    }
-  }, []);
-
+  // Grid Column 정의
   const columns = [
     {
       title: "요금제 ID",
@@ -110,35 +103,47 @@ const Payment = (props) => {
     },
   ];
 
+  const { user, isLoggedIn, token } = props.auth;
+
+  const [rateplanList, setRateplanList] = useState([]);
+
+  const [optionProductList, setOptionProductList] = useState([]);
+
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(false);
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
-  const [form] = Form.useForm();
+  const [searchForm] = useForm();
 
-  const handleTableChange = (pagination, filters, sorter) => {
-    setPagination(2);
+  // 페이지 사이즈
+  const PAGE_SIZE = 20;
 
-    fetch({
-      results: pagination.pageSize,
-      page: pagination.current,
-      sortField: sorter.field,
-      sortOrder: sorter.order,
-      ...filters,
-    });
-  };
+  const [params, setParams] = useState({
+    rateplan_id: undefined,
+    product_type: undefined,
+    product_id: undefined,
+    status: undefined,
+    start_date_start: undefined,
+    start_date_end: undefined,
+    end_date_start: undefined,
+    end_date_end: undefined,
+    page: 1,
+    size: PAGE_SIZE,
+  });
 
-  const [rateplanList, setRateplanList] = useState([]);
+  const [startDateStart, setStartDateStart] = useState(undefined);
+  const [startDateEnd, setStartDateEnd] = useState(undefined);
+  const [endDateStart, setEndDateStart] = useState(undefined);
+  const [endDateEnd, setEndDateEnd] = useState(undefined);
 
-  useEffect(() => {
+  const getRateplanList = (params) => {
+    setLoading(true);
+
     axios
       .post(
         `${process.env.BACKEND_API}/admin/product/rateplan/list`,
-        {
-          page: 1,
-          limit: 100,
-        },
+        { ...params },
         {
           headers: {
             "Content-Type": "application/json;charset=UTF-8",
@@ -148,26 +153,109 @@ const Payment = (props) => {
         }
       )
       .then((response) => {
-        const data = response.data.items;
-        setRateplanList(data);
-        console.log(`data`, data);
-        // setPagination({ ...pagination, total: data.total });
-        // setProductList(data.items);
-        // setLoading(false);
+        const data = response.data;
+        setRateplanList(data.items);
+
+        // 페이지 네이션 정보 세팅
+        const pageInfo = {
+          current: data.page,
+          total: data.total,
+          pageSize: data.size,
+        };
+
+        // pageInfo 세팅
+        setPagination(pageInfo);
+
+        // 로딩바 세팅
+        setLoading(false);
+
+        setParams(params);
       })
       .catch((error) => {
         console.log(`error`, error);
       });
-  }, []);
-
-  const [searchForm] = useForm();
-
-  const handleStartDateChange = (date, dateString) => {
-    // setStartDate(dateString);
   };
 
-  const handleEndDateChange = (date, dateString) => {
-    // setEndDate(dateString);
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+
+    getRateplanList(params);
+  }, []);
+
+  // 테이블 페이지 변경시
+  const handleTableChange = (pagination) => {
+    setPagination(pagination);
+
+    // 호출
+    getRateplanList({ ...params, page: pagination.current });
+  };
+
+  const handleSearch = () => {
+    const searchFormValues = searchForm.getFieldsValue();
+
+    const searchParams = {
+      rateplan_id: searchFormValues.rateplan_id,
+      product_type: searchFormValues.product_type,
+      product_id: searchFormValues.product_id,
+      status: searchFormValues.status,
+      start_date_start: startDateStart,
+      start_date_end: startDateEnd,
+      end_date_start: endDateStart,
+      end_date_end: endDateEnd,
+      page: 1,
+    };
+
+    getRateplanList({ ...params, ...searchParams });
+  };
+
+  const handleReset = () => {
+    // form Item reset
+    searchForm.resetFields();
+
+    setStartDateStart("");
+    setStartDateEnd("");
+    setEndDateStart("");
+    setEndDateEnd("");
+
+    // params state reset
+    const searchParams = {
+      rateplan_id: undefined,
+      product_type: undefined,
+      product_id: undefined,
+      status: undefined,
+      start_date_start: undefined,
+      start_date_end: undefined,
+      end_date_start: undefined,
+      end_date_end: undefined,
+      page: 1,
+    };
+
+    getRateplanList({ ...params, ...searchParams });
+  };
+
+  // 상품 그룹 변경시 상품명 리스트 변경
+  const handleProductTypeChange = (value) => {
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/product/list`,
+        { page: 1, size: 20, status: "active", type: value },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        const productList = response.data.items;
+        setOptionProductList(productList);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
   };
 
   return (
@@ -209,23 +297,8 @@ const Payment = (props) => {
       <Filter
         visible={filterModalOpen}
         onClose={() => setFilterModalOpen(false)}
-        onReset={() => console.log(`reset`)}
-        onSearch={
-          () => {
-            console.log(`onOk`);
-          }
-          //     () => {
-          //   form
-          //     .validateFields()
-          //     .then((values) => {
-          //       form.resetFields();
-          //       onCreate(values);
-          //     })
-          //     .catch((info) => {
-          //       console.log("Validate Failed:", info);
-          //     });
-          // }
-        }
+        onReset={handleReset}
+        onSearch={handleSearch}
       >
         <Form
           form={searchForm}
@@ -237,17 +310,19 @@ const Payment = (props) => {
             <Input />
           </Form.Item>
           <Form.Item name="prodct_type" label="상품 그룹">
-            <Select style={{ width: 160 }}>
+            <Select style={{ width: 160 }} onChange={handleProductTypeChange}>
               <Select.Option value="membership">멤버십</Select.Option>
               <Select.Option value="service">부가서비스</Select.Option>
               <Select.Option value="voucher">이용권</Select.Option>
             </Select>
           </Form.Item>
           <Form.Item name="product_id" label="상품명">
-            {/*  멤버십 - all/on spot / 부가서비스 - 코워킹룸, 미팅룸.. / 이용권 - spot 100.. */}
             <Select style={{ width: 160 }}>
-              {/* <Select.Option value="all_spot">ALL SPOT</Select.Option>
-              <Select.Option value="one_spot">ONE_SPOT</Select.Option> */}
+              {optionProductList.map((product) => (
+                <Select.Option value={product.product_id}>
+                  {product.name}
+                </Select.Option>
+              ))}
             </Select>
           </Form.Item>
           <Form.Item name="status" label="사용 여부">
@@ -258,12 +333,20 @@ const Payment = (props) => {
           </Form.Item>
 
           <Form.Item name="start_date" label="시작 일자">
-            <DatePicker onChange={handleStartDateChange} />
-            <DatePicker onChange={handleEndDateChange} />
+            <DatePicker
+              onChange={(date, dateString) => setStartDateStart(dateString)}
+            />
+            <DatePicker
+              onChange={(date, dateString) => setStartDateEnd(dateString)}
+            />
           </Form.Item>
           <Form.Item name="end_date" label="종료 일자">
-            <DatePicker onChange={handleStartDateChange} />
-            <DatePicker onChange={handleEndDateChange} />
+            <DatePicker
+              onChange={(date, dateString) => setEndDateStart(dateString)}
+            />
+            <DatePicker
+              onChange={(date, dateString) => setEndDateEnd(dateString)}
+            />
           </Form.Item>
         </Form>
       </Filter>
