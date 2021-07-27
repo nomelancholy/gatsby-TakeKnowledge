@@ -11,14 +11,6 @@ import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
 
 const Spot = (props) => {
-  const { user, isLoggedIn, token } = props.auth;
-
-  useEffect(() => {
-    if (!isLoggedIn) {
-      Router.push("/");
-    }
-  }, []);
-
   // Grid Column 정의
   const columns = [
     {
@@ -69,6 +61,8 @@ const Spot = (props) => {
     },
   ];
 
+  const { user, isLoggedIn, token } = props.auth;
+
   // 조회해온 spot list
   const [spotList, setSpotList] = useState([]);
 
@@ -77,26 +71,31 @@ const Spot = (props) => {
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
-  const [pagination, setPagination] = useState({ pageSize: 20 });
+  const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const handleTableChange = (pagination, filters, sorter) => {
-    console.log(`pagination`, pagination);
-    console.log(`filters`, filters);
-    console.log(`sorter`, sorter);
-  };
+  const [searchForm] = useForm();
 
-  useEffect(() => {
-    getSpotList();
-  }, []);
+  // 페이지 사이즈
+  const PAGE_SIZE = 20;
+
+  // 파라미터 state - 초기엔 초기값, 이후엔 바로 직전의 params 저장
+  const [params, setParams] = useState({
+    spot_id: undefined,
+    spot_name: undefined,
+    status: undefined,
+    page: 1,
+    size: PAGE_SIZE,
+  });
 
   // spot list 조회
-  const getSpotList = () => {
+  const getSpotList = (params) => {
     setLoading(true);
+
     axios
       .post(
         `${process.env.BACKEND_API}/admin/spot/list`,
-        { page: 1, size: 100 },
+        { ...params },
         {
           headers: {
             "Content-Type": "application/json;charset=UTF-8",
@@ -107,31 +106,25 @@ const Spot = (props) => {
       )
       .then((response) => {
         const data = response.data;
-        setPagination({ ...pagination, total: data.total });
+
         setSpotList(data.items);
+
+        const pageInfo = {
+          current: data.page,
+          total: data.total,
+          pageSize: data.size,
+        };
+
+        // pageInfo 세팅
+        setPagination(pageInfo);
+
+        // 테이블 페이지 변경을 위해 방금 사용한 params 저장
+        setParams(params);
       })
       .catch((error) => {
         console.log(`error`, error);
       });
   };
-
-  // spot list 조회 완료 후 spot 별 space 조회해서 spot에 추가
-  useEffect(() => {
-    let completeSpotList = [];
-
-    const setCompleteSpotData = async () => {
-      completeSpotList = await Promise.all(
-        spotList.map((spot) => {
-          return getSpotWithSpaceCount(spot);
-        })
-      );
-      setSpotData(completeSpotList);
-    };
-
-    if (spotList) {
-      setCompleteSpotData();
-    }
-  }, [spotList]);
 
   // spot 별 space count 추가
   const getSpotWithSpaceCount = async (spot) => {
@@ -192,12 +185,73 @@ const Spot = (props) => {
   };
 
   useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+
+    getSpotList(params);
+  }, []);
+
+  // spot list 조회 완료 후 spot 별 space 조회해서 spot에 추가
+  useEffect(() => {
+    let completeSpotList = [];
+
+    const setCompleteSpotData = async () => {
+      completeSpotList = await Promise.all(
+        spotList.map((spot) => {
+          return getSpotWithSpaceCount(spot);
+        })
+      );
+      setSpotData(completeSpotList);
+      setLoading(false);
+    };
+
+    if (spotList) {
+      setCompleteSpotData();
+    }
+  }, [spotList]);
+
+  useEffect(() => {
     if (spotData) {
       setLoading(false);
     }
   }, [spotData]);
 
-  const [searchForm] = useForm();
+  // 테이블 페이지 변경시
+  const handleTableChange = (pagination) => {
+    setPagination(pagination);
+
+    // 호출
+    getSpotList({ ...params, page: pagination.current });
+  };
+
+  const handleSearch = () => {
+    const searchFormValues = searchForm.getFieldsValue();
+
+    const searchParams = {
+      spot_id: searchFormValues.spot_id,
+      spot_name: searchFormValues.spot_name,
+      status: searchFormValues.status,
+      page: 1,
+    };
+
+    getSpotList({ ...params, ...searchParams });
+  };
+
+  const handleReset = () => {
+    // form Item reset
+    searchForm.resetFields();
+
+    // params state reset
+    const searchParams = {
+      spot_id: undefined,
+      spot_name: undefined,
+      status: undefined,
+      page: 1,
+    };
+
+    getSpotList({ ...params, ...searchParams });
+  };
 
   return (
     <>
@@ -239,23 +293,8 @@ const Spot = (props) => {
       <Filter
         visible={filterModalOpen}
         onClose={() => setFilterModalOpen(false)}
-        onReset={() => console.log(`reset`)}
-        onSearch={
-          () => {
-            console.log(`onOk`);
-          }
-          //     () => {
-          //   form
-          //     .validateFields()
-          //     .then((values) => {
-          //       form.resetFields();
-          //       onCreate(values);
-          //     })
-          //     .catch((info) => {
-          //       console.log("Validate Failed:", info);
-          //     });
-          // }
-        }
+        onReset={handleReset}
+        onSearch={handleSearch}
       >
         <Form
           form={searchForm}
