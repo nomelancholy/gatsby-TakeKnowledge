@@ -70,7 +70,7 @@ const SpotDetail = (props) => {
       axios
         .post(
           `${process.env.BACKEND_API}/spot/get`,
-          { spot_id: spotId },
+          { spot_id: Number(spotId) },
           {
             headers: {
               "Content-Type": "application/json;charset=UTF-8",
@@ -197,7 +197,6 @@ const SpotDetail = (props) => {
 
     axios(config)
       .then(function (response) {
-        console.log(`response.data`, response.data);
         setOkModalVisible(true);
         if (registerMode) {
           setGeneratedSpotId(response.data.item.spot_id);

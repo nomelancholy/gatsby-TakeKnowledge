@@ -84,9 +84,9 @@ const NoticeDetail = (props) => {
     let url = "";
 
     if (registerMode) {
-      url = `${process.env.BACKEND_API}/services/notice/write`;
+      url = `${process.env.BACKEND_API}/services/notice/add`;
     } else {
-      url = `${process.env.BACKEND_API}/services/notice/edit`;
+      url = `${process.env.BACKEND_API}/services/notice/update`;
       data.notice_id = Number(noticeId);
     }
 
