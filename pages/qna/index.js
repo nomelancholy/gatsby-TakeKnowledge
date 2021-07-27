@@ -181,7 +181,7 @@ const Qna = (props) => {
     size: PAGE_SIZE,
   });
 
-  const getNoticeList = (params) => {
+  const getQnaList = (params) => {
     var config = {
       method: "post",
       url: `${process.env.BACKEND_API}/user/qna/list`,
@@ -229,7 +229,7 @@ const Qna = (props) => {
     setLoading(true);
 
     // 파라미터 없이 호출
-    getNoticeList(params);
+    getQnaList(params);
   }, []);
 
   // 테이블 페이지 변경시
@@ -237,7 +237,7 @@ const Qna = (props) => {
     setPagination(pagination);
 
     // 호출
-    getNoticeList({ ...params, page: pagination.current });
+    getQnaList({ ...params, page: pagination.current });
   };
 
   const [categoryOptions, setCategoryOptions] = useState([]);
@@ -264,7 +264,7 @@ const Qna = (props) => {
       page: 1,
     };
 
-    getNoticeList({ ...params, ...searchParams });
+    getQnaList({ ...params, ...searchParams });
   };
 
   const handleReset = () => {
@@ -281,7 +281,7 @@ const Qna = (props) => {
       page: 1,
     };
 
-    getNoticeList({ ...params, ...searchParams });
+    getQnaList({ ...params, ...searchParams });
   };
 
   return (
