@@ -171,6 +171,10 @@ const Qna = (props) => {
 
   const [searchForm] = useForm();
 
+  // 기간 검색 datepicker 값 저장 state
+  const [regdateStart, setRegdateStart] = useState("");
+  const [regdateEnd, setRegdateEnd] = useState("");
+
   // 페이지 사이즈
   const PAGE_SIZE = 20;
 
@@ -179,7 +183,8 @@ const Qna = (props) => {
     status: undefined,
     classification: undefined,
     category: undefined,
-    regdate: undefined,
+    regdate_start: undefined,
+    regdate_end: undefined,
     page: 1,
     size: PAGE_SIZE,
   });
@@ -261,9 +266,8 @@ const Qna = (props) => {
       classification: searchFormValues.classification,
       category: searchFormValues.category,
       status: searchFormValues.status,
-      regdate: searchFormValues.regdate
-        ? searchFormValues.regdate.format().substring(0, 10)
-        : null,
+      regdate_start: regdateStart,
+      regdate_end: regdateEnd,
       page: 1,
     };
 
@@ -274,13 +278,17 @@ const Qna = (props) => {
     // form Item reset
     searchForm.resetFields();
 
+    setRegdateStart("");
+    setRegdateEnd("");
+
     // params state reset
     const searchParams = {
       qid: undefined,
       classification: undefined,
       category: undefined,
       status: undefined,
-      regdate: undefined,
+      regdate_start: undefined,
+      regdate_end: undefined,
       page: 1,
     };
 
@@ -355,7 +363,12 @@ const Qna = (props) => {
             </Select>
           </Form.Item>
           <Form.Item name="regdate" label="생성 일시">
-            <DatePicker />
+            <DatePicker
+              onChange={(date, dateString) => setRegdateStart(dateString)}
+            />
+            <DatePicker
+              onChange={(date, dateString) => setRegdateEnd(dateString)}
+            />
           </Form.Item>
         </Form>
       </Filter>
