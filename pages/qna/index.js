@@ -161,8 +161,11 @@ const Qna = (props) => {
   const { user, isLoggedIn, token } = props.auth;
 
   const [qnaList, setQnaList] = useState([]);
+
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({});
+
+  const [categoryOptions, setCategoryOptions] = useState([]);
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
@@ -240,8 +243,7 @@ const Qna = (props) => {
     getQnaList({ ...params, page: pagination.current });
   };
 
-  const [categoryOptions, setCategoryOptions] = useState([]);
-
+  // 검색 - 유형 1 변경시 유형 2(카테고리 세팅)
   const handleClassificationChange = (value) => {
     const selectedArray = qnaSelectOptions.filter((option) => {
       return option.label === value;
