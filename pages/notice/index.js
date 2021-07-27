@@ -109,7 +109,7 @@ const Notice = (props) => {
 
     axios
       .post(
-        `${process.env.BACKEND_API}/services/notices`,
+        `${process.env.BACKEND_API}/services/notice/list`,
         { ...params },
         {
           headers: {

@@ -43,7 +43,7 @@ const NoticeDetail = (props) => {
 
       axios
         .get(
-          `${process.env.BACKEND_API}/services/notice_get/${noticeId}`,
+          `${process.env.BACKEND_API}/services/notice/get/${noticeId}`,
           config
         )
         .then(function (response) {
@@ -84,9 +84,9 @@ const NoticeDetail = (props) => {
     let url = "";
 
     if (registerMode) {
-      url = `${process.env.BACKEND_API}/services/notice_add`;
+      url = `${process.env.BACKEND_API}/services/notice/write`;
     } else {
-      url = `${process.env.BACKEND_API}/services/notice_update`;
+      url = `${process.env.BACKEND_API}/services/notice/edit`;
       data.notice_id = Number(noticeId);
     }
 
