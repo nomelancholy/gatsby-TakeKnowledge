@@ -185,6 +185,9 @@ const Qna = (props) => {
   });
 
   const getQnaList = (params) => {
+    // 로딩바 세팅
+    setLoading(true);
+
     var config = {
       method: "post",
       url: `${process.env.BACKEND_API}/user/qna/list`,
@@ -228,8 +231,6 @@ const Qna = (props) => {
       // 로그인 되어 있지 않으면 홈으로
       Router.push("/");
     }
-    // 로딩바 세팅
-    setLoading(true);
 
     // 파라미터 없이 호출
     getQnaList(params);
@@ -275,11 +276,11 @@ const Qna = (props) => {
 
     // params state reset
     const searchParams = {
-      qid: null,
-      classification: null,
-      category: null,
-      status: null,
-      regdate: null,
+      qid: undefined,
+      classification: undefined,
+      category: undefined,
+      status: undefined,
+      regdate: undefined,
       page: 1,
     };
 

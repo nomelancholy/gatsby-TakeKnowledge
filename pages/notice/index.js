@@ -105,6 +105,8 @@ const Notice = (props) => {
   });
 
   const getNoticeList = (params) => {
+    setLoading(true);
+
     axios
       .post(
         `${process.env.BACKEND_API}/services/notices`,
@@ -147,8 +149,6 @@ const Notice = (props) => {
       Router.push("/");
     }
 
-    setLoading(true);
-
     getNoticeList(params);
   }, []);
 
@@ -181,11 +181,11 @@ const Notice = (props) => {
 
     // params state reset
     const searchParams = {
-      notice_id: null,
-      status: null,
-      type: null,
-      sticky: null,
-      title: null,
+      notice_id: undefined,
+      status: undefined,
+      type: undefined,
+      sticky: undefined,
+      title: undefined,
       page: 1,
     };
 
