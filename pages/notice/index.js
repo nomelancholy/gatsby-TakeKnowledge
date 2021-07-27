@@ -15,40 +15,7 @@ import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
 
 const Notice = (props) => {
-  const { user, isLoggedIn, token } = props.auth;
-  const [noticeList, setNoticeList] = useState([]);
-
-  const [searchForm] = useForm();
-
-  useEffect(() => {
-    axios
-      .post(
-        `${process.env.BACKEND_API}/services/notices`,
-        { page: 1, size: 20, type: "normal", sticky: 0 },
-        {
-          headers: {
-            "Content-Type": "application/json;charset=UTF-8",
-            "Access-Control-Allow-Origin": "*",
-            Authorization: decodeURIComponent(token),
-          },
-        }
-      )
-      .then((response) => {
-        console.log(`response.data`, response.data);
-        const noticeList = response.data.items;
-        setNoticeList(noticeList);
-      })
-      .catch((error) => {
-        console.log(`error`, error);
-      });
-  }, []);
-
-  useEffect(() => {
-    if (!isLoggedIn) {
-      Router.push("/");
-    }
-  }, []);
-
+  // 공지 컬럼 정의
   const columns = [
     {
       title: "공지 ID",
@@ -113,15 +80,117 @@ const Notice = (props) => {
     },
   ];
 
+  const { user, isLoggedIn, token } = props.auth;
+
+  const [noticeList, setNoticeList] = useState([]);
+
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(false);
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
-  const [form] = Form.useForm();
+  const [searchForm] = useForm();
 
-  const handleTableChange = (pagination, filters, sorter) => {
-    setPagination(2);
+  // 페이지 사이즈
+  const PAGE_SIZE = 20;
+
+  const [params, setParams] = useState({
+    notice_id: null,
+    status: null,
+    type: null,
+    sticky: null,
+    title: null,
+    page: 1,
+    size: PAGE_SIZE,
+  });
+
+  const getNoticeList = (params) => {
+    axios
+      .post(
+        `${process.env.BACKEND_API}/services/notices`,
+        { params },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        console.log(`response.data`, response.data);
+        const data = response.data;
+
+        setNoticeList(data.items);
+
+        // 페이지 네이션 정보 세팅
+        const pageInfo = {
+          current: data.page,
+          total: data.total,
+          pageSize: data.size,
+        };
+
+        // pageInfo 세팅
+        setPagination(pageInfo);
+
+        // 로딩바 세팅
+        setLoading(false);
+
+        setParams(params);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+
+    setLoading(true);
+
+    getNoticeList(params);
+  }, []);
+
+  // 테이블 페이지 변경시
+  const handleTableChange = (pagination) => {
+    setPagination(pagination);
+
+    // 호출
+    getNoticeList({ ...params, page: pagination.current });
+  };
+
+  const handleSearch = () => {
+    const searchFormValues = searchForm.getFieldsValue();
+
+    const searchParams = {
+      notice_id: searchFormValues.notice_id,
+      status: searchFormValues.status,
+      type: searchFormValues.type,
+      sticky: searchFormValues.sticky,
+      title: searchFormValues.title,
+      page: 1,
+    };
+
+    getNoticeList({ ...params, ...searchParams });
+  };
+
+  const handleReset = () => {
+    // form Item reset
+    searchForm.resetFields();
+
+    // params state reset
+    const searchParams = {
+      notice_id: null,
+      status: null,
+      type: null,
+      sticky: null,
+      title: null,
+      page: 1,
+    };
+
+    getNoticeList({ ...params, ...searchParams });
   };
 
   return (
@@ -166,23 +235,8 @@ const Notice = (props) => {
       <Filter
         visible={filterModalOpen}
         onClose={() => setFilterModalOpen(false)}
-        onReset={() => console.log(`reset`)}
-        onSearch={
-          () => {
-            console.log(`onOk`);
-          }
-          //     () => {
-          //   form
-          //     .validateFields()
-          //     .then((values) => {
-          //       form.resetFields();
-          //       onCreate(values);
-          //     })
-          //     .catch((info) => {
-          //       console.log("Validate Failed:", info);
-          //     });
-          // }
-        }
+        onReset={handleReset}
+        onSearch={handleSearch}
       >
         <Form
           form={searchForm}
