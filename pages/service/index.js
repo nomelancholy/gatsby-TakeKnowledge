@@ -28,7 +28,10 @@ const Service = (props) => {
   const columns = [
     {
       title: "예약 ID",
-      dataIndex: "contract_id",
+      dataIndex: "contract",
+      render: (text, record) => {
+        return text.contract_id;
+      },
     },
     {
       title: "계약자명",
@@ -43,23 +46,25 @@ const Service = (props) => {
     },
     {
       title: "계약 상태",
-      dataIndex: "status",
+      dataIndex: "contract",
       render: (text, record) => {
         let renderText = "";
 
-        if (text === "wait") {
+        const status = text.status;
+
+        if (status === "wait") {
           renderText = "계좌이체 대기";
-        } else if (text === "buy") {
+        } else if (status === "buy") {
           renderText = "구매";
-        } else if (text === "pay") {
+        } else if (status === "pay") {
           renderText = "이용중";
-        } else if (text === "refund") {
+        } else if (status === "refund") {
           renderText = "환불";
-        } else if (text === "expired") {
+        } else if (status === "expired") {
           renderText = "종료";
-        } else if (text === "terminate") {
+        } else if (status === "terminate") {
           renderText = "해지";
-        } else if (text === "canceled") {
+        } else if (status === "canceled") {
           renderText = "취소";
         }
 
@@ -68,7 +73,7 @@ const Service = (props) => {
     },
     {
       title: "부가서비스",
-      dataIndex: "rateplan",
+      dataIndex: "space",
       render: (text, record) => {
         let renderText = "";
 
@@ -77,7 +82,7 @@ const Service = (props) => {
         // console.log(`text.product`, text.product.type);
         // console.log(`type`, type);
 
-        const type = text.product.type;
+        const type = text.type;
 
         switch (type) {
           case "lounge":
@@ -101,62 +106,78 @@ const Service = (props) => {
     },
     {
       title: "사용 시간",
-      dataIndex: "rateplan",
-      render: (text, record) => {
-        let renderText = "";
+      dataIndex: "time_diff",
+      // render: (text, record) => {
+      //   let renderText = "";
 
-        if (text.product.time_unit === "day") {
-          const endDate = new Date(record.end_date);
-          const startDate = new Date(record.start_date);
+      //   if (text.product.time_unit === "day") {
+      //     const endDate = new Date(record.end_date);
+      //     const startDate = new Date(record.start_date);
 
-          const diffDate =
-            (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24) +
-            1;
+      //     const diffDate =
+      //       (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24) +
+      //       1;
 
-          renderText = `${diffDate} 일`;
-        } else {
-          const diffTimes = text.product.end_time - text.product.start_time;
-          renderText = `${diffTimes} 시간`;
-        }
+      //     renderText = `${diffDate} 일`;
+      //   } else {
+      //     const diffTimes = text.product.end_time - text.product.start_time;
+      //     renderText = `${diffTimes} 시간`;
+      //   }
 
-        return renderText;
-      },
+      //   return renderText;
+      // },
     },
     {
       title: "사용 지점",
-      dataIndex: "spot_id",
+      dataIndex: "spot",
+      render: (text, record) => {
+        return text.name;
+      },
     },
     {
       title: "금액",
-      dataIndex: "rateplan",
+      dataIndex: "payment",
       render: (text, record) => {
-        const price = (text.price - text.dc_price).toLocaleString("ko-KR");
-        return price;
+        // const price = (text.price - text.dc_price).toLocaleString("ko-KR");
+        // return price;
+        return text.total;
       },
     },
     {
       title: "결제일",
-      dataIndex: "regdate",
+      dataIndex: "payment",
       render: (text, record) => {
-        const payDate = text.split(" ")[0];
+        const payDate = text.regdate.split(" ")[0];
         return payDate;
       },
     },
     {
       title: "사용 시작일",
-      dataIndex: "start_date",
+      dataIndex: "contract",
+      render: (text, record) => {
+        return text.start_date;
+      },
     },
     {
       title: "사용 종료일",
-      dataIndex: "end_date",
+      dataIndex: "contract",
+      render: (text, record) => {
+        return text.end_date;
+      },
     },
     {
       title: "취소일시",
-      dataIndex: "cancel_date",
+      dataIndex: "contract",
+      render: (text, record) => {
+        return text.cancel_date;
+      },
     },
     {
       title: "생성 일시",
-      dataIndex: "regdate",
+      dataIndex: "contract",
+      render: (text, record) => {
+        return text.regdate;
+      },
     },
   ];
 
@@ -199,6 +220,7 @@ const Service = (props) => {
     reservation_end_date_end: undefined,
     reservation_cancel_date_start: undefined,
     reservation_cancel_date_end: undefined,
+
     page: 1,
     size: PAGE_SIZE,
   });
@@ -208,7 +230,7 @@ const Service = (props) => {
 
     axios
       .post(
-        `${process.env.BACKEND_API}/admin/contract/list`,
+        `${process.env.BACKEND_API}/admin/contract/service/list`,
         { ...params },
         {
           headers: {
