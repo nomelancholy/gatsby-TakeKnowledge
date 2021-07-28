@@ -64,7 +64,7 @@ const NoticeDetail = (props) => {
       form.setFieldsValue({
         status: noticeInfo.status,
         type: noticeInfo.type,
-        sticky: String(noticeInfo.sticky),
+        sticky: noticeInfo.sticky,
         title: noticeInfo.title,
       });
 
@@ -79,6 +79,7 @@ const NoticeDetail = (props) => {
       title: values.title,
       content: content,
       sticky: values.sticky,
+      status: values.status,
     };
 
     let url = "";
@@ -89,6 +90,8 @@ const NoticeDetail = (props) => {
       url = `${process.env.BACKEND_API}/services/notice/update`;
       data.notice_id = Number(noticeId);
     }
+
+    console.log(`data`, data);
 
     const config = {
       method: "post",
@@ -138,9 +141,9 @@ const NoticeDetail = (props) => {
               <Radio style={radioStyle} value={"normal"}>
                 일반 공지
               </Radio>
-              <Radio style={radioStyle} value={"group"}>
+              {/* <Radio style={radioStyle} value={"group"}>
                 그룹 공지
-              </Radio>
+              </Radio> */}
               <Radio style={radioStyle} value={"spot"}>
                 지점 공지
               </Radio>
@@ -148,10 +151,10 @@ const NoticeDetail = (props) => {
           </Form.Item>
           <Form.Item name="sticky" label="상단 노출">
             <Radio.Group>
-              <Radio style={radioStyle} value="1">
+              <Radio style={radioStyle} value={1}>
                 노출
               </Radio>
-              <Radio style={radioStyle} value="0">
+              <Radio style={radioStyle} value={0}>
                 미노출
               </Radio>
             </Radio.Group>

@@ -49,7 +49,7 @@ const Notice = (props) => {
       title: "상단 노출",
       dataIndex: "sticky",
       render: (text, record) => {
-        return text === 0 ? "O" : "X";
+        return text === 0 ? "X" : "O";
       },
     },
     {
@@ -64,6 +64,8 @@ const Notice = (props) => {
       dataIndex: "status",
       render: (text, record) => {
         let renderText = "";
+
+        console.log(`text`, text);
 
         if (text === "publish") {
           renderText = "발행";
@@ -121,6 +123,7 @@ const Notice = (props) => {
       )
       .then((response) => {
         const data = response.data;
+        console.log(`data`, data);
 
         setNoticeList(data.items);
 
@@ -242,6 +245,11 @@ const Notice = (props) => {
           layout="vertical"
           name="form_in_modal"
           initialValues={{ modifier: "public" }}
+          onKeyUp={(e) => {
+            if (e.key === "Enter") {
+              handleSearch();
+            }
+          }}
         >
           <Form.Item name="notice_id" label="공지 ID">
             <Input />

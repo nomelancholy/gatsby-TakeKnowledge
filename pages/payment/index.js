@@ -121,7 +121,7 @@ const Payment = (props) => {
 
   const [params, setParams] = useState({
     rateplan_id: undefined,
-    product_type: undefined,
+    type: undefined,
     product_id: undefined,
     status: undefined,
     start_date_start: undefined,
@@ -197,7 +197,7 @@ const Payment = (props) => {
 
     const searchParams = {
       rateplan_id: searchFormValues.rateplan_id,
-      product_type: searchFormValues.product_type,
+      type: searchFormValues.type,
       product_id: searchFormValues.product_id,
       status: searchFormValues.status,
       start_date_start: startDateStart,
@@ -222,7 +222,7 @@ const Payment = (props) => {
     // params state reset
     const searchParams = {
       rateplan_id: undefined,
-      product_type: undefined,
+      type: undefined,
       product_id: undefined,
       status: undefined,
       start_date_start: undefined,
@@ -305,11 +305,16 @@ const Payment = (props) => {
           layout="vertical"
           name="form_in_modal"
           initialValues={{ modifier: "public" }}
+          onKeyUp={(e) => {
+            if (e.key === "Enter") {
+              handleSearch();
+            }
+          }}
         >
           <Form.Item name="rateplan_id" label="요금제 ID">
             <Input />
           </Form.Item>
-          <Form.Item name="prodct_type" label="상품 그룹">
+          <Form.Item name="type" label="상품 그룹">
             <Select style={{ width: 160 }} onChange={handleProductTypeChange}>
               <Select.Option value="membership">멤버십</Select.Option>
               <Select.Option value="service">부가서비스</Select.Option>
