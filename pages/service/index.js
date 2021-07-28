@@ -72,10 +72,10 @@ const Service = (props) => {
       render: (text, record) => {
         let renderText = "";
 
-        console.log(`record`, record);
+        // console.log(`record`, record);
 
-        console.log(`text.product`, text.product.type);
-        console.log(`type`, type);
+        // console.log(`text.product`, text.product.type);
+        // console.log(`type`, type);
 
         const type = text.product.type;
 
@@ -187,33 +187,29 @@ const Service = (props) => {
   const PAGE_SIZE = 20;
 
   const [params, setParams] = useState({
-    order_id: undefined,
     contract_id: undefined,
     uid: undefined,
-    group_id: undefined,
     user_name: undefined,
-    payment_status: undefined,
-    payment_method: undefined,
-    pay_demand: undefined,
-    order_date_start: undefined,
-    order_date_end: undefined,
+    product_type: undefined,
+    status: undefined,
+    spot_id: undefined,
+    reservation_start_date_start: undefined,
+    reservation_start_date_end: undefined,
+    reservation_end_date_start: undefined,
+    reservation_end_date_end: undefined,
+    reservation_cancel_date_start: undefined,
+    reservation_cancel_date_end: undefined,
     page: 1,
     size: PAGE_SIZE,
   });
 
   const getServiceList = (params) => {
     setLoading(true);
-  };
 
-  useEffect(() => {
     axios
       .post(
         `${process.env.BACKEND_API}/admin/contract/list`,
-        {
-          page: 1,
-          size: 100,
-          contract_type: "service",
-        },
+        { ...params },
         {
           headers: {
             "Content-Type": "application/json;charset=UTF-8",
@@ -224,27 +220,96 @@ const Service = (props) => {
       )
       .then((response) => {
         const data = response.data;
-        console.log(`data`, data);
-        setServiceList(data.items);
         // console.log(`data`, data);
-        // setPagination({ ...pagination, total: data.total });
-        // setLoading(false);
+        setServiceList(data.items);
+
+        // 페이지 네이션 정보 세팅
+        const pageInfo = {
+          current: data.page,
+          total: data.total,
+          pageSize: data.size,
+        };
+
+        // pageInfo 세팅
+        setPagination(pageInfo);
+
+        // 로딩바 세팅
+        setLoading(false);
+
+        setParams(params);
       })
       .catch((error) => {
         console.log(`error`, error);
       });
+  };
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+
+    getServiceList(params);
   }, []);
 
-  const handleTableChange = (pagination, filters, sorter) => {
-    setPagination(2);
+  // 테이블 페이지 변경시
+  const handleTableChange = (pagination) => {
+    setPagination(pagination);
 
-    fetch({
-      results: pagination.pageSize,
-      page: pagination.current,
-      sortField: sorter.field,
-      sortOrder: sorter.order,
-      ...filters,
-    });
+    // 호출
+    getServiceList({ ...params, page: pagination.current });
+  };
+
+  const handleSearch = () => {
+    const searchFormValues = searchForm.getFieldsValue();
+
+    const searchParams = {
+      contract_id: searchFormValues.contract_id,
+      uid: searchFormValues.uid,
+      user_name: searchFormValues.user_name,
+      product_type: searchFormValues.product_type,
+      status: searchFormValues.status,
+      spot_id: searchFormValues.spot_id,
+      reservation_start_date_start: reservationStartDateStart,
+      reservation_start_date_end: reservationStartDateEnd,
+      reservation_end_date_start: reservationEndDateStart,
+      reservation_end_date_end: reservationEndDateEnd,
+      reservation_cancel_date_start: reservationCancelDateStart,
+      reservation_cancel_date_end: reservationCancelDateEnd,
+      page: 1,
+    };
+
+    getServiceList({ ...params, ...searchParams });
+  };
+
+  const handleReset = () => {
+    // form Item reset
+    searchForm.resetFields();
+
+    setReservationStartDateStart(undefined);
+    setReservationStartDateEnd(undefined);
+    setReservationEndDateStart(undefined);
+    setReservationEndDateEnd(undefined);
+    setReservationCancelDateStart(undefined);
+    setReservationCancelDateEnd(undefined);
+
+    // params state reset
+    const searchParams = {
+      contract_id: undefined,
+      uid: undefined,
+      user_name: undefined,
+      product_type: undefined,
+      status: undefined,
+      spot_id: undefined,
+      reservation_start_date_start: undefined,
+      reservation_start_date_end: undefined,
+      reservation_end_date_start: undefined,
+      reservation_end_date_end: undefined,
+      reservation_cancel_date_start: undefined,
+      reservation_cancel_date_end: undefined,
+      page: 1,
+    };
+
+    getServiceList({ ...params, ...searchParams });
   };
 
   return (
@@ -287,23 +352,8 @@ const Service = (props) => {
       <Filter
         visible={filterModalOpen}
         onClose={() => setFilterModalOpen(false)}
-        onReset={() => console.log(`reset`)}
-        onSearch={
-          () => {
-            console.log(`onOk`);
-          }
-          //     () => {
-          //   form
-          //     .validateFields()
-          //     .then((values) => {
-          //       form.resetFields();
-          //       onCreate(values);
-          //     })
-          //     .catch((info) => {
-          //       console.log("Validate Failed:", info);
-          //     });
-          // }
-        }
+        onReset={handleReset}
+        onSearch={handleSearch}
       >
         <Form
           form={searchForm}
