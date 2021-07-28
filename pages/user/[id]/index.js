@@ -6,7 +6,6 @@ import { useRouter } from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import axios from "axios";
-import { render } from "less";
 
 const UserDetail = (props) => {
   // 상품 이용 내역 grid 정의

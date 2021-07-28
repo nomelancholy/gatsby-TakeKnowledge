@@ -8,16 +8,6 @@ import initialize from "@utils/initialize";
 import axios from "axios";
 
 const ContractDetail = (props) => {
-  const router = useRouter();
-  const { id } = router.query;
-  const { user, isLoggedIn, token } = props.auth;
-
-  const [orderList, setOrderList] = useState(undefined);
-
-  const [okModalVisible, setOkModalVisible] = useState(false);
-  // 답장이 있는지 없는지
-  const [isDone, setIsDone] = useState(false);
-
   const radioStyle = {
     display: "inline",
     height: "30px",
@@ -116,88 +106,18 @@ const ContractDetail = (props) => {
   const paymentColumns = [
     {
       title: "결제 ID",
-      dataIndex: "order",
-      render: (text, record) => {
-        const renderText = `${text.order_id} (${record.contract.contract_id})`;
-        return renderText;
-      },
+      dataIndex: "payment_id",
     },
     {
       title: "결제 카드",
-      dataIndex: "user",
-      render: (text, record) => {
-        console.log(`record`, record);
-        return (
-          <a href={`/order/${record.contract.contract_id}`}>
-            {`${text.user_name}(${text.uid})`}
-          </a>
-        );
-      },
-    },
-    {
-      title: "결제 방식",
-      dataIndex: "contract",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.status === "wait") {
-          renderText = "계약 신청(입금전)";
-        } else if (text.status === "buy") {
-          renderText = "계약 신청(이용전)";
-        } else if (text.status === "pay") {
-          renderText = "계약 완료(이용중)";
-        } else if (text.status === "refund") {
-          renderText = "계약 해지(환불)";
-        } else if (text.status === "expired") {
-          renderText = "계약 해지(만료)";
-        } else if (text.status === "terminate") {
-          renderText = "계약 해지(중도)";
-        } else if (text.status === "canceled") {
-          renderText = "계약 해지(취소)";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "결제 유형",
-      dataIndex: "group_id",
-    },
-    {
-      title: "결제 금액",
-      dataIndex: "contract",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.contract_type === "service") {
-          renderText = "부가서비스";
-        } else if (text.contract_type === "membershipt") {
-          renderText = "멤버십";
-        } else if (text.contract_type === "voucher") {
-          renderText = "이용권";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "결제 상태",
-      dataIndex: "product",
+      dataIndex: "user_paymethod",
       render: (text, record) => {
         return text.name;
       },
     },
     {
-      title: "등록자",
-      dataIndex: "contract",
-      render: (text, record) => {
-        console.log(`text`, text);
-        return text.next_paydate;
-      },
-    },
-    {
-      title: "등록 일시",
-      dataIndex: "pay_method",
+      title: "결제 유형",
+      dataIndex: "user_paymethod",
       render: (text, record) => {
         let renderText = "";
 
@@ -211,7 +131,7 @@ const ContractDetail = (props) => {
       },
     },
     {
-      title: "환불",
+      title: "결제 방식",
       dataIndex: "product",
       render: (text, record) => {
         let renderText = "";
@@ -227,10 +147,164 @@ const ContractDetail = (props) => {
         return renderText;
       },
     },
+    {
+      title: "결제 금액",
+      dataIndex: "total",
+    },
+    {
+      title: "결제 상태",
+      dataIndex: "status",
+      render: (text, record) => {
+        let renderText = "";
+
+        if (text === "wait") {
+          renderText = "대기(예정), 결제일 전";
+        } else if (text === "buy") {
+          renderText = "결제";
+        } else if (text === "unpaid") {
+          renderText = "미납, 결제일 후";
+        } else if (text === "canceled") {
+          renderText = "취소";
+        } else if (text === "fail") {
+          renderText = "실패";
+        }
+
+        return renderText;
+      },
+    },
+    {
+      title: "등록자",
+      dataIndex: "",
+      render: (text, record) => {
+        return "System";
+      },
+    },
+    {
+      title: "등록 일시",
+      dataIndex: "regdate",
+    },
+    {
+      title: "환불",
+      dataIndex: "",
+      render: (text, record) => {
+        return <Button>환불</Button>;
+      },
+    },
   ];
 
-  // const [groupForm, userForm, memoForm, historyForm] = Form.useForm();
-  //
+  const PAGE_SIZE = 5;
+
+  // 청구서 테이블 페이징, 로딩
+  const [billPagination, setBillPagination] = useState({});
+  const [billLoading, setBillLoading] = useState(false);
+
+  // 결제 내역 테이블 페이징, 로딩
+  const [paymentPagination, setPaymentPagination] = useState({});
+  const [paymentLoading, setPaymentLoading] = useState(false);
+
+  // 청구서 리스트
+  const [billList, setBillList] = useState([]);
+  // 결제 내역 리스트
+  const [paymentList, setPaymentList] = useState([]);
+
+  // 청구서 내역 조회
+  const getBillList = (params) => {
+    setBillLoading(true);
+
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/contract/order/list`,
+        { ...params },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        const data = response.data;
+        setBillList(data.items);
+
+        // 페이지 네이션 정보 세팅
+        const pageInfo = {
+          current: data.page,
+          total: data.total,
+          pageSize: data.size,
+        };
+
+        // pageInfo 세팅
+        setBillPagination(pageInfo);
+
+        // 로딩바 세팅
+        setBillLoading(false);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
+
+  const getPaymentList = (params) => {
+    setPaymentLoading(true);
+
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/contract/payment/list`,
+        { ...params },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        const data = response.data;
+        console.log(`paymnet data`, data);
+        setPaymentList(data.items);
+
+        // 페이지 네이션 정보 세팅
+        const pageInfo = {
+          current: data.page,
+          total: data.total,
+          pageSize: data.size,
+        };
+
+        // pageInfo 세팅
+        setPaymentPagination(pageInfo);
+
+        // 로딩바 세팅
+        setPaymentLoading(false);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
+
+  // 상품 이용 내역 테이블 변경
+  const handleBillTableChange = (pagination) => {
+    setBillPagination(pagination);
+
+    // 호출
+    getBillList({ page: pagination.current, size: PAGE_SIZE, uid: id });
+  };
+
+  // 상품 이용 내역 테이블 변경
+  const handlePaymentTableChange = (pagination) => {
+    setPaymentPagination(pagination);
+
+    // 호출
+    getPaymentList({ page: pagination.current, size: PAGE_SIZE, uid: id });
+  };
+
+  const router = useRouter();
+  const { id } = router.query;
+  const { user, isLoggedIn, token } = props.auth;
+
+  const [orderList, setOrderList] = useState(undefined);
+
   // 청구 상태
   const [orderStatusForm] = Form.useForm();
   // 그룹 정보
@@ -243,21 +317,6 @@ const ContractDetail = (props) => {
   const [orderForm] = Form.useForm();
   const [memoForm] = Form.useForm();
   const [historyForm] = Form.useForm();
-
-  const [pagination, setPagination] = useState({});
-  const [loading, setLoading] = useState(false);
-
-  const handleTableChange = (pagination, filters, sorter) => {
-    setPagination(2);
-
-    fetch({
-      results: pagination.pageSize,
-      page: pagination.current,
-      sortField: sorter.field,
-      sortOrder: sorter.order,
-      ...filters,
-    });
-  };
 
   useEffect(() => {
     // 청구/결제 상세 내용 조회
@@ -281,13 +340,14 @@ const ContractDetail = (props) => {
       .catch((error) => {
         console.log(`error`, error);
       });
+
+    getPaymentList({ page: 1, size: PAGE_SIZE });
   }, []);
 
   useEffect(() => {
     // 요금제 정보 세팅되면
     if (orderList) {
       console.log(`orderList`, orderList);
-      setIsDone(true);
       // 회원 정보
       userForm.setFieldsValue({
         // 회원 ID
@@ -411,45 +471,8 @@ const ContractDetail = (props) => {
       //   // 내용
       //   content: userDetail.content,
       // });
-    } else {
-      setIsDone(false);
     }
   }, [orderList]);
-
-  // 저장 버튼 클릭
-  const handleReplyRegisterSubmit = (values) => {
-    let url = "";
-
-    url = `${process.env.BACKEND_API}/user/qna-write`;
-
-    let data = {
-      title: values.title,
-      classification: values.classification,
-      category: values.category,
-      content: values.reply,
-      parent: Number(id),
-      status: "publish",
-    };
-
-    const config = {
-      method: "post",
-      url: url,
-      headers: {
-        Authorization: decodeURIComponent(token),
-      },
-      data: data,
-    };
-
-    axios(config)
-      .then(function (response) {
-        if (response.status === 200) {
-          setOkModalVisible(true);
-        }
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-  };
 
   return (
     <>
@@ -480,11 +503,7 @@ const ContractDetail = (props) => {
           </Form>
         </Card>
         <Card title="그룹 정보">
-          <Form
-            form={groupForm}
-            layout="vertical"
-            onFinish={handleReplyRegisterSubmit}
-          >
+          <Form form={groupForm} layout="vertical">
             <Form.Item name="classification" label="소속 그룹">
               <Input disabled />
             </Form.Item>
@@ -509,11 +528,7 @@ const ContractDetail = (props) => {
           </Form>
         </Card>
         <Card title="회원 정보">
-          <Form
-            form={userForm}
-            layout="vertical"
-            onFinish={handleReplyRegisterSubmit}
-          >
+          <Form form={userForm} layout="vertical">
             <Form.Item name="uid" label="회원 ID">
               <Input disabled />
             </Form.Item>
@@ -533,11 +548,7 @@ const ContractDetail = (props) => {
           </Form>
         </Card>
         <Card title="계약 정보">
-          <Form
-            form={contractForm}
-            layout="vertical"
-            onFinish={handleReplyRegisterSubmit}
-          >
+          <Form form={contractForm} layout="vertical">
             <Form.Item name="product_name" label="멤버십 상품">
               <Input disabled />
             </Form.Item>
@@ -565,11 +576,7 @@ const ContractDetail = (props) => {
           </Form>
         </Card>
         <Card title="청구 내용">
-          <Form
-            form={orderForm}
-            layout="vertical"
-            onFinish={handleReplyRegisterSubmit}
-          >
+          <Form form={orderForm} layout="vertical">
             <Form.Item name="contract_type" label="청구 유형">
               <Input disabled />
             </Form.Item>
@@ -587,7 +594,7 @@ const ContractDetail = (props) => {
             </Form.Item>
 
             <Col></Col>
-            <Form.Item name="status" label="청구 상태">
+            <Form.Item name="status" label="청구 항목">
               <Radio.Group>
                 <Radio style={radioStyle} value={"active"}>
                   청구 완료
@@ -610,10 +617,10 @@ const ContractDetail = (props) => {
             size="middle"
             columns={billColumns}
             rowKey={(record) => record.order.order_id}
-            dataSource={[]}
-            pagination={pagination}
-            loading={loading}
-            onChange={handleTableChange}
+            dataSource={billList}
+            pagination={billPagination}
+            loading={billLoading}
+            onChange={handleBillTableChange}
           />
         </Card>
 
@@ -626,24 +633,14 @@ const ContractDetail = (props) => {
             <Table
               size="middle"
               columns={paymentColumns}
-              rowKey={(record) => record.order.order_id}
-              dataSource={[]}
-              pagination={pagination}
-              loading={loading}
-              onChange={handleTableChange}
+              rowKey={(record) => record.payment_id}
+              dataSource={paymentList}
+              pagination={paymentPagination}
+              loading={paymentLoading}
+              onChange={handlePaymentTableChange}
             />
           </Card>
         </Col>
-
-        <Modal
-          visible={okModalVisible}
-          okText="확인"
-          onOk={() => {
-            router.push("/qna");
-          }}
-        >
-          {"답변 등록 완료"}
-        </Modal>
       </Card>
 
       <Row type="flex" align="middle" className="py-4">
