@@ -7,3 +7,10 @@ haters/
 layout.md
 variables.env
 .vercel
+
+#dev pjt config dirs
+.idea*
+
+#deploy caches
+.serverless*
+
