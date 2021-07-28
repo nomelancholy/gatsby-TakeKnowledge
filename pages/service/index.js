@@ -38,7 +38,7 @@ const Service = (props) => {
       dataIndex: "user",
       render: (text, record) => {
         return (
-          <a href={`/service/${record.contract_id}`}>
+          <a href={`/service/${record.contract.contract_id}`}>
             {`${text.user_name}(${text.uid})`}
           </a>
         );
