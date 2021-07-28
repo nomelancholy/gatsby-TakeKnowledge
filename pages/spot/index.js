@@ -38,19 +38,19 @@ const Spot = (props) => {
     },
     {
       title: "라운지",
-      dataIndex: "loungeCnt",
+      dataIndex: "lounge",
     },
     {
       title: "미팅룸",
-      dataIndex: "meetingCnt",
+      dataIndex: "meeting",
     },
     {
       title: "코워킹 룸",
-      dataIndex: "coworkingCnt",
+      dataIndex: "coworking",
     },
     {
       title: "락커",
-      dataIndex: "lockerCnt",
+      dataIndex: "locker",
     },
     {
       title: "활성/비활성",
@@ -77,7 +77,7 @@ const Spot = (props) => {
     },
     {
       title: "생성 일시",
-      dataIndex: "email",
+      dataIndex: "regdate",
     },
   ];
 
@@ -85,9 +85,6 @@ const Spot = (props) => {
 
   // 조회해온 spot list
   const [spotList, setSpotList] = useState([]);
-
-  // space count 추가된 spot list
-  const [spotData, setSpotData] = useState([]);
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
@@ -126,6 +123,7 @@ const Spot = (props) => {
       )
       .then((response) => {
         const data = response.data;
+        console.log(`data`, data);
 
         setSpotList(data.items);
 
@@ -138,70 +136,14 @@ const Spot = (props) => {
         // pageInfo 세팅
         setPagination(pageInfo);
 
+        setLoading(false);
+
         // 테이블 페이지 변경을 위해 방금 사용한 params 저장
         setParams(params);
       })
       .catch((error) => {
         console.log(`error`, error);
       });
-  };
-
-  // spot 별 space count 추가
-  const getSpotWithSpaceCount = async (spot) => {
-    const spaceList = ["lounge", "meeting", "coworking", "locker"];
-
-    let lounge = undefined;
-    let meeting = undefined;
-    let coworking = undefined;
-    let locker = undefined;
-
-    await Promise.all(
-      spaceList.map(async (space) => {
-        await axios
-          .post(
-            `${process.env.BACKEND_API}/spot/space/list`,
-            {
-              spot_id: spot.spot_id,
-              type: space,
-            },
-            {
-              headers: {
-                "Content-Type": "application/json;charset=UTF-8",
-                "Access-Control-Allow-Origin": "*",
-                Authorization: decodeURIComponent(token),
-              },
-            }
-          )
-          .then((response) => {
-            switch (space) {
-              case "lounge":
-                lounge = { ...{}, ...response.data };
-                break;
-              case "meeting":
-                meeting = { ...{}, ...response.data };
-                break;
-              case "coworking":
-                coworking = { ...{}, ...response.data };
-              case "locker":
-                locker = { ...{}, ...response.data };
-              default:
-                break;
-            }
-          })
-          .catch((error) => {
-            console.log(`error`, error);
-          });
-      })
-    );
-
-    const completeSpotObj = {
-      ...spot,
-      loungeCnt: lounge.total,
-      meetingCnt: meeting.total,
-      coworkingCnt: coworking.total,
-      lockerCnt: locker.total,
-    };
-    return completeSpotObj;
   };
 
   useEffect(() => {
@@ -211,31 +153,6 @@ const Spot = (props) => {
 
     getSpotList(params);
   }, []);
-
-  // spot list 조회 완료 후 spot 별 space 조회해서 spot에 추가
-  useEffect(() => {
-    let completeSpotList = [];
-
-    const setCompleteSpotData = async () => {
-      completeSpotList = await Promise.all(
-        spotList.map((spot) => {
-          return getSpotWithSpaceCount(spot);
-        })
-      );
-      setSpotData(completeSpotList);
-      setLoading(false);
-    };
-
-    if (spotList) {
-      setCompleteSpotData();
-    }
-  }, [spotList]);
-
-  useEffect(() => {
-    if (spotData) {
-      setLoading(false);
-    }
-  }, [spotData]);
 
   // 테이블 페이지 변경시
   const handleTableChange = (pagination) => {
@@ -303,7 +220,7 @@ const Spot = (props) => {
         size="middle"
         columns={columns}
         rowKey={(record) => record.spot_id}
-        dataSource={spotData}
+        dataSource={spotList}
         pagination={pagination}
         loading={loading}
         onChange={handleTableChange}
