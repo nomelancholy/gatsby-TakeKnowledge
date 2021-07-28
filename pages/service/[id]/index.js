@@ -6,21 +6,18 @@ import { useRouter } from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import axios from "axios";
+import { fromJS } from "immutable";
 
-const ContractDetail = (props) => {
+const ServiceDetail = (props) => {
   const router = useRouter();
   const { id } = router.query;
   const { user, isLoggedIn, token } = props.auth;
 
-  // 유저 정보 state
-  const [userDetail, setUserDetail] = useState(undefined);
+  // 부가서비스 예약 상세
+  const [serviceDetail, setServiceDetail] = useState(undefined);
 
   // 유저 계약 리스트 state
   const [userContractList, setUserContractList] = useState([]);
-
-  const [okModalVisible, setOkModalVisible] = useState(false);
-  // 답장이 있는지 없는지
-  const [isDone, setIsDone] = useState(false);
 
   const radioStyle = {
     display: "inline",
@@ -28,7 +25,12 @@ const ContractDetail = (props) => {
     lineHeight: "30px",
   };
 
-  const [groupForm, userForm, memoForm, historyForm] = Form.useForm();
+  const [serviceStatusForm] = Form.useForm();
+  const [groupForm] = Form.useForm();
+  const [userForm] = Form.useForm();
+  const [contractForm] = Form.useForm();
+  const [serviceForm] = Form.useForm();
+  const [paymentForm] = Form.useForm();
 
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(false);
@@ -206,18 +208,24 @@ const ContractDetail = (props) => {
   ];
 
   useEffect(() => {
-    // 유저 상세 정보 조회
+    // 부가서비스 상세 정보 조회
     const config = {
       headers: {
         Authorization: decodeURIComponent(token),
       },
     };
     axios
-      .get(`${process.env.BACKEND_API}/admin/user/get/${id}`, config)
+      .get(
+        `${process.env.BACKEND_API}/admin/contract/service/get/${id}`,
+        config
+      )
       .then(function (response) {
-        const userDetail = response.data.item;
-        console.log(`userDetail`, userDetail);
-        setUserDetail(userDetail);
+        const data = response.data.item;
+        setServiceDetail(data);
+        console.log(`data`, data);
+        // const userDetail = response.data.item;
+        // console.log(`userDetail`, userDetail);
+        // setUserDetail(userDetail);
       })
       .catch(function (error) {
         console.log(error);
@@ -246,70 +254,97 @@ const ContractDetail = (props) => {
   }, []);
 
   useEffect(() => {
-    // 요금제 정보 세팅되면
-    // if (userDetail) {
-    //   setIsDone(true);
-    //   form.setFieldsValue({
-    //     // 노출 여부
-    //     state: userDetail.state,
-    //     // 카테고리 1
-    //     classification: userDetail.classification,
-    //     // 카테고리 2
-    //     category: userDetail.category,
-    //     // 작성자
-    //     user_name: userDetail.user.user_name,
-    //     // 제목
-    //     title: userDetail.title,
-    //     // 내용
-    //     content: userDetail.content,
-    //   });
-    //   if (userDetail.reply) {
-    //     form.setFieldsValue({
-    //       // 답장
-    //       reply: userDetail.reply.content,
-    //       // 담당자
-    //       reply_user: userDetail.reply.user.user_name,
-    //     });
-    //   }
-    // } else {
-    //   setIsDone(false);
-    // }
-  }, [userDetail]);
+    if (serviceDetail) {
+      serviceStatusForm.setFieldsValue({});
+      groupForm.setFieldsValue({});
 
-  // 저장 버튼 클릭
-  const handleReplyRegisterSubmit = (values) => {
-    let url = "";
+      let userRole = "";
 
-    url = `${process.env.BACKEND_API}/user/qna/write`;
+      switch (serviceDetail.contract.user.user_role) {
+        case "member":
+          userRole = "멤버";
+          break;
+        case "ffadmin":
+          userRole = "관리자";
+          break;
+        case "group":
+          userRole = "그룹";
+          break;
+        case "user":
+          userRole = "회원";
+          break;
+        default:
+          break;
+      }
 
-    let data = {
-      title: values.title,
-      classification: values.classification,
-      category: values.category,
-      content: values.reply,
-      parent: Number(id),
-      status: "publish",
-    };
-
-    const config = {
-      method: "post",
-      url: url,
-      headers: {
-        Authorization: decodeURIComponent(token),
-      },
-      data: data,
-    };
-
-    axios(config)
-      .then(function (response) {
-        if (response.status === 200) {
-          setOkModalVisible(true);
-        }
-      })
-      .catch(function (error) {
-        console.log(error);
+      userForm.setFieldsValue({
+        user_role: userRole,
+        user_login: serviceDetail.contract.user.user_login,
+        user_name: serviceDetail.contract.user.user_name,
+        uid: serviceDetail.contract.user.uid,
+        user_birthday:
+          serviceDetail.contract.user.user_profile[0].user_birthday,
+        job: serviceDetail.contract.user.user_profile[0].job,
+        address: serviceDetail.contract.user.user_profile[0].address,
+        paymethod: serviceDetail.contract.user.paymethod,
+        fav_spot: serviceDetail.contract.user.fav_spot,
       });
-  };
+
+      contractForm.setFieldsValue({
+        contract_id: serviceDetail.contract.contract_id,
+        extension: serviceDetail.contract.extension,
+        product_name: serviceDetail.contract.rateplan.product.name,
+        next_payday: serviceDetail.contract.next_payday,
+        regdate: serviceDetail.contract.regdate,
+        start_date: serviceDetail.contract.start_date,
+        expired_date: serviceDetail.contract.expired_date,
+        cancel_date: serviceDetail.contract.cancel_date,
+        terminate_date: serviceDetail.contract.terminate_date,
+      });
+
+      let serviceType = "";
+
+      switch (serviceDetail.schedlue.spot_map.space.type) {
+        case "coworking":
+          serviceType = "코워킹룸";
+          break;
+        case "meeting":
+          serviceType = "미팅룸";
+          break;
+        case "lounge":
+          serviceType = "라운지";
+          break;
+        case "locker":
+          serviceType = "락커";
+          break;
+        default:
+          break;
+      }
+
+      const startArray = serviceDetail.schedlue.start_time.split(" ");
+      const endArray = serviceDetail.schedlue.end_time.split(" ");
+
+      const startDate = startArray[0];
+      const startTime = startArray[1];
+      const endDate = endArray[0];
+      const endTime = endArray[1];
+
+      serviceForm.setFieldsValue({
+        service_type: serviceType,
+        start_date: startDate,
+        end_date: endDate,
+        start_time: startTime,
+        end_time: endTime,
+      });
+      paymentForm.setFieldsValue({
+        amount: serviceDetail.payment.amount.toLocaleString("ko"),
+        dc_price: serviceDetail.payment.dc_price.toLocaleString("ko"),
+        coupon_price: serviceDetail.payment.coupon_price.toLocaleString("ko"),
+        // guest_price: serviceDetail.payment.guest_price.toLocaleString("ko"),
+        total: serviceDetail.payment.total.toLocaleString("ko"),
+      });
+    }
+  }, [serviceDetail]);
 
   return (
     <>
@@ -348,11 +383,7 @@ const ContractDetail = (props) => {
           bodyStyle={{ padding: "1rem" }}
           className="mb-4"
         >
-          <Form
-            form={groupForm}
-            layout="vertical"
-            onFinish={handleReplyRegisterSubmit}
-          >
+          <Form form={groupForm} layout="vertical">
             <Form.Item name="classification" label="소속 그룹">
               <Input disabled />
             </Form.Item>
@@ -381,11 +412,7 @@ const ContractDetail = (props) => {
           bodyStyle={{ padding: "1rem" }}
           className="mb-4"
         >
-          <Form
-            form={userForm}
-            layout="vertical"
-            onFinish={handleReplyRegisterSubmit}
-          >
+          <Form form={userForm} layout="vertical">
             <Form.Item name="user_role" label="회원 타입">
               <Input disabled />
             </Form.Item>
@@ -416,10 +443,10 @@ const ContractDetail = (props) => {
             <Form.Item name="address2" label="주소2">
               <Input disabled />
             </Form.Item>
-            <Form.Item name="card" label="대표 결제 카드">
+            <Form.Item name="paymethod" label="대표 결제 카드">
               <Input disabled />
             </Form.Item>
-            <Form.Item name="favorite_spot" label="선호 지점">
+            <Form.Item name="fav_spot" label="선호 지점">
               <Input disabled />
             </Form.Item>
           </Form>
@@ -428,17 +455,89 @@ const ContractDetail = (props) => {
           title={`계약 정보`}
           bodyStyle={{ padding: "1rem" }}
           className="mb-4"
-        ></Card>
+        >
+          <Form form={contractForm} layout="vertical">
+            <Form.Item name="contract_id" label="계약 ID">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="extension" label="연장 회차">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="product_name" label="멤버십 상품">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="next_payday" label="정기 결제일">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="regdate" label="신청 일자">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="start_date" label="시작 일자">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="expired_date" label="만료 일자">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="cancel_date" label="취소 일자">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="terminate_date" label="해지 일자">
+              <Input disabled />
+            </Form.Item>
+          </Form>
+        </Card>
         <Card
           title={`부가서비스 예약 정보`}
           bodyStyle={{ padding: "1rem" }}
           className="mb-4"
-        ></Card>
+        >
+          <Form form={serviceForm} layout="vertical">
+            <Form.Item name="service_type" label="부가서비스">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="start_date" label="시작일">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="end_date" label="종료일">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="start_time" label="시작 시간">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="end_time" label="종료 시간">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="using_time" label="사용 시간">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="expired_date" label="게스트 초대">
+              <Input disabled />
+            </Form.Item>
+          </Form>
+        </Card>
         <Card
           title={`부가서비스 이용 요금 정보`}
           bodyStyle={{ padding: "1rem" }}
           className="mb-4"
-        ></Card>
+        >
+          <Form form={paymentForm} layout="vertical">
+            <Form.Item name="amount" label="부가서비스 요금 (A)">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="dc_price" label="할인액 (B)">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="coupon_price" label="적용 쿠폰 (C)">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="guest_price" label="게스트 초대 금액 (D)">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="total" label="총 결제 금액 (A) + (B) + (C) + (D)">
+              <Input disabled />
+            </Form.Item>
+          </Form>
+        </Card>
         <Card
           title={`청구/결제 정보`}
           bodyStyle={{ padding: "1rem" }}
@@ -454,61 +553,7 @@ const ContractDetail = (props) => {
             onChange={handleTableChange}
           />
         </Card>
-        <Table
-          size="middle"
-          columns={orderColumns}
-          rowKey={(record) => record.rateplan_id}
-          dataSource={[]}
-          pagination={pagination}
-          loading={loading}
-          onChange={handleTableChange}
-        />
-        <Col>
-          <Card
-            title={`상담 메모`}
-            bodyStyle={{ padding: "1rem" }}
-            className="mb-4"
-          >
-            <Form
-              form={historyForm}
-              layout="vertical"
-              onFinish={handleReplyRegisterSubmit}
-            >
-              <Form.Item name="classification">
-                <Input disabled />
-              </Form.Item>
-              <Form.Item name="group_id">
-                <Input.TextArea disabled />
-              </Form.Item>
-            </Form>
-          </Card>
-        </Col>
-        <Col>
-          <Card
-            title={`회원 메모`}
-            bodyStyle={{ padding: "1rem" }}
-            className="mb-4"
-          >
-            <Form
-              form={memoForm}
-              layout="vertical"
-              onFinish={handleReplyRegisterSubmit}
-            >
-              <Form.Item name="classification">
-                <Input disabled />
-              </Form.Item>
-            </Form>
-          </Card>
-        </Col>
-        <Modal
-          visible={okModalVisible}
-          okText="확인"
-          onOk={() => {
-            router.push("/qna");
-          }}
-        >
-          {"답변 등록 완료"}
-        </Modal>
+        <Button>예약 취소/해지</Button>
       </Card>
 
       <Row type="flex" align="middle" className="py-4">
@@ -522,4 +567,4 @@ export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
   return { props: initialize(ctx) };
 });
 
-export default connect((state) => state)(ContractDetail);
+export default connect((state) => state)(ServiceDetail);

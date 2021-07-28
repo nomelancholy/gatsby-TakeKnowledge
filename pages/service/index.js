@@ -28,9 +28,9 @@ const Service = (props) => {
   const columns = [
     {
       title: "예약 ID",
-      dataIndex: "contract",
+      dataIndex: "schedule",
       render: (text, record) => {
-        return text.contract_id;
+        return text.schedule_id;
       },
     },
     {
@@ -38,7 +38,7 @@ const Service = (props) => {
       dataIndex: "user",
       render: (text, record) => {
         return (
-          <a href={`/service/${record.contract.contract_id}`}>
+          <a href={`/service/${record.schedule.schedule_id}`}>
             {`${text.user_name}(${text.uid})`}
           </a>
         );
@@ -243,7 +243,7 @@ const Service = (props) => {
       )
       .then((response) => {
         const data = response.data;
-        // console.log(`data`, data);
+        console.log(`data`, data);
         setServiceList(data.items);
 
         // 페이지 네이션 정보 세팅
