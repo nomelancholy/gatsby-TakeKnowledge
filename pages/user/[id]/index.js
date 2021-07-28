@@ -9,43 +9,6 @@ import axios from "axios";
 import { render } from "less";
 
 const UserDetail = (props) => {
-  const router = useRouter();
-  const { id } = router.query;
-  const { user, isLoggedIn, token } = props.auth;
-
-  // 유저 정보 state
-  const [userDetail, setUserDetail] = useState(undefined);
-
-  // 유저 계약 리스트 state
-  const [userContractList, setUserContractList] = useState([]);
-
-  // 유저 청구 리스트 state
-  const [userOrderList, setUserOrderList] = useState([]);
-
-  const [okModalVisible, setOkModalVisible] = useState(false);
-
-  const radioStyle = {
-    display: "inline",
-    height: "30px",
-    lineHeight: "30px",
-  };
-
-  // 회원 상태
-  const [userStatusForm] = Form.useForm();
-  // 그룹 정보
-  const [groupForm] = Form.useForm();
-  // 회원 정보
-  const [userForm] = Form.useForm();
-  // 상담 메모
-  const [memoForm] = Form.useForm();
-  // 회원 메모
-  const [historyForm] = Form.useForm();
-  // userStatusForm
-  const [pagination, setPagination] = useState({});
-  const [loading, setLoading] = useState(false);
-
-  const PAGE_SIZE = 5;
-
   // 상품 이용 내역 grid 정의
   const userContractColumns = [
     {
@@ -54,26 +17,34 @@ const UserDetail = (props) => {
     },
     {
       title: "계약 상태",
-      dataIndex: "product",
+      dataIndex: "status",
       render: (text, record) => {
         let renderText = "";
 
-        // if (text.type === "membership") {
-        //   renderText = "멤버십";
-        // } else if (text.type === "service") {
-        //   renderText = "부가서비스";
-        // } else if (text.type === "voucher") {
-        //   renderText = "이용권";
-        // }
+        if (text === "wait") {
+          renderText = "계약 신청(입금전)";
+        } else if (text === "buy") {
+          renderText = "계약 신청(이용전)";
+        } else if (text === "pay") {
+          renderText = "계약 완료(이용중)";
+        } else if (text === "refund") {
+          renderText = "계약 해지(환불)";
+        } else if (text === "expired") {
+          renderText = "계약 해지(만료)";
+        } else if (text === "terminate") {
+          renderText = "계약 해지(중도)";
+        } else if (text === "canceled") {
+          renderText = "계약 해지(취소)";
+        }
 
         return renderText;
       },
     },
     {
       title: "멤버십 상품",
-      dataIndex: "product",
+      dataIndex: "rateplan",
       render: (text, record) => {
-        // return text.name;
+        return text.product.name;
       },
     },
     {
@@ -85,92 +56,46 @@ const UserDetail = (props) => {
     },
     {
       title: "결제 유형",
-      dataIndex: "price",
-      render: (text, record) => {
-        // return text.toLocaleString("ko-KR");
-      },
-    },
-    {
-      title: "시작일",
-      dataIndex: "dc_price",
-      render: (text, record) => {
-        // return text.toLocaleString("ko-KR");
-      },
-    },
-    {
-      title: "정기 결제일",
-      dataIndex: "start_date",
-    },
-    {
-      title: "취소일",
-      dataIndex: "end_date",
-    },
-    {
-      title: "해지일",
-      dataIndex: "status",
+      dataIndex: "rateplan",
       render: (text, record) => {
         let renderText = "";
-        if (text === "active") {
-          renderText = "노출";
-        } else if (text === "inactive") {
-          renderText = "미노출";
+
+        if (text.product.pay_demand == "pre") {
+          renderText = "선불";
+        } else if (text.product.pay_demand == "deffered") {
+          renderText = "후불";
+        } else if (text.product.pay_demand == "last") {
+          renderText = "말일 결제";
         }
 
         return renderText;
       },
     },
     {
+      title: "시작일",
+      dataIndex: "start_date",
+    },
+    {
+      title: "정기 결제일",
+      dataIndex: "next_paydate",
+    },
+    {
+      title: "취소일",
+      dataIndex: "cancel_date",
+    },
+    {
+      title: "해지일",
+      dataIndex: "teminate_date",
+    },
+    {
       title: "만료일",
-      dataIndex: "regdate",
+      dataIndex: "expired_date",
     },
     {
       title: "생성 일시",
       dataIndex: "regdate",
     },
   ];
-
-  const [userContractParams, setUserContractParams] = useState({
-    page: 1,
-    size: PAGE_SIZE,
-    uid: id,
-  });
-
-  const getUserContractList = () => {
-    setUserContractLoading(true);
-    // 유저 계약 리스트 조회
-    axios
-      .post(
-        `${process.env.BACKEND_API}/admin/contract/list`,
-        { page: 1, size: 5, uid: id },
-        {
-          headers: {
-            "Content-Type": "application/json;charset=UTF-8",
-            "Access-Control-Allow-Origin": "*",
-            Authorization: decodeURIComponent(token),
-          },
-        }
-      )
-      .then((response) => {
-        const data = response.data;
-        console.log(`data`, data);
-        setUserContractList(data.items);
-
-        // 페이지 네이션 정보 세팅
-        const pageInfo = {
-          current: data.page,
-          total: data.total,
-          pageSize: data.size,
-        };
-
-        // pageInfo 세팅
-        setUserContractPagination(pageInfo);
-
-        setUserContractLoading(false);
-      })
-      .catch((error) => {
-        console.log(`error`, error);
-      });
-  };
 
   // 청구 grid 정의
   const orderColumns = [
@@ -194,15 +119,23 @@ const UserDetail = (props) => {
       render: (text, record) => {
         let renderText = "";
 
-        if (text.type === "membership") {
-          renderText = "멤버십";
-        } else if (text.type === "service") {
-          renderText = "부가서비스";
-        } else if (text.type === "voucher") {
-          renderText = "이용권";
+        if (text.status === "wait") {
+          renderText = "계약 신청(입금전)";
+        } else if (text.status === "buy") {
+          renderText = "계약 신청(이용전)";
+        } else if (text.status === "pay") {
+          renderText = "계약 완료(이용중)";
+        } else if (text.status === "refund") {
+          renderText = "계약 해지(환불)";
+        } else if (text.status === "expired") {
+          renderText = "계약 해지(만료)";
+        } else if (text.status === "terminate") {
+          renderText = "계약 해지(중도)";
+        } else if (text.status === "canceled") {
+          renderText = "계약 해지(취소)";
         }
 
-        return text.status;
+        return renderText;
       },
     },
     {
@@ -216,14 +149,32 @@ const UserDetail = (props) => {
       title: "결제 방식",
       dataIndex: "pay_method",
       render: (text, record) => {
-        return text.type;
+        let renderText = "";
+
+        if (text.type == "personal") {
+          renderText = "개인 카드 결제";
+        } else {
+          renderText = "법인 카드 결제";
+        }
+
+        return renderText;
       },
     },
     {
       title: "결제 유형",
       dataIndex: "product",
       render: (text, record) => {
-        return text.pay_demand;
+        let renderText = "";
+
+        if (text.pay_demand == "pre") {
+          renderText = "선불";
+        } else if (text.pay_demand == "deffered") {
+          renderText = "후불";
+        } else if (text.pay_demand == "last") {
+          renderText = "말일 결제";
+        }
+
+        return renderText;
       },
     },
     {
@@ -237,21 +188,33 @@ const UserDetail = (props) => {
       title: "청구 금액",
       dataIndex: "order",
       render: (text, record) => {
-        return text.amount;
+        return text.amount.toLocaleString("ko-KR");
       },
     },
     {
       title: "결제 금액",
       dataIndex: "payment",
       render: (text, record) => {
-        return text.total;
+        return text.total.toLocaleString("ko-KR");
       },
     },
     {
       title: "결제 상태",
       dataIndex: "payment",
       render: (text, record) => {
-        return text.status;
+        let renderText = "";
+
+        if (text.status == "wait") {
+          renderText = "대기";
+        } else if (text.status == "buy") {
+          renderText = "결제";
+        } else if (text.status == "unpaid") {
+          renderText = "미납";
+        } else if (text.status == "canceld") {
+          renderText = "취소";
+        }
+
+        return renderText;
       },
     },
 
@@ -263,6 +226,137 @@ const UserDetail = (props) => {
       },
     },
   ];
+
+  const PAGE_SIZE = 5;
+
+  // 유저 상품 이용 내역 테이블 페이지, 로딩
+  const [userContractPagination, setUserContractPagination] = useState({});
+  const [userContractLoading, setUserContractLoading] = useState(false);
+
+  // 유저 청구 내역 테이블 페이징, 로딩
+  const [userOrderPagination, setUserOrderPagination] = useState({});
+  const [userOrderLoading, setUserOrderLoading] = useState(false);
+
+  // 유저 계약 리스트 조회
+  const getUserContractList = (params) => {
+    setUserContractLoading(true);
+
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/contract/list`,
+        { ...params },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        const data = response.data;
+        setUserContractList(data.items);
+
+        // 페이지 네이션 정보 세팅
+        const pageInfo = {
+          current: data.page,
+          total: data.total,
+          pageSize: data.size,
+        };
+
+        // pageInfo 세팅
+        setUserContractPagination(pageInfo);
+
+        setUserContractLoading(false);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
+
+  // 유저 청구 내역 조회
+  const getUserOrderList = (params) => {
+    setUserOrderLoading(true);
+
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/contract/order/list`,
+        { ...params },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        const data = response.data;
+        setUserOrderList(data.items);
+
+        // 페이지 네이션 정보 세팅
+        const pageInfo = {
+          current: data.page,
+          total: data.total,
+          pageSize: data.size,
+        };
+
+        // pageInfo 세팅
+        setUserOrderPagination(pageInfo);
+
+        // 로딩바 세팅
+        setUserOrderLoading(false);
+
+        // setParams(params);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
+
+  // 상품 이용 내역 테이블 변경
+  const handleUserContractTableChange = (pagination) => {
+    setUserContractPagination(pagination);
+
+    // 호출
+    getUserContractList({ page: pagination.current, size: PAGE_SIZE, uid: id });
+  };
+
+  // 청구 내역 테이블 변경
+  const handleUserOrderTableChange = (pagination) => {
+    setUserOrderPagination(pagination);
+
+    // 호출
+    getUserOrderList({ page: pagination.current, size: PAGE_SIZE, uid: id });
+  };
+
+  const router = useRouter();
+  const { id } = router.query;
+  const { user, isLoggedIn, token } = props.auth;
+
+  const radioStyle = {
+    display: "inline",
+    height: "30px",
+    lineHeight: "30px",
+  };
+
+  // 유저 정보 state
+  const [userDetail, setUserDetail] = useState(undefined);
+  // 유저 계약 리스트 state
+  const [userContractList, setUserContractList] = useState([]);
+  // 유저 청구 리스트 state
+  const [userOrderList, setUserOrderList] = useState([]);
+
+  // 회원 상태
+  const [userStatusForm] = Form.useForm();
+  // 그룹 정보
+  const [groupForm] = Form.useForm();
+  // 회원 정보
+  const [userForm] = Form.useForm();
+  // 상담 메모
+  const [counselingForm] = Form.useForm();
+  // 회원 메모
+  const [memoForm] = Form.useForm();
 
   useEffect(() => {
     // 유저 상세 정보 조회
@@ -282,27 +376,9 @@ const UserDetail = (props) => {
       });
 
     // 유저 계약 내역 조회
-    getUserContractList(userContractParams);
+    getUserContractList({ page: 1, size: PAGE_SIZE, uid: id });
     // 유저 청구 내역 조회
-    axios
-      .post(
-        `${process.env.BACKEND_API}/admin/contract/order/list`,
-        { page: 1, size: 5, uid: id },
-        {
-          headers: {
-            "Content-Type": "application/json;charset=UTF-8",
-            "Access-Control-Allow-Origin": "*",
-            Authorization: decodeURIComponent(token),
-          },
-        }
-      )
-      .then((response) => {
-        const data = response.data.items;
-        setUserOrderList(data);
-      })
-      .catch((error) => {
-        console.log(`error`, error);
-      });
+    getUserOrderList({ page: 1, size: PAGE_SIZE, uid: id });
   }, []);
 
   useEffect(() => {
@@ -362,26 +438,6 @@ const UserDetail = (props) => {
 
     // 회원 메모
   }, [userDetail]);
-
-  const [userContractPagination, setUserContractPagination] = useState({});
-  const [userContractLoading, setUserContractLoading] = useState(false);
-  // 테이블 페이지 변경시
-  const handleUserContractTableChange = (pagination) => {
-    setUserContractPagination(pagination);
-
-    // 호출
-    getUserContractList({ ...userContractParams, page: pagination.current });
-  };
-
-  const [userOrderPagination, setUserOrderPagination] = useState({});
-  const [userOrderLoading, setUserOrderLoading] = useState(false);
-
-  const handleUserOrderTableChange = (pagination) => {
-    setUserContractPagination(pagination);
-
-    // 호출
-    getUserContractList({ ...userContractParams, page: pagination.current });
-  };
 
   return (
     <>
@@ -520,11 +576,11 @@ const UserDetail = (props) => {
             bodyStyle={{ padding: "1rem" }}
             className="mb-4"
           >
-            <Form form={historyForm} layout="vertical">
-              <Form.Item name="classification">
+            <Form form={counselingForm} layout="vertical">
+              <Form.Item name="title">
                 <Input disabled />
               </Form.Item>
-              <Form.Item name="group_id">
+              <Form.Item name="content">
                 <Input.TextArea disabled />
               </Form.Item>
             </Form>
@@ -537,21 +593,12 @@ const UserDetail = (props) => {
             className="mb-4"
           >
             <Form form={memoForm} layout="vertical">
-              <Form.Item name="classification">
+              <Form.Item name="memo">
                 <Input disabled />
               </Form.Item>
             </Form>
           </Card>
         </Col>
-        <Modal
-          visible={okModalVisible}
-          okText="확인"
-          onOk={() => {
-            router.push("/qna");
-          }}
-        >
-          {"답변 등록 완료"}
-        </Modal>
       </Card>
 
       <Row type="flex" align="middle" className="py-4">
