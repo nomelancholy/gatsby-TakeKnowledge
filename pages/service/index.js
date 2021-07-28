@@ -84,6 +84,8 @@ const Service = (props) => {
 
         const type = text.type;
 
+        // console.log(`type`, type);
+
         switch (type) {
           case "lounge":
             renderText = "라운지";
