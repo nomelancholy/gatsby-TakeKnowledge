@@ -21,7 +21,11 @@ const Spot = (props) => {
       title: "스팟명",
       dataIndex: "name",
       render: (text, record) => {
-        return <a href={`/spot/${record.spot_id}`}>{text}</a>;
+        if (record.status === "trash") {
+          return text;
+        } else {
+          return <a href={`/spot/${record.spot_id}`}>{text}</a>;
+        }
       },
     },
     {
@@ -52,7 +56,23 @@ const Spot = (props) => {
       title: "활성/비활성",
       dataIndex: "status",
       render: (text) => {
-        return text === "active" ? "활성" : "비활성";
+        let renderText = "";
+
+        switch (text) {
+          case "active":
+            renderText = "활성";
+            break;
+          case "inactive":
+            renderText = "비활성";
+            break;
+          case "trash":
+            renderText = "삭제";
+            break;
+          default:
+            break;
+        }
+
+        return renderText;
       },
     },
     {
@@ -82,7 +102,7 @@ const Spot = (props) => {
   // 파라미터 state - 초기엔 초기값, 이후엔 바로 직전의 params 저장
   const [params, setParams] = useState({
     spot_id: undefined,
-    spot_name: undefined,
+    name: undefined,
     status: undefined,
     page: 1,
     size: PAGE_SIZE,
@@ -230,7 +250,7 @@ const Spot = (props) => {
 
     const searchParams = {
       spot_id: searchFormValues.spot_id,
-      spot_name: searchFormValues.spot_name,
+      name: searchFormValues.name,
       status: searchFormValues.status,
       page: 1,
     };
@@ -245,7 +265,7 @@ const Spot = (props) => {
     // params state reset
     const searchParams = {
       spot_id: undefined,
-      spot_name: undefined,
+      name: undefined,
       status: undefined,
       page: 1,
     };
@@ -301,17 +321,22 @@ const Spot = (props) => {
           layout="vertical"
           name="form_in_modal"
           initialValues={{ modifier: "public" }}
+          onKeyUp={(e) => {
+            if (e.key === "Enter") {
+              handleSearch();
+            }
+          }}
         >
           <Form.Item name="spot_id" label="스팟 ID">
             <Input />
           </Form.Item>
-          <Form.Item name="spot_name" label="스팟명">
+          <Form.Item name="name" label="스팟명">
             <Input />
           </Form.Item>
           <Form.Item name="status" label="사용 여부">
-            <Select style={{ width: 160 }}>
-              <Select.Option value="active">사용</Select.Option>
-              <Select.Option value="inactive">미사용</Select.Option>
+            <Select style={{ width: 200 }}>
+              <Select.Option value="active">활성</Select.Option>
+              <Select.Option value="inactive">비활성</Select.Option>
             </Select>
           </Form.Item>
         </Form>
