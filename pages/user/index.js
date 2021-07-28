@@ -131,8 +131,8 @@ const User = (props) => {
     user_name: undefined,
     user_role: undefined,
     contract_status: undefined,
-    registed_card: undefined,
-    user_status: undefined,
+    has_card: undefined,
+    status: undefined,
     page: 1,
     size: PAGE_SIZE,
   });
@@ -200,8 +200,8 @@ const User = (props) => {
       user_name: searchFormValues.user_name,
       user_role: searchFormValues.user_role,
       contract_status: searchFormValues.contract_status,
-      registed_card: searchFormValues.registed_card,
-      user_status: searchFormValues.user_status,
+      has_card: searchFormValues.has_card,
+      status: searchFormValues.status,
       page: 1,
     };
 
@@ -218,8 +218,8 @@ const User = (props) => {
       user_name: undefined,
       user_role: undefined,
       contract_status: undefined,
-      registed_card: undefined,
-      user_status: undefined,
+      has_card: undefined,
+      status: undefined,
       page: 1,
     };
 
@@ -264,6 +264,11 @@ const User = (props) => {
           layout="vertical"
           name="form_in_modal"
           initialValues={{ modifier: "public" }}
+          onKeyUp={(e) => {
+            if (e.key === "Enter") {
+              handleSearch();
+            }
+          }}
         >
           <Form.Item name="uid" label="멤버 ID">
             <Input />
@@ -276,7 +281,6 @@ const User = (props) => {
               <Select.Option value="ffadmin">관리자</Select.Option>
               <Select.Option value="member">멤버</Select.Option>
               <Select.Option value="group">그룹</Select.Option>
-              <Select.Option value="user">회원</Select.Option>
             </Select>
           </Form.Item>
           <Form.Item name="contract_status" label="계약자 타입">
@@ -298,16 +302,16 @@ const User = (props) => {
             <Select style={{ width: 160 }}>
             </Select>
           </Form.Item> */}
-          <Form.Item name="registed_card" label="카드 등록 여부">
+          <Form.Item name="has_card" label="카드 등록 여부">
             <Select style={{ width: 160 }}>
               <Select.Option value={true}>등록</Select.Option>
               <Select.Option value={false}>미등록</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item name="user_status" label="활성/휴면 여부">
+          <Form.Item name="status" label="활성/휴면 여부">
             <Select style={{ width: 160 }}>
               <Select.Option value="active">활성</Select.Option>
-              <Select.Option value="inactive">휴면</Select.Option>
+              <Select.Option value="inactive">비활성</Select.Option>
               <Select.Option value="sleep">휴면</Select.Option>
               <Select.Option value="leave">탈퇴</Select.Option>
             </Select>
