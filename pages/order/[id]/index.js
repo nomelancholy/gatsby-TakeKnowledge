@@ -150,6 +150,9 @@ const ContractDetail = (props) => {
     {
       title: "결제 금액",
       dataIndex: "total",
+      render: (text, record) => {
+        return text.toLocaleString("ko");
+      },
     },
     {
       title: "결제 상태",
@@ -245,6 +248,7 @@ const ContractDetail = (props) => {
       });
   };
 
+  // 결제 내역 조회
   const getPaymentList = (params) => {
     setPaymentLoading(true);
 
@@ -303,7 +307,7 @@ const ContractDetail = (props) => {
   const { id } = router.query;
   const { user, isLoggedIn, token } = props.auth;
 
-  const [orderList, setOrderList] = useState(undefined);
+  const [orderDetail, setOrderDetail] = useState(undefined);
 
   // 청구 상태
   const [orderStatusForm] = Form.useForm();
@@ -315,27 +319,22 @@ const ContractDetail = (props) => {
   const [contractForm] = Form.useForm();
   // 청구 내용
   const [orderForm] = Form.useForm();
-  const [memoForm] = Form.useForm();
-  const [historyForm] = Form.useForm();
 
   useEffect(() => {
     // 청구/결제 상세 내용 조회
     axios
-      .post(
-        `${process.env.BACKEND_API}/admin/contract/order/list`,
-        { contract_id: id },
-        {
-          headers: {
-            "Content-Type": "application/json;charset=UTF-8",
-            "Access-Control-Allow-Origin": "*",
-            Authorization: decodeURIComponent(token),
-          },
-        }
-      )
+      .get(`${process.env.BACKEND_API}/admin/contract/order/get/${id}`, {
+        headers: {
+          "Content-Type": "application/json;charset=UTF-8",
+          "Access-Control-Allow-Origin": "*",
+          Authorization: decodeURIComponent(token),
+        },
+      })
       .then((response) => {
-        const data = response.data.items[0];
+        const data = response.data.item;
+
         console.log(`data`, data);
-        setOrderList(data);
+        setOrderDetail(data);
       })
       .catch((error) => {
         console.log(`error`, error);
@@ -346,77 +345,65 @@ const ContractDetail = (props) => {
 
   useEffect(() => {
     // 요금제 정보 세팅되면
-    if (orderList) {
-      console.log(`orderList`, orderList);
+    if (orderDetail) {
+      console.log(`orderDetail`, orderDetail);
+
+      // 청구 상태
+      orderStatusForm.setFieldsValue({
+        status: "active",
+      });
+
+      // 그룹 정보
+      groupForm.setFieldsValue({});
+
       // 회원 정보
       userForm.setFieldsValue({
-        // 회원 ID
-        uid: orderList.user.uid,
-        // 멤버 이름
-        user_name: orderList.user.user_name,
-        // 아이디
-        // 핸드폰 번호
-        // 대표 결제 카드
+        uid: orderDetail.contract.user.uid,
+        user_name: orderDetail.contract.user.user_name,
+        user_login: orderDetail.contract.user.user_login,
+        phone: "",
+        paymethod: orderDetail.contract.user.paymethod,
       });
 
-      // 계약 상태 세팅
       let contractStatus = "";
 
-      switch (orderList.contract.status) {
-        case "wait":
-          contractStatus = "구매 대기";
-          break;
-        case "buy":
-          contractStatus = "구매";
-          break;
-        case "pay":
-          contractStatus = "이용 시작";
-          break;
-        case "refund":
-          contractStatus = "환불";
-          break;
-        case "expired":
-          contractStatus = "종료";
-          break;
-        case "terminate":
-          contractStatus = "해지";
-          break;
-        case "canceled":
-          contractStatus = "취소";
-          break;
-        default:
-          break;
+      if (orderDetail.contract.status === "wait") {
+        contractStatus = "계약 신청(입금전)";
+      } else if (orderDetail.contract.status === "buy") {
+        contractStatus = "계약 신청(이용전)";
+      } else if (orderDetail.contract.status === "pay") {
+        contractStatus = "계약 완료(이용중)";
+      } else if (orderDetail.contract.status === "refund") {
+        contractStatus = "계약 해지(환불)";
+      } else if (orderDetail.contract.status === "expired") {
+        contractStatus = "계약 해지(만료)";
+      } else if (orderDetail.contract.status === "terminate") {
+        contractStatus = "계약 해지(중도)";
+      } else if (orderDetail.contract.status === "canceled") {
+        contractStatus = "계약 해지(취소)";
       }
-
       // 계약 정보
       contractForm.setFieldsValue({
-        // 멤버십 상품
-        product_name: orderList.product.name,
-        // 계약 상태
+        product_name: orderDetail.contract.rateplan.product.name,
         status: contractStatus,
-        // 계약 ID
-        contract_id: orderList.contract.contract_id,
-        // 계약 시작일
-        start_date: orderList.contract.regdate,
-        // 계약 신청일
-        // 연장 회차
-        // 정기 결제일
-        next_paydate: orderList.contract.next_paydate,
-        // 적용 요금제
+        contract_id: orderDetail.contract.contract_id,
+        start_date: orderDetail.contract.start_date,
+        regdate: orderDetail.contract.regdate,
+        next_paydate: orderDetail.contract.next_paydate,
+        rateplan_name: orderDetail.contract.rateplan.name,
       });
 
-      // 청구 유형 세팅
-      let contractType;
+      let productType = "";
 
-      switch (orderList.contract.contract_type) {
+      switch (orderDetail.contract.rateplan.product.type) {
         case "membership":
-          contractType = "멤버십";
+          productType = "멤버십";
           break;
         case "service":
-          contractType = "부가서비스";
+          productType = "부가서비스";
           break;
         case "voucher":
-          contractType = "이용권";
+          productType = "이용권";
           break;
         default:
           break;
@@ -424,7 +411,7 @@ const ContractDetail = (props) => {
 
       let payDemand = "";
 
-      switch (orderList.product.pay_demand) {
+      switch (orderDetail.contract.rateplan.product.pay_demand) {
         case "pre":
           payDemand = "선불";
           break;
@@ -440,22 +427,120 @@ const ContractDetail = (props) => {
 
       // 청구 내용
       orderForm.setFieldsValue({
-        // 청구 유형
-        contract_type: contractType,
-        // 결제 방식
-        pay_method:
-          orderList.pay_method.type === "personal"
-            ? "개인 카드결제"
-            : "법인 카드 결제",
-        // 결제 유형
+        product_type: productType,
         pay_demand: payDemand,
-        // 청구 기간
-        // 정기 결제일자
-        next_paydate: orderList.contract.next_paydate,
-        // 청구 상태
-        // 총 금액
-        total: orderList.payment.total,
+        next_paydate: orderDetail.contract.next_paydate,
+        total: orderDetail.order.amount.toLocaleString("ko"),
       });
+
+      // 회원 정보
+      // userForm.setFieldsValue({
+      //   // 회원 ID
+      //   uid: orderDetail.user.uid,
+      //   // 멤버 이름
+      //   user_name: orderDetail.user.user_name,
+      //   // 아이디
+      //   // 핸드폰 번호
+      //   // 대표 결제 카드
+      // });
+
+      // // 계약 상태 세팅
+      // let contractStatus = "";
+
+      // switch (orderDetail.contract.status) {
+      //   case "wait":
+      //     contractStatus = "구매 대기";
+      //     break;
+      //   case "buy":
+      //     contractStatus = "구매";
+      //     break;
+      //   case "pay":
+      //     contractStatus = "이용 시작";
+      //     break;
+      //   case "refund":
+      //     contractStatus = "환불";
+      //     break;
+      //   case "expired":
+      //     contractStatus = "종료";
+      //     break;
+      //   case "terminate":
+      //     contractStatus = "해지";
+      //     break;
+      //   case "canceled":
+      //     contractStatus = "취소";
+      //     break;
+      //   default:
+      //     break;
+      // }
+
+      // // 계약 정보
+      // contractForm.setFieldsValue({
+      //   // 멤버십 상품
+      //   product_name: orderDetail.product.name,
+      //   // 계약 상태
+      //   status: contractStatus,
+      //   // 계약 ID
+      //   contract_id: orderDetail.contract.contract_id,
+      //   // 계약 시작일
+      //   start_date: orderDetail.contract.regdate,
+      //   // 계약 신청일
+      //   // 연장 회차
+      //   // 정기 결제일
+      //   next_paydate: orderDetail.contract.next_paydate,
+      //   // 적용 요금제
+      // });
+
+      // // 청구 유형 세팅
+      // let contractType;
+
+      // switch (orderDetail.contract.contract_type) {
+      //   case "membership":
+      //     contractType = "멤버십";
+      //     break;
+      //   case "service":
+      //     contractType = "부가서비스";
+      //     break;
+      //   case "voucher":
+      //     contractType = "이용권";
+      //     break;
+      //   default:
+      //     break;
+      // }
+
+      // let payDemand = "";
+
+      // switch (orderDetail.product.pay_demand) {
+      //   case "pre":
+      //     payDemand = "선불";
+      //     break;
+      //   case "deffered":
+      //     payDemand = "후불";
+      //     break;
+      //   case "last":
+      //     payDemand = "말일 결제";
+      //     break;
+      //   default:
+      //     break;
+      // }
+
+      // // 청구 내용
+      // orderForm.setFieldsValue({
+      //   // 청구 유형
+      //   contract_type: contractType,
+      //   // 결제 방식
+      //   pay_method:
+      //     orderDetail.pay_method.type === "personal"
+      //       ? "개인 카드결제"
+      //       : "법인 카드 결제",
+      //   // 결제 유형
+      //   pay_demand: payDemand,
+      //   // 청구 기간
+      //   // 정기 결제일자
+      //   next_paydate: orderDetail.contract.next_paydate,
+      //   // 청구 상태
+      //   // 총 금액
+      //   total: orderDetail.payment.total,
+      // });
 
       // form.setFieldsValue({
       //   // 노출 여부
@@ -472,7 +557,7 @@ const ContractDetail = (props) => {
       //   content: userDetail.content,
       // });
     }
-  }, [orderList]);
+  }, [orderDetail]);
 
   return (
     <>
@@ -486,17 +571,20 @@ const ContractDetail = (props) => {
           <Form form={orderStatusForm}>
             <Form.Item name="status" label="청구 상태">
               <Radio.Group>
-                <Radio style={radioStyle} value={"active"}>
+                <Radio style={radioStyle} value={"purchase"}>
                   완료
                 </Radio>
-                <Radio style={radioStyle} value={"inactive"}>
+                <Radio style={radioStyle} value={"unpaid"}>
                   미납
                 </Radio>
-                <Radio style={radioStyle} value={"inactive"}>
+                <Radio style={radioStyle} value={"will"}>
                   예정
                 </Radio>
-                <Radio style={radioStyle} value={"inactive"}>
+                <Radio style={radioStyle} value={"refund"}>
                   환불
+                </Radio>
+                <Radio style={radioStyle} value={"canceled"}>
+                  취소
                 </Radio>
               </Radio.Group>
             </Form.Item>
@@ -542,7 +630,7 @@ const ContractDetail = (props) => {
               <Input disabled />
             </Form.Item>
 
-            <Form.Item name="card" label="대표 결제 카드">
+            <Form.Item name="paymethod" label="대표 결제 카드">
               <Input disabled />
             </Form.Item>
           </Form>
@@ -561,7 +649,7 @@ const ContractDetail = (props) => {
             <Form.Item name="start_date" label="계약 시작일">
               <Input disabled />
             </Form.Item>
-            <Form.Item name="request_date" label="계약 신청일">
+            <Form.Item name="regdate" label="계약 신청일">
               <Input disabled />
             </Form.Item>
             <Form.Item name="extend_count" label="연장 회차">
@@ -570,14 +658,14 @@ const ContractDetail = (props) => {
             <Form.Item name="next_paydate" label="정기 결제일">
               <Input disabled />
             </Form.Item>
-            <Form.Item name="card" label="적용 요금제">
+            <Form.Item name="rateplan_name" label="적용 요금제">
               <Input disabled />
             </Form.Item>
           </Form>
         </Card>
         <Card title="청구 내용">
           <Form form={orderForm} layout="vertical">
-            <Form.Item name="contract_type" label="청구 유형">
+            <Form.Item name="product_type" label="청구 유형">
               <Input disabled />
             </Form.Item>
             <Form.Item name="pay_method" label="결제 방식">
