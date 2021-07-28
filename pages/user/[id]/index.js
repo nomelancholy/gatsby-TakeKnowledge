@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import axios from "axios";
+import { render } from "less";
 
 const UserDetail = (props) => {
   const router = useRouter();
@@ -18,9 +19,10 @@ const UserDetail = (props) => {
   // 유저 계약 리스트 state
   const [userContractList, setUserContractList] = useState([]);
 
+  // 유저 청구 리스트 state
+  const [userOrderList, setUserOrderList] = useState([]);
+
   const [okModalVisible, setOkModalVisible] = useState(false);
-  // 답장이 있는지 없는지
-  const [isDone, setIsDone] = useState(false);
 
   const radioStyle = {
     display: "inline",
@@ -42,19 +44,10 @@ const UserDetail = (props) => {
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const handleTableChange = (pagination, filters, sorter) => {
-    setPagination(2);
+  const PAGE_SIZE = 5;
 
-    fetch({
-      results: pagination.pageSize,
-      page: pagination.current,
-      sortField: sorter.field,
-      sortOrder: sorter.order,
-      ...filters,
-    });
-  };
-
-  const contractColumns = [
+  // 상품 이용 내역 grid 정의
+  const userContractColumns = [
     {
       title: "계약 ID",
       dataIndex: "contract_id",
@@ -136,18 +129,68 @@ const UserDetail = (props) => {
     },
   ];
 
+  const [userContractParams, setUserContractParams] = useState({
+    page: 1,
+    size: PAGE_SIZE,
+    uid: id,
+  });
+
+  const getUserContractList = () => {
+    setUserContractLoading(true);
+    // 유저 계약 리스트 조회
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/contract/list`,
+        { page: 1, size: 5, uid: id },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        const data = response.data;
+        console.log(`data`, data);
+        setUserContractList(data.items);
+
+        // 페이지 네이션 정보 세팅
+        const pageInfo = {
+          current: data.page,
+          total: data.total,
+          pageSize: data.size,
+        };
+
+        // pageInfo 세팅
+        setUserContractPagination(pageInfo);
+
+        setUserContractLoading(false);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
+
+  // 청구 grid 정의
   const orderColumns = [
     {
       title: "청구 ID",
-      dataIndex: "rateplan_id",
+      dataIndex: "order",
+      render: (text, record) => {
+        return text.order_id;
+      },
     },
     {
       title: "계약 ID",
-      dataIndex: "rateplan_id",
+      dataIndex: "contract",
+      render: (text, record) => {
+        return text.contract_id;
+      },
     },
     {
-      title: "상품 그룹",
-      dataIndex: "product",
+      title: "계약 상태",
+      dataIndex: "contract",
       render: (text, record) => {
         let renderText = "";
 
@@ -159,62 +202,65 @@ const UserDetail = (props) => {
           renderText = "이용권";
         }
 
-        return renderText;
+        return text.status;
       },
     },
     {
-      title: "상품 명",
+      title: "멤버십 상품",
       dataIndex: "product",
       render: (text, record) => {
         return text.name;
       },
     },
     {
-      title: "요금제 이름",
-      dataIndex: "name",
+      title: "결제 방식",
+      dataIndex: "pay_method",
       render: (text, record) => {
-        return <a href={`/payment/${record.rateplan_id}`}>{text}</a>;
+        return text.type;
       },
     },
     {
-      title: "이용 요금",
-      dataIndex: "price",
+      title: "결제 유형",
+      dataIndex: "product",
       render: (text, record) => {
-        return text.toLocaleString("ko-KR");
+        return text.pay_demand;
       },
     },
     {
-      title: "기본 할인 요금",
-      dataIndex: "dc_price",
+      title: "결제 일자",
+      dataIndex: "contract",
       render: (text, record) => {
-        return text.toLocaleString("ko-KR");
+        return text.regdate;
       },
     },
     {
-      title: "시작일",
-      dataIndex: "start_date",
-    },
-    {
-      title: "종료일",
-      dataIndex: "end_date",
-    },
-    {
-      title: "노출 여부",
-      dataIndex: "status",
+      title: "청구 금액",
+      dataIndex: "order",
       render: (text, record) => {
-        let renderText = "";
-        if (text === "active") {
-          renderText = "노출";
-        } else if (text === "inactive") {
-          renderText = "미노출";
-        }
+        return text.amount;
+      },
+    },
+    {
+      title: "결제 금액",
+      dataIndex: "payment",
+      render: (text, record) => {
+        return text.total;
+      },
+    },
+    {
+      title: "결제 상태",
+      dataIndex: "payment",
+      render: (text, record) => {
+        return text.status;
+      },
+    },
 
-        return renderText;
-      },
-    },
     {
       title: "생성 일시",
-      dataIndex: "regdate",
+      dataIndex: "order",
+      render: (text, record) => {
+        return text.regdate;
+      },
     },
   ];
 
@@ -229,17 +275,19 @@ const UserDetail = (props) => {
       .get(`${process.env.BACKEND_API}/admin/user/get/${id}`, config)
       .then(function (response) {
         const userDetail = response.data.item;
-        console.log(`userDetail`, userDetail);
         setUserDetail(userDetail);
       })
       .catch(function (error) {
         console.log(error);
       });
-    // 유저 계약 리스트 조회
+
+    // 유저 계약 내역 조회
+    getUserContractList(userContractParams);
+    // 유저 청구 내역 조회
     axios
       .post(
-        `${process.env.BACKEND_API}/admin/contract/list`,
-        { page: 1, size: 100, uid: id },
+        `${process.env.BACKEND_API}/admin/contract/order/list`,
+        { page: 1, size: 5, uid: id },
         {
           headers: {
             "Content-Type": "application/json;charset=UTF-8",
@@ -250,8 +298,7 @@ const UserDetail = (props) => {
       )
       .then((response) => {
         const data = response.data.items;
-        console.log(`data`, data);
-        setUserContractList(data);
+        setUserOrderList(data);
       })
       .catch((error) => {
         console.log(`error`, error);
@@ -259,35 +306,37 @@ const UserDetail = (props) => {
   }, []);
 
   useEffect(() => {
-    // 요금제 정보 세팅되면
+    // 유저 정보 세팅되면
     if (userDetail) {
-      setIsDone(true);
-
+      console.log(`userDetail`, userDetail);
       let userRole = "";
 
-      switch (userDetail.user_role) {
-        case "ffadmin":
-          userRole = "관리자";
-          break;
-        case "member":
-          userRole = "멤버";
-          break;
-        case "group":
-          userRole = "그룹";
-          break;
-        case "user":
-          userRole = "회원";
-          break;
-        default:
-          break;
+      if (userDetail.user_status === "inactive") {
+        userRole = userDetail.user_status;
+      } else {
+        userRole = userDetail.user_role;
+      }
+
+      // 회원 상태
+      userStatusForm.setFieldsValue({
+        // 회원 타입
+        user_role: userRole,
+      });
+
+      // 그룹 정보
+      if (userDetail.user_role !== "group") {
+        groupForm.setFieldsValue({
+          group: "개인",
+        });
+      } else {
+        // 그룹 정보 세팅
       }
 
       // 회원 정보
       userForm.setFieldsValue({
         // 회원 ID
         uid: userDetail.uid,
-        // 회원 타입
-        user_role: userRole,
+
         // 카테고리 2
         user_name: userDetail.user_name,
         // 작성자
@@ -307,44 +356,31 @@ const UserDetail = (props) => {
         // 선호 지점
         favorite_spot: "",
       });
-    } else {
-      setIsDone(false);
     }
+
+    // 상담 메모
+
+    // 회원 메모
   }, [userDetail]);
 
-  // 저장 버튼 클릭
-  const handleReplyRegisterSubmit = (values) => {
-    let url = "";
+  const [userContractPagination, setUserContractPagination] = useState({});
+  const [userContractLoading, setUserContractLoading] = useState(false);
+  // 테이블 페이지 변경시
+  const handleUserContractTableChange = (pagination) => {
+    setUserContractPagination(pagination);
 
-    url = `${process.env.BACKEND_API}/user/qna/write`;
+    // 호출
+    getUserContractList({ ...userContractParams, page: pagination.current });
+  };
 
-    let data = {
-      title: values.title,
-      classification: values.classification,
-      category: values.category,
-      content: values.reply,
-      parent: Number(id),
-      status: "publish",
-    };
+  const [userOrderPagination, setUserOrderPagination] = useState({});
+  const [userOrderLoading, setUserOrderLoading] = useState(false);
 
-    const config = {
-      method: "post",
-      url: url,
-      headers: {
-        Authorization: decodeURIComponent(token),
-      },
-      data: data,
-    };
+  const handleUserOrderTableChange = (pagination) => {
+    setUserContractPagination(pagination);
 
-    axios(config)
-      .then(function (response) {
-        if (response.status === 200) {
-          setOkModalVisible(true);
-        }
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+    // 호출
+    getUserContractList({ ...userContractParams, page: pagination.current });
   };
 
   return (
@@ -357,21 +393,27 @@ const UserDetail = (props) => {
       >
         <Card>
           <Form form={userStatusForm}>
-            <Form.Item name="status" label="회원 상태">
-              <Radio.Group>
-                <Radio style={radioStyle} value={"active"}>
+            <Form.Item name="user_role" label="회원 상태">
+              <Radio.Group disabled>
+                <Radio style={radioStyle} value={"ffadmin"}>
+                  관리자
+                </Radio>
+                <Radio style={radioStyle} value={"member"}>
                   멤버
                 </Radio>
-                <Radio style={radioStyle} value={"inactive"}>
+                <Radio style={radioStyle} value={"user"}>
                   회원
                 </Radio>
+                {/* <Radio style={radioStyle} value={"group"}>
+                  그룹
+                </Radio> */}
                 <Radio style={radioStyle} value={"inactive"}>
                   탈퇴 회원
                 </Radio>
                 <Radio style={radioStyle} value={"inactive"}>
                   휴면 회원
                 </Radio>
-                <Radio style={radioStyle} value={"inactive"}>
+                {/* <Radio style={radioStyle} value={"inactive"}>
                   그룹 멤버
                 </Radio>
                 <Radio style={radioStyle} value={"inactive"}>
@@ -379,18 +421,14 @@ const UserDetail = (props) => {
                 </Radio>
                 <Radio style={radioStyle} value={"inactive"}>
                   그룹 관리자 멤버
-                </Radio>
+                </Radio> */}
               </Radio.Group>
             </Form.Item>
           </Form>
         </Card>
         <Card title="그룹 정보">
-          <Form
-            form={groupForm}
-            layout="vertical"
-            onFinish={handleReplyRegisterSubmit}
-          >
-            <Form.Item name="classification" label="소속 그룹">
+          <Form form={groupForm} layout="vertical">
+            <Form.Item name="group" label="소속 그룹">
               <Input disabled />
             </Form.Item>
             <Form.Item name="group_id" label="그룹 ID">
@@ -417,11 +455,7 @@ const UserDetail = (props) => {
           </Form>
         </Card>
         <Card title="회원 정보">
-          <Form
-            form={userForm}
-            layout="vertical"
-            onFinish={handleReplyRegisterSubmit}
-          >
+          <Form form={userForm} layout="vertical">
             <Form.Item name="uid" label="회원 ID">
               <Input disabled />
             </Form.Item>
@@ -460,23 +494,23 @@ const UserDetail = (props) => {
         <Card title="상품 이용 내역">
           <Table
             size="middle"
-            columns={contractColumns}
+            columns={userContractColumns}
             rowKey={(record) => record.contract_id}
             dataSource={userContractList}
-            pagination={pagination}
-            loading={loading}
-            onChange={handleTableChange}
+            pagination={userContractPagination}
+            loading={userContractLoading}
+            onChange={handleUserContractTableChange}
           />
         </Card>
         <Card title="청구 내역">
           <Table
             size="middle"
             columns={orderColumns}
-            rowKey={(record) => record.rateplan_id}
-            dataSource={[]}
-            pagination={pagination}
-            loading={loading}
-            onChange={handleTableChange}
+            rowKey={(record) => record.order_id}
+            dataSource={userOrderList}
+            pagination={userOrderPagination}
+            loading={userOrderLoading}
+            onChange={handleUserOrderTableChange}
           />
         </Card>
 
@@ -486,11 +520,7 @@ const UserDetail = (props) => {
             bodyStyle={{ padding: "1rem" }}
             className="mb-4"
           >
-            <Form
-              form={historyForm}
-              layout="vertical"
-              onFinish={handleReplyRegisterSubmit}
-            >
+            <Form form={historyForm} layout="vertical">
               <Form.Item name="classification">
                 <Input disabled />
               </Form.Item>
@@ -506,11 +536,7 @@ const UserDetail = (props) => {
             bodyStyle={{ padding: "1rem" }}
             className="mb-4"
           >
-            <Form
-              form={memoForm}
-              layout="vertical"
-              onFinish={handleReplyRegisterSubmit}
-            >
+            <Form form={memoForm} layout="vertical">
               <Form.Item name="classification">
                 <Input disabled />
               </Form.Item>

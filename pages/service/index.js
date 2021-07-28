@@ -24,41 +24,7 @@ import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
 
 const Service = (props) => {
-  const { user, isLoggedIn, token } = props.auth;
-
-  const [serviceList, setServiceList] = useState([]);
-
-  const [searchForm] = useForm();
-
-  useEffect(() => {
-    axios
-      .post(
-        `${process.env.BACKEND_API}/admin/contract/list`,
-        {
-          page: 1,
-          size: 100,
-          contract_type: "service",
-        },
-        {
-          headers: {
-            "Content-Type": "application/json;charset=UTF-8",
-            "Access-Control-Allow-Origin": "*",
-            Authorization: decodeURIComponent(token),
-          },
-        }
-      )
-      .then((response) => {
-        const data = response.data.items;
-        setServiceList(data);
-        // console.log(`data`, data);
-        // setPagination({ ...pagination, total: data.total });
-        // setLoading(false);
-      })
-      .catch((error) => {
-        console.log(`error`, error);
-      });
-  }, []);
-
+  // 부가서비스 예약 관리 컬럼 정의
   const columns = [
     {
       title: "예약 ID",
@@ -102,7 +68,36 @@ const Service = (props) => {
     },
     {
       title: "부가서비스",
-      dataIndex: "group_id",
+      dataIndex: "rateplan",
+      render: (text, record) => {
+        let renderText = "";
+
+        console.log(`record`, record);
+
+        console.log(`text.product`, text.product.type);
+        console.log(`type`, type);
+
+        const type = text.product.type;
+
+        switch (type) {
+          case "lounge":
+            renderText = "라운지";
+            break;
+          case "meeting":
+            renderText = "미팅룸";
+            break;
+          case "coworking":
+            renderText = "코워킹룸";
+            break;
+          case "locker":
+            renderText = "락커";
+            break;
+          default:
+            break;
+        }
+
+        return renderText;
+      },
     },
     {
       title: "사용 시간",
@@ -165,14 +160,80 @@ const Service = (props) => {
     },
   ];
 
-  const [data, setData] = useState([]);
+  const { user, isLoggedIn, token } = props.auth;
+
+  const [serviceList, setServiceList] = useState([]);
+
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const [registrationModalOpen, setRegistrationModalOpen] = useState(false);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
-  const [form] = Form.useForm();
+  const [reservationStartDateStart, setReservationStartDateStart] =
+    useState(undefined);
+  const [reservationStartDateEnd, setReservationStartDateEnd] =
+    useState(undefined);
+  const [reservationEndDateStart, setReservationEndDateStart] =
+    useState(undefined);
+  const [reservationEndDateEnd, setReservationEndDateEnd] = useState(undefined);
+  const [reservationCancelDateStart, setReservationCancelDateStart] =
+    useState(undefined);
+  const [reservationCancelDateEnd, setReservationCancelDateEnd] =
+    useState(undefined);
+
+  const [searchForm] = useForm();
+
+  // 페이지 사이즈
+  const PAGE_SIZE = 20;
+
+  const [params, setParams] = useState({
+    order_id: undefined,
+    contract_id: undefined,
+    uid: undefined,
+    group_id: undefined,
+    user_name: undefined,
+    payment_status: undefined,
+    payment_method: undefined,
+    pay_demand: undefined,
+    order_date_start: undefined,
+    order_date_end: undefined,
+    page: 1,
+    size: PAGE_SIZE,
+  });
+
+  const getServiceList = (params) => {
+    setLoading(true);
+  };
+
+  useEffect(() => {
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/contract/list`,
+        {
+          page: 1,
+          size: 100,
+          contract_type: "service",
+        },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        const data = response.data;
+        console.log(`data`, data);
+        setServiceList(data.items);
+        // console.log(`data`, data);
+        // setPagination({ ...pagination, total: data.total });
+        // setLoading(false);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  }, []);
 
   const handleStartDateChange = (date, dateString) => {
     // setStartDate(dateString);
@@ -261,13 +322,13 @@ const Service = (props) => {
           <Form.Item name="contract_id" label="예약 ID">
             <Input />
           </Form.Item>
-          <Form.Item name="user_id" label="멤버 ID">
+          <Form.Item name="uid" label="멤버 ID">
             <Input />
           </Form.Item>
           <Form.Item name="user_name" label="계약자명">
             <Input />
           </Form.Item>
-          <Form.Item name="contract_type" label="부가서비스">
+          <Form.Item name="product_type" label="부가서비스">
             <Select style={{ width: 160 }}>
               <Select.Option value="meeting">미팅룸</Select.Option>
               <Select.Option value="coworking">코워킹룸</Select.Option>
@@ -275,10 +336,15 @@ const Service = (props) => {
               <Select.Option value="lounge">라운지</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item name="contract_status" label="예약 상태">
+          <Form.Item name="status" label="예약 상태">
             <Select style={{ width: 160 }}>
-              <Select.Option value="all_spot">ALL SPOT</Select.Option>
-              <Select.Option value="one_spot">ONE_SPOT</Select.Option>
+              <Select.Option value="wait">계좌이체 대기</Select.Option>
+              <Select.Option value="buy">구매</Select.Option>
+              <Select.Option value="pay">이용중</Select.Option>
+              <Select.Option value="refund">환불</Select.Option>
+              <Select.Option value="expired">종료</Select.Option>
+              <Select.Option value="terminate">해지</Select.Option>
+              <Select.Option value="canceld">취소</Select.Option>
             </Select>
           </Form.Item>
           <Form.Item name="spot" label="사용 지점">

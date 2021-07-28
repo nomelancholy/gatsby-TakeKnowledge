@@ -403,7 +403,6 @@ const Order = (props) => {
           </Form.Item>
           <Form.Item name="pay_demand" label="결제 유형">
             <Select style={{ width: 160 }}>
-              {/* 활성화 된 spot 리스트 가져와서  map */}
               <Select.Option value="pre">선불</Select.Option>
               <Select.Option value="deffered">후불</Select.Option>
               <Select.Option value="last">말일결제</Select.Option>
