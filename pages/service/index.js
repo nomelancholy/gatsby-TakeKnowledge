@@ -235,14 +235,6 @@ const Service = (props) => {
       });
   }, []);
 
-  const handleStartDateChange = (date, dateString) => {
-    // setStartDate(dateString);
-  };
-
-  const handleEndDateChange = (date, dateString) => {
-    // setEndDate(dateString);
-  };
-
   const handleTableChange = (pagination, filters, sorter) => {
     setPagination(2);
 
