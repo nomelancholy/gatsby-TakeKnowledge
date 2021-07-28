@@ -356,16 +356,40 @@ const Service = (props) => {
           </Form.Item>
 
           <Form.Item name="start_date" label="예약 시작 일자">
-            <DatePicker onChange={handleStartDateChange} />
-            <DatePicker onChange={handleEndDateChange} />
+            <DatePicker
+              onChange={(date, dateString) =>
+                setReservationStartDateStart(dateString)
+              }
+            />
+            <DatePicker
+              onChange={(date, dateString) =>
+                setReservationStartDateEnd(dateString)
+              }
+            />
           </Form.Item>
           <Form.Item name="end_date" label="예약 종료 일자">
-            <DatePicker onChange={handleStartDateChange} />
-            <DatePicker onChange={handleEndDateChange} />
+            <DatePicker
+              onChange={(date, dateString) =>
+                setReservationEndDateStart(dateString)
+              }
+            />
+            <DatePicker
+              onChange={(date, dateString) =>
+                setReservationEndDateEnd(dateString)
+              }
+            />
           </Form.Item>
           <Form.Item name="cancel_date" label="예약 취소 일자">
-            <DatePicker onChange={handleStartDateChange} />
-            <DatePicker onChange={handleEndDateChange} />
+            <DatePicker
+              onChange={(date, dateString) =>
+                setReservationCancelDateStart(dateString)
+              }
+            />
+            <DatePicker
+              onChange={(date, dateString) =>
+                setReservationCancelDateEnd(dateString)
+              }
+            />
           </Form.Item>
         </Form>
       </Filter>
