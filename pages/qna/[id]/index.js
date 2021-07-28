@@ -19,6 +19,8 @@ const QnaDetail = (props) => {
   // 답장이 있는지 없는지
   const [isDone, setIsDone] = useState(false);
 
+  const [replyQid, setReplyQid] = useState(undefined);
+
   const radioStyle = {
     display: "inline",
     height: "30px",
@@ -73,6 +75,8 @@ const QnaDetail = (props) => {
           // 담당자
           reply_user: qnaDetail.reply.user.user_name,
         });
+
+        setReplyQid(qnaDetail.reply.qid);
       }
     } else {
       setIsDone(false);
@@ -92,6 +96,12 @@ const QnaDetail = (props) => {
       content: values.reply,
       parent: Number(id),
     };
+
+    if (isDone) {
+      url = `${process.env.BACKEND_API}/user/qna/edit`;
+
+      data.qid = Number(replyQid);
+    }
 
     const config = {
       method: "post",

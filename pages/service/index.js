@@ -222,7 +222,6 @@ const Service = (props) => {
     reservation_end_date_end: undefined,
     reservation_cancel_date_start: undefined,
     reservation_cancel_date_end: undefined,
-
     page: 1,
     size: PAGE_SIZE,
   });
