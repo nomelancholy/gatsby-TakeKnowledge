@@ -172,8 +172,8 @@ const Qna = (props) => {
   const [searchForm] = useForm();
 
   // 기간 검색 datepicker 값 저장 state
-  const [regdateStart, setRegdateStart] = useState("");
-  const [regdateEnd, setRegdateEnd] = useState("");
+  const [regdateStart, setRegdateStart] = useState(undefined);
+  const [regdateEnd, setRegdateEnd] = useState(undefined);
 
   // 페이지 사이즈
   const PAGE_SIZE = 20;
@@ -183,8 +183,8 @@ const Qna = (props) => {
     status: undefined,
     classification: undefined,
     category: undefined,
-    regdate_start: undefined,
-    regdate_end: undefined,
+    start_date: undefined,
+    end_date: undefined,
     page: 1,
     size: PAGE_SIZE,
   });
@@ -266,8 +266,8 @@ const Qna = (props) => {
       classification: searchFormValues.classification,
       category: searchFormValues.category,
       status: searchFormValues.status,
-      regdate_start: regdateStart,
-      regdate_end: regdateEnd,
+      start_date: regdateStart,
+      end_date: regdateEnd,
       page: 1,
     };
 
@@ -278,8 +278,8 @@ const Qna = (props) => {
     // form Item reset
     searchForm.resetFields();
 
-    setRegdateStart("");
-    setRegdateEnd("");
+    setRegdateStart(undefined);
+    setRegdateEnd(undefined);
 
     // params state reset
     const searchParams = {
@@ -287,8 +287,8 @@ const Qna = (props) => {
       classification: undefined,
       category: undefined,
       status: undefined,
-      regdate_start: undefined,
-      regdate_end: undefined,
+      start_date: undefined,
+      end_date: undefined,
       page: 1,
     };
 
@@ -339,7 +339,7 @@ const Qna = (props) => {
           </Form.Item>
           <Form.Item name="classification" label="문의 유형">
             <Select
-              style={{ width: 120 }}
+              style={{ width: 200 }}
               onChange={handleClassificationChange}
             >
               {qnaSelectOptions.map((option) => (
@@ -350,14 +350,14 @@ const Qna = (props) => {
             </Select>
           </Form.Item>
           <Form.Item name="category" label="카테고리">
-            <Select style={{ width: 120 }}>
+            <Select style={{ width: 200 }}>
               {categoryOptions.map((option) => (
                 <Select.Option value={option}>{option}</Select.Option>
               ))}
             </Select>
           </Form.Item>
           <Form.Item name="status" label="처리 상태">
-            <Select style={{ width: 120 }}>
+            <Select style={{ width: 200 }}>
               <Select.Option value="wait">대기</Select.Option>
               <Select.Option value="done">해결</Select.Option>
             </Select>
