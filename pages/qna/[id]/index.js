@@ -16,9 +16,7 @@ const QnaDetail = (props) => {
   const [qnaDetail, setQnaDetail] = useState(undefined);
 
   const [okModalVisible, setOkModalVisible] = useState(false);
-  // 답장이 있는지 없는지
-  const [isDone, setIsDone] = useState(false);
-
+  // 답장을 단 적이 있는 경우 (작성/수정 flag)
   const [replyQid, setReplyQid] = useState(undefined);
 
   const radioStyle = {
@@ -51,8 +49,6 @@ const QnaDetail = (props) => {
   useEffect(() => {
     // 요금제 정보 세팅되면
     if (qnaDetail) {
-      setIsDone(true);
-
       form.setFieldsValue({
         // 노출 여부
         status: qnaDetail.status,
@@ -78,8 +74,6 @@ const QnaDetail = (props) => {
 
         setReplyQid(qnaDetail.reply.qid);
       }
-    } else {
-      setIsDone(false);
     }
   }, [qnaDetail]);
 
@@ -89,18 +83,17 @@ const QnaDetail = (props) => {
 
     url = `${process.env.BACKEND_API}/user/qna/write`;
 
-    let data = {
-      title: values.title,
-      classification: values.classification,
-      category: values.category,
-      content: values.reply,
-      parent: Number(id),
-    };
+    const formData = new FormData();
 
-    if (isDone) {
+    formData.append("title", values.title);
+    formData.append("classification", values.classification);
+    formData.append("category", values.category);
+    formData.append("content", values.reply);
+    formData.append("parent", id);
+
+    if (replyQid) {
       url = `${process.env.BACKEND_API}/user/qna/edit`;
-
-      data.qid = Number(replyQid);
+      formData.append("qid", replyQid);
     }
 
     const config = {
@@ -109,7 +102,7 @@ const QnaDetail = (props) => {
       headers: {
         Authorization: decodeURIComponent(token),
       },
-      data: data,
+      data: formData,
     };
 
     axios(config)
@@ -164,7 +157,7 @@ const QnaDetail = (props) => {
           <Form.Item name="reply" label="답장">
             <Input.TextArea />
           </Form.Item>
-          {isDone && (
+          {replyQid && (
             <Form.Item name="reply_user" label="담당자">
               <Input disabled />
             </Form.Item>
