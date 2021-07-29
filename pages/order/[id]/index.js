@@ -15,7 +15,7 @@ const ContractDetail = (props) => {
   };
 
   // 청구서 테이블 컬럼 정의
-  const billColumns = [
+  const orderColumns = [
     {
       title: "청구 ID",
       dataIndex: "order",
@@ -198,21 +198,23 @@ const ContractDetail = (props) => {
   const PAGE_SIZE = 5;
 
   // 청구서 테이블 페이징, 로딩
-  const [billPagination, setBillPagination] = useState({});
-  const [billLoading, setBillLoading] = useState(false);
-
-  // 결제 내역 테이블 페이징, 로딩
-  const [paymentPagination, setPaymentPagination] = useState({});
-  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [orderPagination, setOrderPagination] = useState({});
+  const [orderLoading, setOrderLoading] = useState(false);
 
   // 청구서 리스트
-  const [billList, setBillList] = useState([]);
-  // 결제 내역 리스트
-  const [paymentList, setPaymentList] = useState([]);
+  const [orderList, setOrderList] = useState([]);
+
+  // 상품 이용 내역 테이블 변경
+  const handleOrderTableChange = (pagination) => {
+    setOrderPagination(pagination);
+
+    // 호출
+    getOrderList({ page: pagination.current, size: PAGE_SIZE, uid: id });
+  };
 
   // 청구서 내역 조회
-  const getBillList = (params) => {
-    setBillLoading(true);
+  const getOrderList = (params) => {
+    setOrderLoading(true);
 
     axios
       .post(
@@ -228,7 +230,7 @@ const ContractDetail = (props) => {
       )
       .then((response) => {
         const data = response.data;
-        setBillList(data.items);
+        setOrderList(data.items);
 
         // 페이지 네이션 정보 세팅
         const pageInfo = {
@@ -238,14 +240,29 @@ const ContractDetail = (props) => {
         };
 
         // pageInfo 세팅
-        setBillPagination(pageInfo);
+        setOrderPagination(pageInfo);
 
         // 로딩바 세팅
-        setBillLoading(false);
+        setOrderLoading(false);
       })
       .catch((error) => {
         console.log(`error`, error);
       });
+  };
+
+  // 결제 내역 테이블 페이징, 로딩
+  const [paymentPagination, setPaymentPagination] = useState({});
+  const [paymentLoading, setPaymentLoading] = useState(false);
+
+  // 결제 내역 리스트
+  const [paymentList, setPaymentList] = useState([]);
+
+  // 상품 이용 내역 테이블 변경
+  const handlePaymentTableChange = (pagination) => {
+    setPaymentPagination(pagination);
+
+    // 호출
+    getPaymentList({ page: pagination.current, size: PAGE_SIZE, uid: id });
   };
 
   // 결제 내역 조회
@@ -285,22 +302,6 @@ const ContractDetail = (props) => {
       .catch((error) => {
         console.log(`error`, error);
       });
-  };
-
-  // 상품 이용 내역 테이블 변경
-  const handleBillTableChange = (pagination) => {
-    setBillPagination(pagination);
-
-    // 호출
-    getBillList({ page: pagination.current, size: PAGE_SIZE, uid: id });
-  };
-
-  // 상품 이용 내역 테이블 변경
-  const handlePaymentTableChange = (pagination) => {
-    setPaymentPagination(pagination);
-
-    // 호출
-    getPaymentList({ page: pagination.current, size: PAGE_SIZE, uid: id });
   };
 
   const router = useRouter();
@@ -703,12 +704,12 @@ const ContractDetail = (props) => {
         <Card title="청구서">
           <Table
             size="middle"
-            columns={billColumns}
+            columns={orderColumns}
             rowKey={(record) => record.order.order_id}
-            dataSource={billList}
-            pagination={billPagination}
-            loading={billLoading}
-            onChange={handleBillTableChange}
+            dataSource={orderList}
+            pagination={orderPagination}
+            loading={orderLoading}
+            onChange={handleOrderTableChange}
           />
         </Card>
 

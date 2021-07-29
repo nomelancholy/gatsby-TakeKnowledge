@@ -17,32 +17,33 @@ import { useRouter } from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import axios from "axios";
+import Checkbox from "antd/lib/checkbox/Checkbox";
 
 const ContractDetail = (props) => {
-  const router = useRouter();
-  const { id } = router.query;
-  const { user, isLoggedIn, token } = props.auth;
-
-  const [orderList, setOrderList] = useState(undefined);
-
-  const [okModalVisible, setOkModalVisible] = useState(false);
-  // 답장이 있는지 없는지
-  const [isDone, setIsDone] = useState(false);
-
   const radioStyle = {
     display: "inline",
     height: "30px",
     lineHeight: "30px",
   };
 
-  // 청구서 테이블 컬럼 정의
-  const billColumns = [
+  // 운영 요일 checkbox 옵션
+  const workingDaysOptions = [
+    { label: "월", value: "mon" },
+    { label: "화", value: "tue" },
+    { label: "수", value: "wed" },
+    { label: "목", value: "thu" },
+    { label: "금", value: "fri" },
+    { label: "토", value: "sat" },
+    { label: "일", value: "sun" },
+  ];
+
+  // 청구/결제 정보 테이블 컬럼 정의
+  const orderColumns = [
     {
       title: "청구 ID",
       dataIndex: "order",
       render: (text, record) => {
-        const renderText = `${text.order_id}`;
-        return renderText;
+        return <a href={`/order/${record.order.order_id}`}>{text.order_id}</a>;
       },
     },
     {
@@ -51,39 +52,10 @@ const ContractDetail = (props) => {
       render: (text, record) => {
         let renderText = "";
 
-        if (text.status === "wait") {
-          renderText = "계약 신청(입금전)";
-        } else if (text.status === "buy") {
-          renderText = "계약 신청(이용전)";
-        } else if (text.status === "pay") {
-          renderText = "계약 완료(이용중)";
-        } else if (text.status === "refund") {
-          renderText = "계약 해지(환불)";
-        } else if (text.status === "expired") {
-          renderText = "계약 해지(만료)";
-        } else if (text.status === "terminate") {
-          renderText = "계약 해지(중도)";
-        } else if (text.status === "canceled") {
-          renderText = "계약 해지(취소)";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "청구 항목",
-      dataIndex: "group_id",
-    },
-    {
-      title: "email 발송 상태",
-      dataIndex: "contract",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.contract_type === "service") {
-          renderText = "부가서비스";
-        } else if (text.contract_type === "membershipt") {
+        if (text.contract_type === "membership") {
           renderText = "멤버십";
+        } else if (text.contract_type === "service") {
+          renderText = "부가서비스";
         } else if (text.contract_type === "voucher") {
           renderText = "이용권";
         }
@@ -92,30 +64,40 @@ const ContractDetail = (props) => {
       },
     },
     {
-      title: "청구 금액",
+      title: "청구 항목",
       dataIndex: "product",
       render: (text, record) => {
         return text.name;
       },
     },
     {
-      title: "청구일",
-      dataIndex: "contract",
+      title: "청구 금액",
+      dataIndex: "order",
       render: (text, record) => {
-        console.log(`text`, text);
-        return text.next_paydate;
+        return text.amount.toLocaleString("ko");
+      },
+    },
+    {
+      title: "청구일",
+      dataIndex: "order",
+      render: (text, record) => {
+        return text.regdate;
       },
     },
     {
       title: "결제 상태",
-      dataIndex: "pay_method",
+      dataIndex: "payment",
       render: (text, record) => {
         let renderText = "";
 
-        if (text.type == "personal") {
-          renderText = "개인 카드 결제";
-        } else {
-          renderText = "법인 카드 결제";
+        if (text.status == "wait") {
+          renderText = "대기";
+        } else if (text.status == "buy") {
+          renderText = "결제";
+        } else if (text.status == "unpaid") {
+          renderText = "미납";
+        } else if (text.status == "canceld") {
+          renderText = "취소";
         }
 
         return renderText;
@@ -123,38 +105,15 @@ const ContractDetail = (props) => {
     },
     {
       title: "생성 일시",
-      dataIndex: "pay_method",
+      dataIndex: "order",
       render: (text, record) => {
-        let renderText = "";
-
-        if (text.type == "personal") {
-          renderText = "개인 카드 결제";
-        } else {
-          renderText = "법인 카드 결제";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "환불",
-      dataIndex: "pay_method",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.type == "personal") {
-          renderText = "개인 카드 결제";
-        } else {
-          renderText = "법인 카드 결제";
-        }
-
-        return renderText;
+        return text.regdate;
       },
     },
   ];
 
-  // 결제 내역 columns 정의
-  const paymentColumns = [
+  // 이용권 columns 정의
+  const voucherColumns = [
     {
       title: "이용 ID",
       dataIndex: "order",
@@ -321,209 +280,170 @@ const ContractDetail = (props) => {
   const serviceColumns = [
     {
       title: "예약 ID",
-      dataIndex: "order",
+      dataIndex: "schedule",
       render: (text, record) => {
-        const renderText = `${text.order_id}`;
-        return renderText;
+        return <a href={`/service/${text.schedule_id}`}>{text.schedule_id}</a>;
       },
     },
     {
       title: "구분",
       dataIndex: "contract",
       render: (text, record) => {
-        let renderText = "";
-
-        if (text.status === "wait") {
-          renderText = "계약 신청(입금전)";
-        } else if (text.status === "buy") {
-          renderText = "계약 신청(이용전)";
-        } else if (text.status === "pay") {
-          renderText = "계약 완료(이용중)";
-        } else if (text.status === "refund") {
-          renderText = "계약 해지(환불)";
-        } else if (text.status === "expired") {
-          renderText = "계약 해지(만료)";
-        } else if (text.status === "terminate") {
-          renderText = "계약 해지(중도)";
-        } else if (text.status === "canceled") {
-          renderText = "계약 해지(취소)";
-        }
-
-        return renderText;
+        return "";
       },
     },
     {
       title: "상품명",
-      dataIndex: "group_id",
+      dataIndex: "space",
+      render: (text, record) => {
+        return text.name;
+      },
     },
     {
       title: "유형",
       dataIndex: "contract",
       render: (text, record) => {
-        let renderText = "";
-
-        if (text.contract_type === "service") {
-          renderText = "부가서비스";
-        } else if (text.contract_type === "membershipt") {
-          renderText = "멤버십";
-        } else if (text.contract_type === "voucher") {
-          renderText = "이용권";
-        }
-
-        return renderText;
+        return "";
       },
     },
     {
       title: "요일",
       dataIndex: "product",
       render: (text, record) => {
-        return text.name;
-      },
-    },
-    {
-      title: "청구일",
-      dataIndex: "contract",
-      render: (text, record) => {
-        console.log(`text`, text);
-        return text.next_paydate;
+        return "";
       },
     },
     {
       title: "시간제",
-      dataIndex: "pay_method",
+      dataIndex: "schedule",
       render: (text, record) => {
         let renderText = "";
 
-        if (text.type == "personal") {
-          renderText = "개인 카드 결제";
-        } else {
-          renderText = "법인 카드 결제";
-        }
+        const startArray = text.start_time.split(" ");
+        const endArray = text.end_time.split(" ");
+
+        const startDate = startArray[0];
+        const startTime = startArray[1];
+        const endDate = endArray[0];
+        const endTime = endArray[1];
+
+        renderText = `${startTime}~${endTime}`;
 
         return renderText;
       },
     },
     {
       title: "시작일",
-      dataIndex: "pay_method",
+      dataIndex: "schedule",
       render: (text, record) => {
         let renderText = "";
 
-        if (text.type == "personal") {
-          renderText = "개인 카드 결제";
-        } else {
-          renderText = "법인 카드 결제";
-        }
+        const startArray = text.start_time.split(" ");
+        const endArray = text.end_time.split(" ");
+
+        const startDate = startArray[0];
+        const startTime = startArray[1];
+        const endDate = endArray[0];
+        const endTime = endArray[1];
+
+        renderText = startDate;
 
         return renderText;
       },
     },
     {
       title: "종료일",
-      dataIndex: "pay_method",
+      dataIndex: "schedule",
       render: (text, record) => {
         let renderText = "";
 
-        if (text.type == "personal") {
-          renderText = "개인 카드 결제";
-        } else {
-          renderText = "법인 카드 결제";
-        }
+        const startArray = text.start_time.split(" ");
+        const endArray = text.end_time.split(" ");
+
+        const startDate = startArray[0];
+        const startTime = startArray[1];
+        const endDate = endArray[0];
+        const endTime = endArray[1];
+
+        renderText = endDate;
 
         return renderText;
       },
     },
     {
       title: "사용일수",
-      dataIndex: "contract",
-      render: (text, record) => {
-        console.log(`text`, text);
-        return text.next_paydate;
-      },
+      dataIndex: "time_diff",
     },
     {
       title: "사용 지점",
       dataIndex: "pay_method",
-      render: (text, record) => {
-        let renderText = "";
+      // render: (text, record) => {
+      //   let renderText = "";
 
-        if (text.type == "personal") {
-          renderText = "개인 카드 결제";
-        } else {
-          renderText = "법인 카드 결제";
-        }
+      //   if (text.type == "personal") {
+      //     renderText = "개인 카드 결제";
+      //   } else {
+      //     renderText = "법인 카드 결제";
+      //   }
 
-        return renderText;
-      },
+      //   return renderText;
+      // },
     },
     {
       title: "사용 공간",
       dataIndex: "pay_method",
-      render: (text, record) => {
-        let renderText = "";
+      // render: (text, record) => {
+      //   let renderText = "";
 
-        if (text.type == "personal") {
-          renderText = "개인 카드 결제";
-        } else {
-          renderText = "법인 카드 결제";
-        }
+      //   if (text.type == "personal") {
+      //     renderText = "개인 카드 결제";
+      //   } else {
+      //     renderText = "법인 카드 결제";
+      //   }
 
-        return renderText;
-      },
+      //   return renderText;
+      // },
     },
     {
       title: "생성 일시",
-      dataIndex: "pay_method",
+      dataIndex: "contract",
       render: (text, record) => {
-        let renderText = "";
-
-        if (text.type == "personal") {
-          renderText = "개인 카드 결제";
-        } else {
-          renderText = "법인 카드 결제";
-        }
-
-        return renderText;
+        return text.regdate;
       },
     },
   ];
 
-  // const [groupForm, userForm, memoForm, historyForm] = Form.useForm();
-  //
-  // 계약 상태
-  const [contractStatusForm] = Form.useForm();
-  // 그룹 정보
-  const [groupForm] = Form.useForm();
-  // 회원 정보
-  const [userForm] = Form.useForm();
-  // 계약 정보
-  const [contractForm] = Form.useForm();
-  // 청구 내용
-  const [orderForm] = Form.useForm();
-  const [memoForm] = Form.useForm();
-  const [historyForm] = Form.useForm();
+  const PAGE_SIZE = 5;
 
-  const [pagination, setPagination] = useState({});
-  const [loading, setLoading] = useState(false);
-
-  const handleTableChange = (pagination, filters, sorter) => {
-    setPagination(2);
-
-    fetch({
-      results: pagination.pageSize,
-      page: pagination.current,
-      sortField: sorter.field,
-      sortOrder: sorter.order,
-      ...filters,
-    });
+  const [orderPagination, setOrderPagination] = useState({});
+  const [orderLoading, setOrderLoading] = useState(false);
+  const handleOrderTableChange = (pagination) => {
+    setOrderPagination(pagination);
   };
 
-  useEffect(() => {
-    // 청구/결제 상세 내용 조회
+  const [voucherPagination, setVoucherPagination] = useState({});
+  const [voucherLoading, setVoucherLoading] = useState(false);
+  const handleVoucherTableChange = (pagination) => {
+    setVoucherPagination(pagination);
+  };
+
+  const [servicePagination, setServicePagination] = useState({});
+  const [serviceLoading, setServiceLoading] = useState(false);
+  const handleServiceTableChange = (pagination) => {
+    setServicePagination(pagination);
+  };
+
+  const [orderList, setOrderList] = useState([]);
+  const [voucherList, setVoucherList] = useState([]);
+  const [serviceList, setServiceList] = useState([]);
+
+  const getOrderList = (params) => {
+    setOrderLoading(true);
+
     axios
       .post(
         `${process.env.BACKEND_API}/admin/contract/order/list`,
-        { contract_id: id },
+        { ...params },
         {
           headers: {
             "Content-Type": "application/json;charset=UTF-8",
@@ -533,129 +453,342 @@ const ContractDetail = (props) => {
         }
       )
       .then((response) => {
-        const data = response.data.items[0];
-        console.log(`data`, data);
-        setOrderList(data);
+        const data = response.data;
+        setOrderList(data.items);
+
+        // 페이지 네이션 정보 세팅
+        const pageInfo = {
+          current: data.page,
+          total: data.total,
+          pageSize: data.size,
+        };
+
+        // pageInfo 세팅
+        setOrderPagination(pageInfo);
+
+        // 로딩바 세팅
+        setOrderLoading(false);
       })
       .catch((error) => {
         console.log(`error`, error);
       });
+  };
+
+  const getServiceList = (params) => {
+    setServiceLoading(true);
+
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/contract/service/list`,
+        { ...params },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        const data = response.data;
+        console.log(`service data`, data);
+        setServiceList(data.items);
+
+        // 페이지 네이션 정보 세팅
+        const pageInfo = {
+          current: data.page,
+          total: data.total,
+          pageSize: data.size,
+        };
+
+        // pageInfo 세팅
+        setServicePagination(pageInfo);
+
+        // 로딩바 세팅
+        setServiceLoading(false);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
+
+  const router = useRouter();
+  const { id } = router.query;
+  const { user, isLoggedIn, token } = props.auth;
+
+  const [contractDetail, setContractDetail] = useState(undefined);
+
+  // 계약 상태
+  const [contractStatusForm] = Form.useForm();
+  // 그룹 정보
+  const [groupForm] = Form.useForm();
+  // 회원 정보
+  const [userForm] = Form.useForm();
+  // 계약 정보
+  const [contractForm] = Form.useForm();
+  // 청구 내용
+  const [chargeForm] = Form.useForm();
+  // 상품 정보
+  const [productForm] = Form.useForm();
+  // 상담 메모
+  const [memoForm] = Form.useForm();
+  // 상담 메모 히스토리
+  const [historyForm] = Form.useForm();
+
+  useEffect(() => {
+    // 청구/결제 상세 내용 조회
+    axios
+      .get(`${process.env.BACKEND_API}/admin/contract/get/${id}`, {
+        headers: {
+          "Content-Type": "application/json;charset=UTF-8",
+          "Access-Control-Allow-Origin": "*",
+          Authorization: decodeURIComponent(token),
+        },
+      })
+      .then((response) => {
+        const data = response.data.item;
+        setContractDetail(data);
+        console.log(`data`, data);
+        // setOrderList(data);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+
+    getOrderList({ page: 1, size: PAGE_SIZE, contract_id: id });
+
+    getServiceList({
+      page: 1,
+      size: PAGE_SIZE,
+      // contract_type: "service",
+      contract_id: id,
+    });
   }, []);
 
   useEffect(() => {
     // 요금제 정보 세팅되면
-    if (orderList) {
-      console.log(`orderList`, orderList);
-      setIsDone(true);
-      // 회원 정보
-      userForm.setFieldsValue({
-        // 회원 ID
-        uid: orderList.user.uid,
-        // 멤버 이름
-        user_name: orderList.user.user_name,
-        // 아이디
-        // 핸드폰 번호
-        // 대표 결제 카드
-      });
+    if (contractDetail) {
+      console.log(`contractDetail`, contractDetail);
+      contractStatusForm.setFieldsValue({});
+      groupForm.setFieldsValue({});
 
-      // 계약 상태 세팅
-      let contractStatus = "";
+      let userRole = "";
 
-      switch (orderList.contract.status) {
-        case "wait":
-          contractStatus = "구매 대기";
+      switch (contractDetail.user.user_role) {
+        case "member":
+          userRole = "멤버";
           break;
-        case "buy":
-          contractStatus = "구매";
+        case "ffadmin":
+          userRole = "관리자";
           break;
-        case "pay":
-          contractStatus = "이용 시작";
+        case "group":
+          userRole = "그룹";
           break;
-        case "refund":
-          contractStatus = "환불";
-          break;
-        case "expired":
-          contractStatus = "종료";
-          break;
-        case "terminate":
-          contractStatus = "해지";
-          break;
-        case "canceled":
-          contractStatus = "취소";
+        case "user":
+          userRole = "회원";
           break;
         default:
           break;
       }
 
-      // 계약 정보
+      userForm.setFieldsValue({
+        uid: contractDetail.user.uid,
+        user_role: userRole,
+        user_name: contractDetail.user.user_name,
+        user_login: contractDetail.user.user_login,
+        phone: contractDetail.user.phone,
+        birthday: contractDetail.user.user_profile[0].user_birthday,
+        job: contractDetail.user.user_profile[0].job,
+        address: contractDetail.user.user_profile[0].address,
+        address_etc: contractDetail.user.user_profile[0].address_etc,
+        paymethod: contractDetail.user.paymethod,
+        fav_spot: contractDetail.user.fav_spot,
+      });
       contractForm.setFieldsValue({
-        // 멤버십 상품
-        product_name: orderList.product.name,
-        // 계약 상태
-        status: contractStatus,
-        // 계약 ID
-        contract_id: orderList.contract.contract_id,
-        // 계약 시작일
-        start_date: orderList.contract.regdate,
-        // 계약 신청일
-        // 연장 회차
-        // 정기 결제일
-        next_paydate: orderList.contract.next_paydate,
-        // 적용 요금제
+        contract_id: contractDetail.contract_id,
+        product_name: contractDetail.rateplan.product.name,
+        extension: contractDetail.extension,
+        next_payday: contractDetail.next_payday,
+        regdate: contractDetail.regdate,
+        start_date: contractDetail.start_date,
+        end_date: contractDetail.end_date,
+        cancel_date: contractDetail.cancel_date,
+        terminate_date: contractDetail.terminate_date,
+      });
+      chargeForm.setFieldsValue({
+        rateplan_name: contractDetail.rateplan.name,
+        product_price: contractDetail.rateplan.price.toLocaleString("ko"),
+        dc_price: contractDetail.rateplan.dc_price.toLocaleString("ko"),
+        total: (
+          contractDetail.rateplan.price - contractDetail.rateplan.dc_price
+        ).toLocaleString("ko"),
       });
 
-      // 청구 유형 세팅
-      let contractType;
+      let planSpot = "";
 
-      switch (orderList.contract.contract_type) {
+      switch (contractDetail.rateplan.product.plan_spot) {
+        case "all_spot":
+          planSpot = "ALL SPOT";
+          break;
+        case "one_spot":
+          planSpot = "ONE SPOT";
+          break;
+        default:
+          break;
+      }
+
+      let productType = "";
+
+      switch (contractDetail.rateplan.product.type) {
         case "membership":
-          contractType = "멤버십";
+          productType = "멤버십";
           break;
         case "service":
-          contractType = "부가서비스";
-          break;
-        case "voucher":
-          contractType = "이용권";
+          productType = "부가 서비스";
           break;
         default:
           break;
       }
 
-      let payDemand = "";
+      let serviceType = "";
 
-      switch (orderList.product.pay_demand) {
-        case "pre":
-          payDemand = "선불";
+      switch (contractDetail.rateplan.product.service_type) {
+        case "accumulate":
+          serviceType = "기본형";
           break;
-        case "deffered":
-          payDemand = "후불";
-          break;
-        case "last":
-          payDemand = "말일 결제";
+        case "deduction":
+          serviceType = "차감형";
           break;
         default:
           break;
       }
 
-      // 청구 내용
-      orderForm.setFieldsValue({
-        // 청구 유형
-        contract_type: contractType,
-        // 결제 방식
-        pay_method:
-          orderList.pay_method.type === "personal"
-            ? "개인 카드결제"
-            : "법인 카드 결제",
-        // 결제 유형
-        pay_demand: payDemand,
-        // 청구 기간
-        // 정기 결제일자
-        next_paydate: orderList.contract.next_paydate,
-        // 청구 상태
-        // 총 금액
-        total: orderList.payment.total,
+      let workingDays = [];
+
+      Object.entries(contractDetail.rateplan.product.working_days).filter(
+        (obj) => {
+          if (obj[1]) {
+            workingDays.push(obj[0]);
+          }
+        }
+      );
+
+      console.log(`workingDays`, workingDays);
+
+      productForm.setFieldsValue({
+        product_id: contractDetail.rateplan.product.product_id,
+        name: contractDetail.rateplan.product.name,
+        product_type: productType,
+        service_type: serviceType,
+        paymethod: "",
+        working_days: workingDays,
+        start_time: contractDetail.rateplan.product.start_time,
+        end_time: contractDetail.rateplan.product.end_time,
+        spaces: contractDetail.rateplan.product.spaces.join(", "),
       });
-
+      memoForm.setFieldsValue({});
+      historyForm.setFieldsValue({});
+      // console.log(`orderList`, orderList);
+      // // 회원 정보
+      // userForm.setFieldsValue({
+      //   // 회원 ID
+      //   uid: orderList.user.uid,
+      //   // 멤버 이름
+      //   user_name: orderList.user.user_name,
+      //   // 아이디
+      //   // 핸드폰 번호
+      //   // 대표 결제 카드
+      // });
+      // // 계약 상태 세팅
+      // let contractStatus = "";
+      // switch (orderList.contract.status) {
+      //   case "wait":
+      //     contractStatus = "구매 대기";
+      //     break;
+      //   case "buy":
+      //     contractStatus = "구매";
+      //     break;
+      //   case "pay":
+      //     contractStatus = "이용 시작";
+      //     break;
+      //   case "refund":
+      //     contractStatus = "환불";
+      //     break;
+      //   case "expired":
+      //     contractStatus = "종료";
+      //     break;
+      //   case "terminate":
+      //     contractStatus = "해지";
+      //     break;
+      //   case "canceled":
+      //     contractStatus = "취소";
+      //     break;
+      //   default:
+      //     break;
+      // }
+      // // 계약 정보
+      // contractForm.setFieldsValue({
+      //   // 멤버십 상품
+      //   product_name: orderList.product.name,
+      //   // 계약 상태
+      //   status: contractStatus,
+      //   // 계약 ID
+      //   contract_id: orderList.contract.contract_id,
+      //   // 계약 시작일
+      //   start_date: orderList.contract.regdate,
+      //   // 계약 신청일
+      //   // 연장 회차
+      //   // 정기 결제일
+      //   next_paydate: orderList.contract.next_paydate,
+      //   // 적용 요금제
+      // });
+      // // 청구 유형 세팅
+      // let contractType;
+      // switch (orderList.contract.contract_type) {
+      //   case "membership":
+      //     contractType = "멤버십";
+      //     break;
+      //   case "service":
+      //     contractType = "부가서비스";
+      //     break;
+      //   case "voucher":
+      //     contractType = "이용권";
+      //     break;
+      //   default:
+      //     break;
+      // }
+      // let payDemand = "";
+      // switch (orderList.product.pay_demand) {
+      //   case "pre":
+      //     payDemand = "선불";
+      //     break;
+      //   case "deffered":
+      //     payDemand = "후불";
+      //     break;
+      //   case "last":
+      //     payDemand = "말일 결제";
+      //     break;
+      //   default:
+      //     break;
+      // }
+      // // 청구 내용
+      // chargeForm.setFieldsValue({
+      //   // 청구 유형
+      //   contract_type: contractType,
+      //   // 결제 방식
+      //   pay_method:
+      //     orderList.pay_method.type === "personal"
+      //       ? "개인 카드결제"
+      //       : "법인 카드 결제",
+      //   // 결제 유형
+      //   pay_demand: payDemand,
+      //   // 청구 기간
+      //   // 정기 결제일자
+      //   next_paydate: orderList.contract.next_paydate,
+      //   // 청구 상태
+      //   // 총 금액
+      //   total: orderList.payment.total,
+      // });
       // form.setFieldsValue({
       //   // 노출 여부
       //   state: userDetail.state,
@@ -670,45 +803,8 @@ const ContractDetail = (props) => {
       //   // 내용
       //   content: userDetail.content,
       // });
-    } else {
-      setIsDone(false);
     }
-  }, [orderList]);
-
-  // 저장 버튼 클릭
-  const handleReplyRegisterSubmit = (values) => {
-    let url = "";
-
-    url = `${process.env.BACKEND_API}/user/qna-write`;
-
-    let data = {
-      title: values.title,
-      classification: values.classification,
-      category: values.category,
-      content: values.reply,
-      parent: Number(id),
-      status: "publish",
-    };
-
-    const config = {
-      method: "post",
-      url: url,
-      headers: {
-        Authorization: decodeURIComponent(token),
-      },
-      data: data,
-    };
-
-    axios(config)
-      .then(function (response) {
-        if (response.status === 200) {
-          setOkModalVisible(true);
-        }
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-  };
+  }, [contractDetail]);
 
   return (
     <>
@@ -748,11 +844,7 @@ const ContractDetail = (props) => {
               bodyStyle={{ padding: "1rem" }}
               className="mb-4"
             >
-              <Form
-                form={groupForm}
-                layout="vertical"
-                onFinish={handleReplyRegisterSubmit}
-              >
+              <Form form={groupForm} layout="vertical">
                 <Form.Item name="group_name" label="그룹명(기업명)">
                   <Input disabled />
                 </Form.Item>
@@ -781,11 +873,7 @@ const ContractDetail = (props) => {
               bodyStyle={{ padding: "1rem" }}
               className="mb-4"
             >
-              <Form
-                form={userForm}
-                layout="vertical"
-                onFinish={handleReplyRegisterSubmit}
-              >
+              <Form form={userForm} layout="vertical">
                 <Form.Item name="uid" label="회원 ID">
                   <Input disabled />
                 </Form.Item>
@@ -813,10 +901,10 @@ const ContractDetail = (props) => {
                 <Form.Item name="address_etc" label="상세주소">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="card" label="대표 결제 카드">
+                <Form.Item name="paymethod" label="대표 결제 카드">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="favorite_spot" label="선호 지점">
+                <Form.Item name="fav_spot" label="선호 지점">
                   <Input disabled />
                 </Form.Item>
               </Form>
@@ -826,36 +914,32 @@ const ContractDetail = (props) => {
               bodyStyle={{ padding: "1rem" }}
               className="mb-4"
             >
-              <Form
-                form={contractForm}
-                layout="vertical"
-                onFinish={handleReplyRegisterSubmit}
-              >
+              <Form form={contractForm} layout="vertical">
                 <Form.Item name="contract_id" label="계약 ID">
                   <Input disabled />
                 </Form.Item>
                 <Form.Item name="product_name" label="멤버십 상품">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="extend_count" label="연장 회차">
+                <Form.Item name="extension" label="연장 회차">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="next_paydate" label="정기 결제일">
+                <Form.Item name="next_payday" label="정기 결제일">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="request_date" label="신청 일자">
+                <Form.Item name="regdate" label="신청 일자">
                   <Input disabled />
                 </Form.Item>
                 <Form.Item name="start_date" label="시작 일자">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="request_date" label="종료 일자">
+                <Form.Item name="end_date" label="종료 일자">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="extend_count" label="취소 일자">
+                <Form.Item name="cancel_date" label="취소 일자">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="card" label="해지 일자">
+                <Form.Item name="terminate_date" label="해지 일자">
                   <Input disabled />
                 </Form.Item>
               </Form>
@@ -865,21 +949,17 @@ const ContractDetail = (props) => {
               bodyStyle={{ padding: "1rem" }}
               className="mb-4"
             >
-              <Form
-                form={orderForm}
-                layout="vertical"
-                onFinish={handleReplyRegisterSubmit}
-              >
-                <Form.Item name="contract_type" label="적용 요금제">
+              <Form form={chargeForm} layout="vertical">
+                <Form.Item name="rateplan_name" label="적용 요금제">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="pay_method" label="멤버십 상품요금(A)">
+                <Form.Item name="product_price" label="멤버십 상품요금(A)">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="pay_demand" label="할인액(B)">
+                <Form.Item name="dc_price" label="할인액(B)">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="contract_id" label="합계금액(A-B)">
+                <Form.Item name="total" label="합계금액(A-B)">
                   <Input disabled />
                 </Form.Item>
               </Form>
@@ -889,79 +969,53 @@ const ContractDetail = (props) => {
               bodyStyle={{ padding: "1rem" }}
               className="mb-4"
             >
-              <Form
-                form={orderForm}
-                layout="vertical"
-                onFinish={handleReplyRegisterSubmit}
-              >
-                <Form.Item name="contract_type" label="상품 ID">
+              <Form form={productForm} layout="vertical">
+                <Form.Item name="product_id" label="상품 ID">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="contract_type" label="상품 명">
+                <Form.Item name="name" label="상품 명">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="pay_method" label="상품 구분">
+                <Form.Item name="product_type" label="상품 구분">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="pay_demand" label="유형">
+                <Form.Item name="service_type" label="유형">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="contract_id" label="결제 유형">
+                <Form.Item name="paymethod" label="결제 유형">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="status" label="요일">
-                  <Radio.Group>
-                    <Radio style={radioStyle} value={"active"}>
-                      월
-                    </Radio>
-                    <Radio style={radioStyle} value={"inactive"}>
-                      화
-                    </Radio>
-                    <Radio style={radioStyle} value={"inactive"}>
-                      수
-                    </Radio>
-                    <Radio style={radioStyle} value={"inactive"}>
-                      목
-                    </Radio>
-                    <Radio style={radioStyle} value={"inactive"}>
-                      금
-                    </Radio>
-                    <Radio style={radioStyle} value={"inactive"}>
-                      토
-                    </Radio>
-                    <Radio style={radioStyle} value={"inactive"}>
-                      일
-                    </Radio>
-                  </Radio.Group>
+                <Form.Item name="working_days" label="요일">
+                  <Checkbox.Group options={workingDaysOptions} />
                 </Form.Item>
-                <Form.Item name="pay_method" label="시작 시간">
+                <Form.Item name="start_time" label="시작 시간">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="pay_demand" label="종료 시간">
+                <Form.Item name="end_time" label="종료 시간">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="contract_id" label="공간 정보">
+                <Form.Item name="spaces" label="공간 정보">
                   <Input disabled />
                 </Form.Item>
               </Form>
             </Card>
             <Card
-              title="청구서"
+              title="청구/결제 정보"
               extra={<Button onClick={console.log(`a`)}>청구하기</Button>}
               bodyStyle={{ padding: "1rem" }}
               className="mb-4"
             >
               <Table
                 size="middle"
-                columns={billColumns}
+                columns={orderColumns}
                 rowKey={(record) => record.order.order_id}
-                dataSource={[]}
-                pagination={pagination}
-                loading={loading}
-                onChange={handleTableChange}
+                dataSource={orderList}
+                pagination={orderPagination}
+                loading={orderLoading}
+                onChange={handleOrderTableChange}
               />
             </Card>
-
+            {/* 
             <Card
               title={`이용권 정보`}
               bodyStyle={{ padding: "1rem" }}
@@ -969,14 +1023,14 @@ const ContractDetail = (props) => {
             >
               <Table
                 size="middle"
-                columns={paymentColumns}
+                columns={voucherColumns}
                 rowKey={(record) => record.order.order_id}
-                dataSource={[]}
-                pagination={pagination}
-                loading={loading}
-                onChange={handleTableChange}
+                dataSource={voucherList}
+                pagination={voucherPagination}
+                loading={voucherLoading}
+                onChange={handleVoucherTableChange}
               />
-            </Card>
+            </Card> */}
 
             <Card
               title={`부가 서비스 이용 정보`}
@@ -986,11 +1040,11 @@ const ContractDetail = (props) => {
               <Table
                 size="middle"
                 columns={serviceColumns}
-                rowKey={(record) => record.order.order_id}
-                dataSource={[]}
-                pagination={pagination}
-                loading={loading}
-                onChange={handleTableChange}
+                rowKey={(record) => record.contract.contract_id}
+                dataSource={serviceList}
+                pagination={servicePagination}
+                loading={serviceLoading}
+                onChange={handleServiceTableChange}
               />
             </Card>
             <Card
@@ -998,11 +1052,11 @@ const ContractDetail = (props) => {
               bodyStyle={{ padding: "1rem" }}
               className="mb-4"
             >
-              <Form>
-                <Form.Item name="group_name" label="">
+              <Form form={memoForm}>
+                <Form.Item name="title" label="">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="group_id" label="">
+                <Form.Item name="content" label="">
                   <Input.TextArea disabled />
                 </Form.Item>
               </Form>
@@ -1013,31 +1067,18 @@ const ContractDetail = (props) => {
               bodyStyle={{ padding: "1rem" }}
               className="mb-4"
             >
-              <Form>
-                <Form.Item name="group_name" label="">
+              <Form form={historyForm}>
+                <Form.Item name="title" label="">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="group_id" label="">
+                <Form.Item name="content" label="">
                   <Input.TextArea disabled />
-                </Form.Item>
-                <Form.Item name="group_id" label="">
-                  <Input disabled />
                 </Form.Item>
               </Form>
             </Card>
             <Button>계약 시작일 변경</Button>
             <Button>계약 연장</Button>
             <Button>계약 취소 / 해지</Button>
-
-            <Modal
-              visible={okModalVisible}
-              okText="확인"
-              onOk={() => {
-                router.push("/qna");
-              }}
-            >
-              {"답변 등록 완료"}
-            </Modal>
 
             <Row type="flex" align="middle" className="py-4">
               <span className="px-2 w-10"></span>
