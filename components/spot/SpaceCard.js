@@ -93,6 +93,7 @@ const SpaceCard = (props) => {
         name: spaceInfo.space.name,
         seat_capacity: spaceInfo.space.seat_capacity,
         max_seat_capacity: spaceInfo.space.seat_limit,
+        floor: spaceInfo.space.floor,
       });
 
       let checkOptions = [];
@@ -132,6 +133,7 @@ const SpaceCard = (props) => {
     data.append("type", type);
     data.append("property", values.property);
     data.append("seat_capacity", values.seat_capacity);
+    data.append("floor", values.floor);
 
     const validOptionInfos = values.options;
 
@@ -147,6 +149,13 @@ const SpaceCard = (props) => {
     }
 
     data.append("options", JSON.stringify(options));
+
+    // 파일 처리
+    if (values.images) {
+      values.images.map((image, index) => {
+        formData.append(`image${index + 1}`, image.originFileObj);
+      });
+    }
 
     const config = {
       method: "post",
@@ -209,8 +218,8 @@ const SpaceCard = (props) => {
   };
 
   return (
-    <Col sm={24} md={8} className="mb-4">
-      <Card>
+    <Col className="mb-4">
+      <Card bodyStyle={{ background: "lightgray" }}>
         {!isNew && (
           <>
             <Button onClick={() => setDeleteModalVisible(true)}>삭제</Button>
@@ -278,6 +287,9 @@ const SpaceCard = (props) => {
           </Form.Item>
           <Form.Item name="max_seat_capacity" label="최대 인원">
             <InputNumber disabled={true} />
+          </Form.Item>
+          <Form.Item name="floor" label="층 정보">
+            <InputNumber /> 층
           </Form.Item>
           <Button type="primary" htmlType="submit">
             {isNew ? "등록" : "수정"}

@@ -78,27 +78,30 @@ const SpaceDetail = (props) => {
         bodyStyle={{ padding: "1rem" }}
         className="mb-4"
       >
-        <Row gutter={16}>
-          <h3>{`스팟 명 : ${spotName}`}</h3>
-        </Row>
-        <Button onClick={handleAddSpace}>+</Button>
         <Card
-          title={`${title} 리스트`}
+          title={`스팟 명 : ${spotName}`}
           bodyStyle={{ padding: "1rem" }}
           className="mb-4"
         >
-          {spaceList.map((spaceObj) => (
-            <>
-              <SpaceCard
-                key={spaceObj.space_id}
-                spotId={spotId}
-                spaceInfo={spaceObj}
-                type={type}
-                title={title}
-                handleSpaceDeleted={handleSpaceDeleted}
-              />
-            </>
-          ))}
+          <Button onClick={handleAddSpace}>+</Button>
+          <Card
+            title={`${title} 리스트`}
+            bodyStyle={{ padding: "1rem" }}
+            className="mb-4"
+          >
+            {spaceList.map((spaceObj) => (
+              <>
+                <SpaceCard
+                  key={spaceObj.space_id}
+                  spotId={spotId}
+                  spaceInfo={spaceObj}
+                  type={type}
+                  title={title}
+                  handleSpaceDeleted={handleSpaceDeleted}
+                />
+              </>
+            ))}
+          </Card>
         </Card>
       </Card>
     </>

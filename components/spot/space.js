@@ -77,12 +77,12 @@ const Space = (props) => {
     formData.append("spot_id", spotId);
     formData.append(`${type}_desc`, values.desc);
 
-    // 파일 처리 필요
-    // if (values.images) {
-    //   values.images.map((image, index) => {
-    //     formData.append(`image${index + 1}`, image.originFileObj);
-    //   });
-    // }
+    if (values.images) {
+      values.images.map((image, index) => {
+        console.log(`${type}${index + 1}`);
+        formData.append(`${type}${index + 1}`, image.originFileObj);
+      });
+    }
 
     const config = {
       method: "post",
@@ -95,13 +95,11 @@ const Space = (props) => {
 
     axios(config)
       .then(function (response) {
-        console.log(`response.data`, response.data);
-        // setOkModalVisible(true);
+        setOkModalVisible(true);
       })
       .catch(function (error) {
         console.log(error);
       });
-    console.log(`values`, values);
   };
 
   const handleFileChange = ({ fileList }) => {
