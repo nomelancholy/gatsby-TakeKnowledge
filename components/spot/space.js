@@ -16,9 +16,11 @@ const Space = (props) => {
   const [spaceList, setSpaceList] = useState([]);
 
   const [fileList, setFileList] = useState([]);
+  const [removedFileList, setRemovedFileList] = useState([]);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
 
+  const [okModalVisible, setOkModalVisible] = useState(false);
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -42,6 +44,7 @@ const Space = (props) => {
       }
     }
 
+    // 내려줄 데이터 조회
     if (spotId) {
       const config = {
         method: "post",
@@ -64,10 +67,28 @@ const Space = (props) => {
         });
     }
 
+    // 받아온 설명 세팅
     if (desc) {
       form.setFieldsValue({
         desc: desc,
       });
+    }
+
+    if (images) {
+      const optionImages = [];
+
+      images.map((image) => {
+        if (image.image_key.startsWith(type)) {
+          const newObj = {
+            thumbUrl: image.image_path,
+            image_key: image.image_key,
+          };
+
+          optionImages.push(newObj);
+        }
+      });
+
+      setFileList(optionImages);
     }
   }, []);
 
@@ -75,12 +96,16 @@ const Space = (props) => {
     const formData = new FormData();
 
     formData.append("spot_id", spotId);
-    formData.append(`${type}_desc`, values.desc);
+    if (values.desc) {
+      formData.append(`${type}_desc`, values.desc);
+    }
 
     if (values.images) {
       values.images.map((image, index) => {
-        console.log(`${type}${index + 1}`);
-        formData.append(`${type}${index + 1}`, image.originFileObj);
+        // image_key가 있는 파일은 이미 서버에 등록되어 있기 때문에 제외
+        if (!image.image_key) {
+          formData.append(`${type}${index + 1}`, image.originFileObj);
+        }
       });
     }
 
@@ -95,16 +120,35 @@ const Space = (props) => {
 
     axios(config)
       .then(function (response) {
-        setOkModalVisible(true);
+        if (response.status === 200) {
+          setOkModalVisible(true);
+        }
       })
       .catch(function (error) {
         console.log(error);
       });
   };
 
-  const handleFileChange = ({ fileList }) => {
-    form.setFieldsValue({ images: fileList });
-    setFileList(fileList);
+  const handleFileChange = ({ file }) => {
+    if (file.status === "done") {
+      // 파일 추가
+      setFileList([...fileList, file]);
+      form.setFieldsValue({ images: [...fileList, file] });
+    } else if (file.status === "removed") {
+      // 파일 삭제
+
+      // 삭제된 파일 list 에서 삭제
+      const newFileList = fileList.filter((fileObj) => fileObj !== file);
+      setFileList(newFileList);
+      form.setFieldsValue(newFileList);
+
+      if (file.image_key) {
+        // 서버에서 받아온 파일인 경우
+        // 서버에서 삭제하기 위한 배열 세팅
+        const newRemovedFileList = [...removedFileList, file.image_key];
+        setRemovedFileList(newRemovedFileList);
+      }
+    }
   };
 
   const handlePreview = (file) => {
@@ -150,6 +194,13 @@ const Space = (props) => {
           <Button type="primary" htmlType="submit">
             저장
           </Button>
+          <Modal
+            visible={okModalVisible}
+            okText="확인"
+            onOk={() => setOkModalVisible(false)}
+          >
+            {title} 정보 등록 완료
+          </Modal>
         </Form>
         <Button
           type="primary"

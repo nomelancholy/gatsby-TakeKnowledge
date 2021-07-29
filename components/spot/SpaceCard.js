@@ -34,6 +34,7 @@ const SpaceCard = (props) => {
   const [fileList, setFileList] = useState([]);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
+  const [removedFileList, setRemovedFileList] = useState([]);
 
   // 모달 관련 state
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -87,6 +88,21 @@ const SpaceCard = (props) => {
     }
     // 객체가 있을 경우 필드 세팅
     if (Object.keys(spaceInfo).length !== 0) {
+      if (spaceInfo.images) {
+        const spaceImages = [];
+
+        spaceInfo.images.map((image) => {
+          const newObj = {
+            thumbUrl: image.image_path,
+            image_key: image.image_key,
+          };
+
+          spaceImages.push(newObj);
+        });
+
+        setFileList(spaceImages);
+      }
+
       form.setFieldsValue({
         images: spaceInfo.images,
         property: spaceInfo.space.property,
@@ -117,6 +133,7 @@ const SpaceCard = (props) => {
   }, []);
 
   const handleSpaceChangeSumbit = (values) => {
+    console.log(`values`, values);
     let data = new FormData();
 
     let url = "";
@@ -153,7 +170,7 @@ const SpaceCard = (props) => {
     // 파일 처리
     if (values.images) {
       values.images.map((image, index) => {
-        formData.append(`image${index + 1}`, image.originFileObj);
+        data.append(`image${index + 1}`, image.originFileObj);
       });
     }
 
@@ -197,9 +214,26 @@ const SpaceCard = (props) => {
     handleSpaceDeleted(spaceInfo.space_id);
   };
 
-  const handleFileChange = ({ fileList }) => {
-    form.setFieldsValue({ images: fileList });
-    setFileList(fileList);
+  const handleFileChange = ({ file }) => {
+    if (file.status === "done") {
+      // 파일 추가
+      setFileList([...fileList, file]);
+      form.setFieldsValue({ images: [...fileList, file] });
+    } else if (file.status === "removed") {
+      // 파일 삭제
+
+      // 삭제된 파일 list 에서 삭제
+      const newFileList = fileList.filter((fileObj) => fileObj !== file);
+      setFileList(newFileList);
+      form.setFieldsValue(newFileList);
+
+      if (file.image_key) {
+        // 서버에서 받아온 파일인 경우
+        // 서버에서 삭제하기 위한 배열 세팅
+        const newRemovedFileList = [...removedFileList, file.image_key];
+        setRemovedFileList(newRemovedFileList);
+      }
+    }
   };
 
   const handlePreview = (file) => {
@@ -289,7 +323,7 @@ const SpaceCard = (props) => {
             <InputNumber disabled={true} />
           </Form.Item>
           <Form.Item name="floor" label="층 정보">
-            <InputNumber /> 층
+            <InputNumber label={"층"} />
           </Form.Item>
           <Button type="primary" htmlType="submit">
             {isNew ? "등록" : "수정"}

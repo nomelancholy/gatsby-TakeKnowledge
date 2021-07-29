@@ -44,7 +44,9 @@ const SpotDetail = (props) => {
   const [generatedSpotId, setGeneratedSpotId] = useState(undefined);
 
   // file 관련 state
+
   const [fileList, setFileList] = useState([]);
+  const [removedFileList, setRemovedFileList] = useState([]);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
 
@@ -120,10 +122,22 @@ const SpotDetail = (props) => {
         });
       }
 
+      // 이미지 파일 세팅
       if (spotInfo.images) {
-        // 이미지 추가되면 작업 필요
-        // images.map({});
-        // setFileList();
+        const spotImages = [];
+
+        spotInfo.images.map((image) => {
+          if (image.image_key.startsWith("image")) {
+            const newObj = {
+              thumbUrl: image.image_path,
+              image_key: image.image_key,
+            };
+
+            spotImages.push(newObj);
+          }
+        });
+
+        setFileList(spotImages);
       }
     }
   }, [spotInfo]);
@@ -169,10 +183,17 @@ const SpotDetail = (props) => {
     formData.append("seat_capacity", values.seat_capacity);
     formData.append("excerpt", JSON.stringify(excerpt));
 
+    if (removedFileList.length > 0) {
+      formData.append("del_images", JSON.stringify(removedFileList));
+    }
+
     // 파일 처리
     if (values.images) {
       values.images.map((image, index) => {
-        formData.append(`image${index + 1}`, image.originFileObj);
+        // image_key가 있는 파일은 이미 서버에 등록되어 있기 때문에 제외
+        if (!image.image_key) {
+          formData.append(`image${index + 1}`, image.originFileObj);
+        }
       });
     }
 
@@ -206,10 +227,26 @@ const SpotDetail = (props) => {
       });
   };
 
-  const handleFileChange = ({ fileList }) => {
-    console.log(`fileList`, fileList);
-    form.setFieldsValue({ images: fileList });
-    setFileList(fileList);
+  const handleFileChange = ({ file }) => {
+    if (file.status === "done") {
+      // 파일 추가
+      setFileList([...fileList, file]);
+      form.setFieldsValue({ images: [...fileList, file] });
+    } else if (file.status === "removed") {
+      // 파일 삭제
+
+      // 삭제된 파일 list 에서 삭제
+      const newFileList = fileList.filter((fileObj) => fileObj !== file);
+      setFileList(newFileList);
+      form.setFieldsValue(newFileList);
+
+      if (file.image_key) {
+        // 서버에서 받아온 파일인 경우
+        // 서버에서 삭제하기 위한 배열 세팅
+        const newRemovedFileList = [...removedFileList, file.image_key];
+        setRemovedFileList(newRemovedFileList);
+      }
+    }
   };
 
   const handlePreview = (file) => {
@@ -378,28 +415,28 @@ const SpotDetail = (props) => {
                 type="lounge"
                 spotId={spotId ? spotId : generatedSpotId}
                 desc={spotInfo.lounge_desc}
-                images={spotInfo.lounge_image}
+                images={spotInfo.images}
               />
               <Space
                 key="meeting"
                 type="meeting"
                 spotId={spotId ? spotId : generatedSpotId}
                 desc={spotInfo.meeting_desc}
-                images={spotInfo.meeting_image}
+                images={spotInfo.images}
               />
               <Space
                 key="coworking"
                 type="coworking"
                 spotId={spotId ? spotId : generatedSpotId}
                 desc={spotInfo.coworking_desc}
-                images={spotInfo.coworking_image}
+                images={spotInfo.images}
               />
               {/* <Space
                 key="locker"
                 type="locker"
                 spotId={spotId ? spotId : generatedSpotId}
                 desc={spotInfo.locker_desc}
-                images={spotInfo.locker_image}
+                images={spotInfo.images}
               /> */}
             </>
           )}
