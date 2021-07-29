@@ -6,145 +6,33 @@ import { useRouter } from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import axios from "axios";
-import { fromJS } from "immutable";
 
 const ServiceDetail = (props) => {
-  const router = useRouter();
-  const { id } = router.query;
-  const { user, isLoggedIn, token } = props.auth;
-
-  // 부가서비스 예약 상세
-  const [serviceDetail, setServiceDetail] = useState(undefined);
-
-  // 유저 계약 리스트 state
-  const [userContractList, setUserContractList] = useState([]);
-
   const radioStyle = {
     display: "inline",
     height: "30px",
     lineHeight: "30px",
   };
 
-  const [serviceStatusForm] = Form.useForm();
-  const [groupForm] = Form.useForm();
-  const [userForm] = Form.useForm();
-  const [contractForm] = Form.useForm();
-  const [serviceForm] = Form.useForm();
-  const [paymentForm] = Form.useForm();
-
-  const [pagination, setPagination] = useState({});
-  const [loading, setLoading] = useState(false);
-
-  const handleTableChange = (pagination, filters, sorter) => {
-    setPagination(2);
-
-    fetch({
-      results: pagination.pageSize,
-      page: pagination.current,
-      sortField: sorter.field,
-      sortOrder: sorter.order,
-      ...filters,
-    });
-  };
-
-  const contractColumns = [
-    {
-      title: "계약 ID",
-      dataIndex: "contract_id",
-    },
-    {
-      title: "계약 상태",
-      dataIndex: "product",
-      render: (text, record) => {
-        let renderText = "";
-
-        // if (text.type === "membership") {
-        //   renderText = "멤버십";
-        // } else if (text.type === "service") {
-        //   renderText = "부가서비스";
-        // } else if (text.type === "voucher") {
-        //   renderText = "이용권";
-        // }
-
-        return renderText;
-      },
-    },
-    {
-      title: "멤버십 상품",
-      dataIndex: "product",
-      render: (text, record) => {
-        // return text.name;
-      },
-    },
-    {
-      title: "결제 방식",
-      dataIndex: "name",
-      render: (text, record) => {
-        // return <a href={`/payment/${record.rateplan_id}`}>{text}</a>;
-      },
-    },
-    {
-      title: "결제 유형",
-      dataIndex: "price",
-      render: (text, record) => {
-        // return text.toLocaleString("ko-KR");
-      },
-    },
-    {
-      title: "시작일",
-      dataIndex: "dc_price",
-      render: (text, record) => {
-        // return text.toLocaleString("ko-KR");
-      },
-    },
-    {
-      title: "정기 결제일",
-      dataIndex: "start_date",
-    },
-    {
-      title: "취소일",
-      dataIndex: "end_date",
-    },
-    {
-      title: "해지일",
-      dataIndex: "status",
-      render: (text, record) => {
-        let renderText = "";
-        if (text === "active") {
-          renderText = "노출";
-        } else if (text === "inactive") {
-          renderText = "미노출";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "만료일",
-      dataIndex: "regdate",
-    },
-    {
-      title: "생성 일시",
-      dataIndex: "regdate",
-    },
-  ];
-
   const orderColumns = [
     {
-      title: "요금제 ID",
-      dataIndex: "rateplan_id",
+      title: "청구 ID",
+      dataIndex: "order",
+      render: (text, record) => {
+        return <a href={`/order/${record.order.order_id}`}>{text.order_id}</a>;
+      },
     },
     {
-      title: "상품 그룹",
-      dataIndex: "product",
+      title: "구분",
+      dataIndex: "contract",
       render: (text, record) => {
         let renderText = "";
 
-        if (text.type === "membership") {
+        if (text.contract_type === "membership") {
           renderText = "멤버십";
-        } else if (text.type === "service") {
+        } else if (text.contract_type === "service") {
           renderText = "부가서비스";
-        } else if (text.type === "voucher") {
+        } else if (text.contract_type === "voucher") {
           renderText = "이용권";
         }
 
@@ -152,50 +40,40 @@ const ServiceDetail = (props) => {
       },
     },
     {
-      title: "상품 명",
+      title: "청구 항목",
       dataIndex: "product",
       render: (text, record) => {
         return text.name;
       },
     },
     {
-      title: "요금제 이름",
-      dataIndex: "name",
+      title: "청구 금액",
+      dataIndex: "order",
       render: (text, record) => {
-        return <a href={`/payment/${record.rateplan_id}`}>{text}</a>;
+        return text.amount.toLocaleString("ko");
       },
     },
     {
-      title: "이용 요금",
-      dataIndex: "price",
+      title: "청구일",
+      dataIndex: "order",
       render: (text, record) => {
-        return text.toLocaleString("ko-KR");
+        return text.regdate;
       },
     },
     {
-      title: "기본 할인 요금",
-      dataIndex: "dc_price",
-      render: (text, record) => {
-        return text.toLocaleString("ko-KR");
-      },
-    },
-    {
-      title: "시작일",
-      dataIndex: "start_date",
-    },
-    {
-      title: "종료일",
-      dataIndex: "end_date",
-    },
-    {
-      title: "노출 여부",
-      dataIndex: "status",
+      title: "결제 상태",
+      dataIndex: "payment",
       render: (text, record) => {
         let renderText = "";
-        if (text === "active") {
-          renderText = "노출";
-        } else if (text === "inactive") {
-          renderText = "미노출";
+
+        if (text.status == "wait") {
+          renderText = "대기";
+        } else if (text.status == "buy") {
+          renderText = "결제";
+        } else if (text.status == "unpaid") {
+          renderText = "미납";
+        } else if (text.status == "canceld") {
+          renderText = "취소";
         }
 
         return renderText;
@@ -203,9 +81,80 @@ const ServiceDetail = (props) => {
     },
     {
       title: "생성 일시",
-      dataIndex: "regdate",
+      dataIndex: "order",
+      render: (text, record) => {
+        return text.regdate;
+      },
     },
   ];
+
+  const PAGE_SIZE = 5;
+
+  const getOrderList = (params) => {
+    setLoading(true);
+    // 유저 계약 리스트 조회
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/contract/order/list`,
+        { ...params },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        const data = response.data;
+        setOrderList(data.items);
+
+        // 페이지 네이션 정보 세팅
+        const pageInfo = {
+          current: data.page,
+          total: data.total,
+          pageSize: data.size,
+        };
+
+        setPagination(pageInfo);
+
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
+
+  const handleTableChange = (pagination) => {
+    setPagination(pagination);
+
+    getOrderList({
+      page: pagination.current,
+      size: PAGE_SIZE,
+      schedule_id: id,
+    });
+  };
+
+  // 청구 결제 리스트 state
+  const [orderList, setOrderList] = useState([]);
+
+  const [pagination, setPagination] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  const router = useRouter();
+  const { id } = router.query;
+
+  const { user, isLoggedIn, token } = props.auth;
+
+  // 부가서비스 예약 상세
+  const [serviceDetail, setServiceDetail] = useState(undefined);
+
+  const [serviceStatusForm] = Form.useForm();
+  const [groupForm] = Form.useForm();
+  const [userForm] = Form.useForm();
+  const [contractForm] = Form.useForm();
+  const [serviceForm] = Form.useForm();
+  const [paymentForm] = Form.useForm();
 
   useEffect(() => {
     // 부가서비스 상세 정보 조회
@@ -222,35 +171,17 @@ const ServiceDetail = (props) => {
       .then(function (response) {
         const data = response.data.item;
         setServiceDetail(data);
-        console.log(`data`, data);
-        // const userDetail = response.data.item;
-        // console.log(`userDetail`, userDetail);
-        // setUserDetail(userDetail);
       })
       .catch(function (error) {
         console.log(error);
       });
-    // 유저 계약 리스트 조회
-    axios
-      .post(
-        `${process.env.BACKEND_API}/admin/contract/list`,
-        { page: 1, size: 100, uid: id },
-        {
-          headers: {
-            "Content-Type": "application/json;charset=UTF-8",
-            "Access-Control-Allow-Origin": "*",
-            Authorization: decodeURIComponent(token),
-          },
-        }
-      )
-      .then((response) => {
-        const data = response.data.items;
-        console.log(`data`, data);
-        setUserContractList(data);
-      })
-      .catch((error) => {
-        console.log(`error`, error);
-      });
+
+    // 청구 결제 리스트 조회
+    getOrderList({
+      page: pagination.current,
+      size: PAGE_SIZE,
+      schedule_id: id,
+    });
   }, []);
 
   useEffect(() => {
@@ -545,9 +476,9 @@ const ServiceDetail = (props) => {
         >
           <Table
             size="middle"
-            columns={contractColumns}
-            rowKey={(record) => record.contract_id}
-            dataSource={userContractList}
+            columns={orderColumns}
+            rowKey={(record) => record.order.order_id}
+            dataSource={orderList}
             pagination={pagination}
             loading={loading}
             onChange={handleTableChange}
