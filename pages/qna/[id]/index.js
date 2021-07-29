@@ -16,6 +16,8 @@ const QnaDetail = (props) => {
   const [qnaDetail, setQnaDetail] = useState(undefined);
 
   const [okModalVisible, setOkModalVisible] = useState(false);
+  const [removeModalVisible, setRemoveModalVisible] = useState(false);
+
   // 답장을 단 적이 있는 경우 (작성/수정 flag)
   const [replyQid, setReplyQid] = useState(undefined);
 
@@ -39,6 +41,7 @@ const QnaDetail = (props) => {
       })
       .then((response) => {
         const qnaDetail = response.data.item;
+        console.log(`qnaDetail`, qnaDetail);
         setQnaDetail(qnaDetail);
       })
       .catch((error) => {
@@ -116,6 +119,29 @@ const QnaDetail = (props) => {
       });
   };
 
+  const handleRemove = () => {
+    const config = {
+      method: "post",
+      url: `${process.env.BACKEND_API}/user/qna/delete`,
+      headers: {
+        Authorization: decodeURIComponent(token),
+      },
+      data: {
+        qid: id,
+      },
+    };
+
+    axios(config)
+      .then(function (response) {
+        if (response.status === 200) {
+          router.push("/qna");
+        }
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
+
   return (
     <>
       <Card
@@ -166,6 +192,13 @@ const QnaDetail = (props) => {
           <Button type="primary" htmlType="submit">
             저장
           </Button>
+          <Button
+            onClick={() => {
+              setRemoveModalVisible(true);
+            }}
+          >
+            삭제
+          </Button>
         </Form>
         <Modal
           visible={okModalVisible}
@@ -175,6 +208,9 @@ const QnaDetail = (props) => {
           }}
         >
           {"답변 등록 완료"}
+        </Modal>
+        <Modal visible={removeModalVisible} okText="확인" onOk={handleRemove}>
+          {"삭제하시겠습니까?"}
         </Modal>
       </Card>
 

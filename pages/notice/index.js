@@ -65,8 +65,6 @@ const Notice = (props) => {
       render: (text, record) => {
         let renderText = "";
 
-        console.log(`text`, text);
-
         if (text === "publish") {
           renderText = "발행";
         } else if (text === "private") {
@@ -123,7 +121,7 @@ const Notice = (props) => {
       )
       .then((response) => {
         const data = response.data;
-        console.log(`data`, data);
+        console.log(`notice data`, data);
 
         setNoticeList(data.items);
 

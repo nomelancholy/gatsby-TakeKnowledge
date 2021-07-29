@@ -48,6 +48,7 @@ const NoticeDetail = (props) => {
         )
         .then(function (response) {
           const noticeInfo = response.data.item;
+          console.log(`noticeInfo`, noticeInfo);
           setNoticeInfo(noticeInfo);
         })
         .catch(function (error) {
@@ -90,8 +91,6 @@ const NoticeDetail = (props) => {
       url = `${process.env.BACKEND_API}/services/notice/update`;
       data.notice_id = Number(noticeId);
     }
-
-    console.log(`data`, data);
 
     const config = {
       method: "post",

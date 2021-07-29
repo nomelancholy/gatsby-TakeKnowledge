@@ -206,6 +206,7 @@ const Qna = (props) => {
     axios(config)
       .then(function (response) {
         const data = response.data;
+        console.log(`qna data`, data);
 
         // 데이터 바인딩
         setQnaList(data.items);
@@ -348,7 +349,7 @@ const Qna = (props) => {
               onChange={handleClassificationChange}
             >
               {qnaSelectOptions.map((option) => (
-                <Select.Option value={option.label}>
+                <Select.Option key={option.label} value={option.label}>
                   {option.label}
                 </Select.Option>
               ))}
@@ -357,7 +358,9 @@ const Qna = (props) => {
           <Form.Item name="category" label="카테고리">
             <Select style={{ width: 200 }}>
               {categoryOptions.map((option) => (
-                <Select.Option value={option}>{option}</Select.Option>
+                <Select.Option key={option} value={option}>
+                  {option}
+                </Select.Option>
               ))}
             </Select>
           </Form.Item>
