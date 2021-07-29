@@ -170,13 +170,10 @@ const ProductSpot = (props) => {
   // 옵션 스팟이 바뀔 때 사용 가능 공간 변경
   const handleOptionSpotChange = (value) => {
     const spotConfig = {
-      method: "post",
-      url: `${process.env.BACKEND_API}/spot/get`,
+      method: "get",
+      url: `${process.env.BACKEND_API}/admin/spot/get/${value}`,
       headers: {
         Authorization: decodeURIComponent(token),
-      },
-      data: {
-        spot_id: value,
       },
     };
 

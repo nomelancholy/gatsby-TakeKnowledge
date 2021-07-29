@@ -104,7 +104,7 @@ const SpaceCard = (props) => {
       }
 
       form.setFieldsValue({
-        images: spaceInfo.images,
+        // images: spaceInfo.images,
         property: spaceInfo.space.property,
         name: spaceInfo.space.name,
         seat_capacity: spaceInfo.space.seat_capacity,

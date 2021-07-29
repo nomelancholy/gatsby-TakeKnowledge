@@ -66,6 +66,15 @@ const ProductDetail = (props) => {
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
 
+  const [logoImage, setLogoImage] = useState([]);
+  const [logoPreviewVisible, setLogoPreviewVisible] = useState(false);
+  const [logoPreviewImage, setLogoPreviewImage] = useState("");
+
+  const [productImageList, setProductImageList] = useState([]);
+  const [productImagePreviewVisible, setProductImagePreviewVisible] =
+    useState(false);
+  const [productPreviewImage, setProductPreviewImage] = useState("");
+
   const [okModalVisible, setOkModalVisible] = useState(false);
 
   // 상품 구분 선택 state
@@ -132,13 +141,38 @@ const ProductDetail = (props) => {
         name: productInfo.name,
         // 결제 유형
         pay_demand: productInfo.pay_demand,
+        // 총 사용 가능일
+        available_days: productInfo.available_days,
+        // 결제 방법
+        pay_method: productInfo.pay_method,
         // 멤버십 유형
         service_type: productInfo.service_type,
         // 체크인 단위
         time_unit: productInfo.time_unit,
+        // 자동 결제
+        pay_extend: productInfo.pay_extend,
+
         // 주간 이용 한도
         week_limit: productInfo.week_limit,
       });
+
+      console.log(`productInfo`, productInfo);
+      if (productInfo.images.logo) {
+        // productInfo.images.map((image) => {
+        //   console.log(`image`, image);
+        // });
+        // productInfo.images.map((image) => {
+        // const newObj = {
+        //   thumbUrl: image.image_path,
+        //   image_key: image.image_key,
+        // };
+        // if (Object.keys(image) === "logo") {
+        //   setLogoImage(newObj);
+        // } else {
+        //   setProductImageList([...productImageList, image]);
+        // }
+        // });
+      }
 
       // 운영 시간 시작 / 끝 시간
       setStartTime(productInfo.start_time);
@@ -220,19 +254,21 @@ const ProductDetail = (props) => {
     formData.append("status", values.status);
     formData.append("name", values.name);
     formData.append("pay_demand", values.pay_demand);
+    formData.append("pay_method", values.pay_method);
     formData.append("service_type", values.service_type);
     formData.append("time_unit", values.time_unit);
+    formData.append("pay_extend", values.pay_extend);
     formData.append("intro", intro);
     formData.append("content", content);
 
     // TO-DO 로고 처리
     if (values.logo) {
-      formData.append("logo", values.logo);
+      formData.append("logo", values.logo[0].originFileObj);
     }
 
     // 상품 이미지 처리
-    if (values.images) {
-      values.images.map((image, index) => {
+    if (values.productImages) {
+      values.productImages.map((image, index) => {
         formData.append(`image${index + 1}`, image.originFileObj);
       });
     }
@@ -311,16 +347,28 @@ const ProductDetail = (props) => {
     setType(value);
   };
 
-  const handleFileChange = ({ fileList }) => {
-    form.setFieldsValue({ images: fileList });
-    setFileList(fileList);
+  // 파일 변경
+  const handleLogoChange = ({ fileList }) => {
+    form.setFieldsValue({ logo: fileList });
+    setLogoImage(fileList);
   };
 
-  const handlePreview = (file) => {
-    setPreviewVisible(true);
-    setPreviewImage(file.url || file.thumbUrl);
+  const handleLogoPreview = (file) => {
+    setLogoPreviewVisible(true);
+    setLogoPreviewImage(file.url || file.thumbUrl);
   };
 
+  const handleProductImagesChange = ({ fileList }) => {
+    form.setFieldsValue({ productImages: fileList });
+    setProductImageList(fileList);
+  };
+
+  const handleProductImagesPreview = (file) => {
+    setProductImagePreviewVisible(true);
+    setProductPreviewImage(file.url || file.thumbUrl);
+  };
+
+  // 시간 변경
   const handleStartTimeChange = (values) => {
     setStartTime(values);
   };
@@ -329,6 +377,7 @@ const ProductDetail = (props) => {
     setEndTime(values);
   };
 
+  // 에디터
   const handleIntroChange = (values) => {
     setIntro(values);
   };
@@ -386,15 +435,21 @@ const ProductDetail = (props) => {
                   <Select.Option value="service">부가서비스</Select.Option>
                 </Select>
               </Form.Item>
-              <Form.Item name="plan_spot" label="상품 옵션">
-                <Select defaultValue="-" style={{ width: 120 }}>
-                  <Select.Option value="one_spot">단일 스팟</Select.Option>
-                  <Select.Option value="all_spot">전 스팟</Select.Option>
-                </Select>
-              </Form.Item>
-              <Form.Item name="memo" label="메모">
-                <Input />
-              </Form.Item>
+              {type !== "service" && (
+                <Form.Item name="plan_spot" label="상품 옵션">
+                  <Select defaultValue="-" style={{ width: 120 }}>
+                    <Select.Option value="one_spot">단일 스팟</Select.Option>
+                    <Select.Option value="all_spot">전 스팟</Select.Option>
+                  </Select>
+                </Form.Item>
+              )}
+
+              {type === "membership" && (
+                <Form.Item name="memo" label="메모">
+                  <Input />
+                </Form.Item>
+              )}
+
               <Form.Item name="status" label="활성 / 비활성">
                 <Radio.Group>
                   <Radio style={radioStyle} value={"active"}>
@@ -411,15 +466,31 @@ const ProductDetail = (props) => {
               <Form.Item name="pay_demand" label="결제 유형">
                 <Select defaultValue="-" style={{ width: 120 }}>
                   <Select.Option value="pre">선불</Select.Option>
+                  <Select.Option value="direct">바로결제</Select.Option>
                   <Select.Option value="deffered">후불</Select.Option>
                 </Select>
               </Form.Item>
+              {type !== "service" && (
+                <Form.Item name="pay_method" label="결제 방식">
+                  <Select defaultValue="-" style={{ width: 120 }}>
+                    <Select.Option value="credit_card">카드결제</Select.Option>
+                    <Select.Option value="bank_trasfer">계좌이체</Select.Option>
+                  </Select>
+                </Form.Item>
+              )}
+
               <Form.Item name="service_type" label="멤버십 유형">
                 <Select defaultValue="-" style={{ width: 120 }}>
                   <Select.Option value="accumulate">기본형</Select.Option>
                   <Select.Option value="deduction">차감형</Select.Option>
                 </Select>
               </Form.Item>
+              {type === "voucher" && (
+                <Form.Item name="available_days" label="총 사용 가능일">
+                  <Input />
+                </Form.Item>
+              )}
+
               <Form.Item name="time_unit" label="체크인 단위">
                 <Radio.Group>
                   <Radio style={radioStyle} value={"day"}>
@@ -430,31 +501,44 @@ const ProductDetail = (props) => {
                   </Radio>
                 </Radio.Group>
               </Form.Item>
-              <Form.Item name="images" label="상품  로고이미지">
+              {type !== "service" && (
+                <Form.Item name="pay_extend" label="정기 결제">
+                  <Radio.Group>
+                    <Radio style={radioStyle} value={true}>
+                      ON
+                    </Radio>
+                    <Radio style={radioStyle} value={false}>
+                      OFF
+                    </Radio>
+                  </Radio.Group>
+                </Form.Item>
+              )}
+
+              <Form.Item name="logo" label="상품  로고이미지">
                 <Upload
                   name="image"
                   listType="picture-card"
-                  fileList={[]}
-                  // onChange={handleFileChange}
-                  // onPreview={handlePreview}
+                  fileList={logoImage}
+                  onChange={handleLogoChange}
+                  onPreview={handleLogoPreview}
                 >
-                  {fileList.length < 1 ? (
+                  {logoImage.length < 1 ? (
                     <Button icon={<UploadOutlined />}>업로드</Button>
                   ) : null}
                 </Upload>
-                {/* <Modal
-                  visible={previewVisible}
+                <Modal
+                  visible={logoPreviewVisible}
                   footer={null}
                   onCancel={() => {
-                    setPreviewVisible(false);
+                    setLogoPreviewVisible(false);
                   }}
                 >
                   <img
                     alt="example"
                     style={{ width: "100%" }}
-                    src={previewImage}
+                    src={logoPreviewImage}
                   />
-                </Modal> */}
+                </Modal>
               </Form.Item>
               <Form.Item name="intro" label="상품 소개">
                 <PostEditor onChange={handleIntroChange} setContents={intro} />
@@ -466,31 +550,31 @@ const ProductDetail = (props) => {
                 />
               </Form.Item>
               <Form.Item
-                name="images"
+                name="productImages"
                 label="상품 이미지 (최대 5장까지 첨부 가능)"
               >
                 <Upload
                   name="image"
                   listType="picture-card"
-                  fileList={fileList}
-                  onChange={handleFileChange}
-                  onPreview={handlePreview}
+                  fileList={productImageList}
+                  onChange={handleProductImagesChange}
+                  onPreview={handleProductImagesPreview}
                 >
-                  {fileList.length < 5 ? (
+                  {productImageList.length < 5 ? (
                     <Button icon={<UploadOutlined />}>업로드</Button>
                   ) : null}
                 </Upload>
                 <Modal
-                  visible={previewVisible}
+                  visible={productImagePreviewVisible}
                   footer={null}
                   onCancel={() => {
-                    setPreviewVisible(false);
+                    setProductImagePreviewVisible(false);
                   }}
                 >
                   <img
                     alt="example"
                     style={{ width: "100%" }}
-                    src={previewImage}
+                    src={productPreviewImage}
                   />
                 </Modal>
               </Form.Item>
