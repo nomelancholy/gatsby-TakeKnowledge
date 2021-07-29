@@ -20,13 +20,10 @@ const Cowork = (props) => {
     setType(type);
 
     const spotConfig = {
-      method: "post",
-      url: `${process.env.BACKEND_API}/spot/get`,
+      method: "get",
+      url: `${process.env.BACKEND_API}/admin/spot/get/${id}`,
       headers: {
         Authorization: decodeURIComponent(token),
-      },
-      data: {
-        spot_id: id,
       },
     };
 

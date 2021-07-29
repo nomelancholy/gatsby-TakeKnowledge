@@ -68,19 +68,16 @@ const SpotDetail = (props) => {
       setRegisterMode(false);
 
       axios
-        .post(
-          `${process.env.BACKEND_API}/spot/get`,
-          { spot_id: Number(spotId) },
-          {
-            headers: {
-              "Content-Type": "application/json;charset=UTF-8",
-              "Access-Control-Allow-Origin": "*",
-              Authorization: decodeURIComponent(token),
-            },
-          }
-        )
+        .get(`${process.env.BACKEND_API}/admin/spot/get/${spotId}`, {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        })
         .then((response) => {
           const spotData = response.data;
+          console.log(`spotData`, spotData);
           setSpotInfo(spotData);
         })
         .catch((error) => {
@@ -125,6 +122,8 @@ const SpotDetail = (props) => {
 
       if (spotInfo.images) {
         // 이미지 추가되면 작업 필요
+        // images.map({});
+        // setFileList();
       }
     }
   }, [spotInfo]);
@@ -208,6 +207,7 @@ const SpotDetail = (props) => {
   };
 
   const handleFileChange = ({ fileList }) => {
+    console.log(`fileList`, fileList);
     form.setFieldsValue({ images: fileList });
     setFileList(fileList);
   };
@@ -276,6 +276,9 @@ const SpotDetail = (props) => {
                   </Radio>
                   <Radio style={radioStyle} value={"inactive"}>
                     비활성
+                  </Radio>
+                  <Radio style={radioStyle} value={"trash"}>
+                    삭제
                   </Radio>
                 </Radio.Group>
               </Form.Item>
@@ -391,13 +394,13 @@ const SpotDetail = (props) => {
                 desc={spotInfo.coworking_desc}
                 images={spotInfo.coworking_image}
               />
-              <Space
+              {/* <Space
                 key="locker"
                 type="locker"
                 spotId={spotId ? spotId : generatedSpotId}
                 desc={spotInfo.locker_desc}
                 images={spotInfo.locker_image}
-              />
+              /> */}
             </>
           )}
 
