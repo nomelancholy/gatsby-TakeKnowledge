@@ -1,4 +1,15 @@
-import { Button, Form, Input, Row, Modal, Card, Radio, Table, Col } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  Row,
+  Modal,
+  Card,
+  Radio,
+  Table,
+  Col,
+  Select,
+} from "antd";
 
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
@@ -13,6 +24,48 @@ const ContractDetail = (props) => {
     height: "30px",
     lineHeight: "30px",
   };
+
+  const orderItmesColumns = [
+    {
+      title: "항목",
+      dataIndex: "name",
+      // render: (text, record) => {
+      //   const renderText = `${text.order_id}`;
+      //   return renderText;
+      // },
+    },
+    {
+      title: "할인쿠폰",
+      dataIndex: "coupon",
+      // render: (text, record) => {
+      //   const renderText = `${text.order_id}`;
+      //   return renderText;
+      // },
+    },
+    {
+      title: "금액",
+      dataIndex: "amount",
+      // render: (text, record) => {
+      //   const renderText = `${text.order_id}`;
+      //   return renderText;
+      // },
+    },
+    {
+      title: "청구 일자",
+      dataIndex: "order_date",
+      // render: (text, record) => {
+      //   const renderText = `${text.order_id}`;
+      //   return renderText;
+      // },
+    },
+    {
+      title: "청구 사유",
+      dataIndex: "reason",
+      render: (text, record) => {
+        return <Input style={{ width: 160 }}></Input>;
+      },
+    },
+  ];
 
   // 청구서 테이블 컬럼 정의
   const orderColumns = [
@@ -197,6 +250,10 @@ const ContractDetail = (props) => {
 
   const PAGE_SIZE = 5;
 
+  // 청구 항목 아이템
+
+  const [orderItemList, setOrderItemList] = useState([]);
+
   // 청구서 테이블 페이징, 로딩
   const [orderPagination, setOrderPagination] = useState({});
   const [orderLoading, setOrderLoading] = useState(false);
@@ -310,6 +367,9 @@ const ContractDetail = (props) => {
 
   const [orderDetail, setOrderDetail] = useState(undefined);
 
+  // 선택된 결제 카드
+  const [selectedCard, setSelectedCard] = useState([]);
+
   // 청구 상태
   const [orderStatusForm] = Form.useForm();
   // 그룹 정보
@@ -341,13 +401,42 @@ const ContractDetail = (props) => {
         console.log(`error`, error);
       });
 
+    // 결제 내역 조회
     getPaymentList({ page: 1, size: PAGE_SIZE });
   }, []);
+
+  const [userCardList, setUserCardList] = useState([]);
+
+  const getUserCardList = (uid) => {
+    axios
+      .post(
+        `${process.env.BACKEND_API}/user/card/list`,
+        {
+          uid,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        const data = response.data;
+        setUserCardList(data.items);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
 
   useEffect(() => {
     // 요금제 정보 세팅되면
     if (orderDetail) {
       console.log(`orderDetail`, orderDetail);
+      // 유저 카드 정보 조회
+      getUserCardList(orderDetail.order.uid);
 
       // 청구 상태
       orderStatusForm.setFieldsValue({
@@ -433,132 +522,12 @@ const ContractDetail = (props) => {
         next_paydate: orderDetail.contract.next_paydate,
         total: orderDetail.order.amount.toLocaleString("ko"),
       });
-
-      // 회원 정보
-      // userForm.setFieldsValue({
-      //   // 회원 ID
-      //   uid: orderDetail.user.uid,
-      //   // 멤버 이름
-      //   user_name: orderDetail.user.user_name,
-      //   // 아이디
-      //   // 핸드폰 번호
-      //   // 대표 결제 카드
-      // });
-
-      // // 계약 상태 세팅
-      // let contractStatus = "";
-
-      // switch (orderDetail.contract.status) {
-      //   case "wait":
-      //     contractStatus = "구매 대기";
-      //     break;
-      //   case "buy":
-      //     contractStatus = "구매";
-      //     break;
-      //   case "pay":
-      //     contractStatus = "이용 시작";
-      //     break;
-      //   case "refund":
-      //     contractStatus = "환불";
-      //     break;
-      //   case "expired":
-      //     contractStatus = "종료";
-      //     break;
-      //   case "terminate":
-      //     contractStatus = "해지";
-      //     break;
-      //   case "canceled":
-      //     contractStatus = "취소";
-      //     break;
-      //   default:
-      //     break;
-      // }
-
-      // // 계약 정보
-      // contractForm.setFieldsValue({
-      //   // 멤버십 상품
-      //   product_name: orderDetail.product.name,
-      //   // 계약 상태
-      //   status: contractStatus,
-      //   // 계약 ID
-      //   contract_id: orderDetail.contract.contract_id,
-      //   // 계약 시작일
-      //   start_date: orderDetail.contract.regdate,
-      //   // 계약 신청일
-      //   // 연장 회차
-      //   // 정기 결제일
-      //   next_paydate: orderDetail.contract.next_paydate,
-      //   // 적용 요금제
-      // });
-
-      // // 청구 유형 세팅
-      // let contractType;
-
-      // switch (orderDetail.contract.contract_type) {
-      //   case "membership":
-      //     contractType = "멤버십";
-      //     break;
-      //   case "service":
-      //     contractType = "부가서비스";
-      //     break;
-      //   case "voucher":
-      //     contractType = "이용권";
-      //     break;
-      //   default:
-      //     break;
-      // }
-
-      // let payDemand = "";
-
-      // switch (orderDetail.product.pay_demand) {
-      //   case "pre":
-      //     payDemand = "선불";
-      //     break;
-      //   case "deffered":
-      //     payDemand = "후불";
-      //     break;
-      //   case "last":
-      //     payDemand = "말일 결제";
-      //     break;
-      //   default:
-      //     break;
-      // }
-
-      // // 청구 내용
-      // orderForm.setFieldsValue({
-      //   // 청구 유형
-      //   contract_type: contractType,
-      //   // 결제 방식
-      //   pay_method:
-      //     orderDetail.pay_method.type === "personal"
-      //       ? "개인 카드결제"
-      //       : "법인 카드 결제",
-      //   // 결제 유형
-      //   pay_demand: payDemand,
-      //   // 청구 기간
-      //   // 정기 결제일자
-      //   next_paydate: orderDetail.contract.next_paydate,
-      //   // 청구 상태
-      //   // 총 금액
-      //   total: orderDetail.payment.total,
-      // });
-
-      // form.setFieldsValue({
-      //   // 노출 여부
-      //   state: userDetail.state,
-      //   // 카테고리 1
-      //   classification: userDetail.classification,
-      //   // 카테고리 2
-      //   category: userDetail.category,
-      //   // 작성자
-      //   user_name: userDetail.user.user_name,
-      //   // 제목
-      //   title: userDetail.title,
-      //   // 내용
-      //   content: userDetail.content,
-      // });
     }
   }, [orderDetail]);
+
+  const handlePaymentCardChange = (value) => {
+    setSelectedCard(value);
+  };
 
   return (
     <>
@@ -683,23 +652,37 @@ const ContractDetail = (props) => {
             </Form.Item>
 
             <Col></Col>
-            <Form.Item name="status" label="청구 항목">
-              <Radio.Group>
-                <Radio style={radioStyle} value={"active"}>
-                  청구 완료
-                </Radio>
-                <Radio style={radioStyle} value={"inactive"}>
-                  청구 취소
-                </Radio>
-                <Radio style={radioStyle} value={"inactive"}>
-                  청구 환불
-                </Radio>
-              </Radio.Group>
-            </Form.Item>
+            <Card
+              title={`청구 항목`}
+              bodyStyle={{ padding: "1rem" }}
+              className="mb-4"
+            >
+              <Table
+                size="middle"
+                columns={orderItmesColumns}
+                rowKey={(record) => record.name}
+                dataSource={orderItemList}
+                // pagination={paymentPagination}
+                // loading={paymentLoading}
+                // onChange={handlePaymentTableChange}
+              />
+            </Card>
             <Form.Item name="total" label="총 금액">
-              <Input disabled />
+              <Input disabled style={{ width: 260 }} />
             </Form.Item>
           </Form>
+          <Select
+            defaultValue={selectedCard}
+            style={{ width: 160 }}
+            onChange={handlePaymentCardChange}
+          >
+            {userCardList.map((card) => (
+              <Select.Option key={card.customer_uid} value={card.customer_uid}>
+                {card.name}
+              </Select.Option>
+            ))}
+          </Select>
+          <Button>결제</Button>
         </Card>
         <Card title="청구서">
           <Table
