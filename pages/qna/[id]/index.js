@@ -203,13 +203,26 @@ const QnaDetail = (props) => {
         <Modal
           visible={okModalVisible}
           okText="확인"
+          cancelText="취소"
           onOk={() => {
             router.push("/qna");
           }}
+          onCancel={() => {
+            setOkModalVisible(false);
+          }}
+          cancelButtonProps={{ style: { display: "none" } }}
         >
           {"답변 등록 완료"}
         </Modal>
-        <Modal visible={removeModalVisible} okText="확인" onOk={handleRemove}>
+        <Modal
+          visible={removeModalVisible}
+          okText="확인"
+          onOk={handleRemove}
+          onCancel={() => {
+            setRemoveModalVisible(false);
+          }}
+          cancelButtonProps={{ style: { display: "none" } }}
+        >
           {"삭제하시겠습니까?"}
         </Modal>
       </Card>
