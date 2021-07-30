@@ -21,6 +21,9 @@ import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import axios from "axios";
 import Checkbox from "antd/lib/checkbox/Checkbox";
+import { contractOrderColumns } from "@utils/columns/order";
+import { contractServiceColumns } from "@utils/columns/service";
+import { contractVoucherColumns } from "@utils/columns/product";
 
 const ContractDetail = (props) => {
   const radioStyle = {
@@ -40,381 +43,7 @@ const ContractDetail = (props) => {
     { label: "일", value: "sun" },
   ];
 
-  // 청구/결제 정보 테이블 컬럼 정의
-  const orderColumns = [
-    {
-      title: "청구 ID",
-      dataIndex: "order",
-      render: (text, record) => {
-        return <a href={`/order/${record.order.order_id}`}>{text.order_id}</a>;
-      },
-    },
-    {
-      title: "구분",
-      dataIndex: "contract",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.contract_type === "membership") {
-          renderText = "멤버십";
-        } else if (text.contract_type === "service") {
-          renderText = "부가서비스";
-        } else if (text.contract_type === "voucher") {
-          renderText = "이용권";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "청구 항목",
-      dataIndex: "product",
-      render: (text, record) => {
-        return text.name;
-      },
-    },
-    {
-      title: "청구 금액",
-      dataIndex: "order",
-      render: (text, record) => {
-        return text.amount.toLocaleString("ko");
-      },
-    },
-    {
-      title: "청구일",
-      dataIndex: "order",
-      render: (text, record) => {
-        return text.regdate;
-      },
-    },
-    {
-      title: "결제 상태",
-      dataIndex: "payment",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.status == "wait") {
-          renderText = "대기";
-        } else if (text.status == "buy") {
-          renderText = "결제";
-        } else if (text.status == "unpaid") {
-          renderText = "미납";
-        } else if (text.status == "canceld") {
-          renderText = "취소";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "생성 일시",
-      dataIndex: "order",
-      render: (text, record) => {
-        return text.regdate;
-      },
-    },
-  ];
-
-  // 이용권 columns 정의
-  const voucherColumns = [
-    {
-      title: "이용 ID",
-      dataIndex: "order",
-      render: (text, record) => {
-        const renderText = `${text.order_id} (${record.contract.contract_id})`;
-        return renderText;
-      },
-    },
-    {
-      title: "구분",
-      dataIndex: "user",
-      render: (text, record) => {
-        console.log(`record`, record);
-        return (
-          <a href={`/order/${record.contract.contract_id}`}>
-            {`${text.user_name}(${text.uid})`}
-          </a>
-        );
-      },
-    },
-    {
-      title: "상품명",
-      dataIndex: "contract",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.status === "wait") {
-          renderText = "계약 신청(입금전)";
-        } else if (text.status === "buy") {
-          renderText = "계약 신청(이용전)";
-        } else if (text.status === "pay") {
-          renderText = "계약 완료(이용중)";
-        } else if (text.status === "refund") {
-          renderText = "계약 해지(환불)";
-        } else if (text.status === "expired") {
-          renderText = "계약 해지(만료)";
-        } else if (text.status === "terminate") {
-          renderText = "계약 해지(중도)";
-        } else if (text.status === "canceled") {
-          renderText = "계약 해지(취소)";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "유형",
-      dataIndex: "group_id",
-    },
-    {
-      title: "요일",
-      dataIndex: "contract",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.contract_type === "service") {
-          renderText = "부가서비스";
-        } else if (text.contract_type === "membershipt") {
-          renderText = "멤버십";
-        } else if (text.contract_type === "voucher") {
-          renderText = "이용권";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "시간제",
-      dataIndex: "product",
-      render: (text, record) => {
-        return text.name;
-      },
-    },
-    {
-      title: "시작일",
-      dataIndex: "contract",
-      render: (text, record) => {
-        console.log(`text`, text);
-        return text.next_paydate;
-      },
-    },
-    {
-      title: "종료일",
-      dataIndex: "pay_method",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.type == "personal") {
-          renderText = "개인 카드 결제";
-        } else {
-          renderText = "법인 카드 결제";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "사용일수",
-      dataIndex: "product",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.pay_demand == "pre") {
-          renderText = "선불";
-        } else if (text.pay_demand == "deffered") {
-          renderText = "후불";
-        } else if (text.pay_demand == "last") {
-          renderText = "말일 결제";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "사용 지점",
-      dataIndex: "product",
-      render: (text, record) => {
-        return text.name;
-      },
-    },
-    {
-      title: "사용 공간",
-      dataIndex: "contract",
-      render: (text, record) => {
-        console.log(`text`, text);
-        return text.next_paydate;
-      },
-    },
-    {
-      title: "이용 상태",
-      dataIndex: "pay_method",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.type == "personal") {
-          renderText = "개인 카드 결제";
-        } else {
-          renderText = "법인 카드 결제";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "생성 일시",
-      dataIndex: "product",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.pay_demand == "pre") {
-          renderText = "선불";
-        } else if (text.pay_demand == "deffered") {
-          renderText = "후불";
-        } else if (text.pay_demand == "last") {
-          renderText = "말일 결제";
-        }
-
-        return renderText;
-      },
-    },
-  ];
-
   // 부가 서비스 이용 정보
-  const serviceColumns = [
-    {
-      title: "예약 ID",
-      dataIndex: "schedule",
-      render: (text, record) => {
-        return <a href={`/service/${text.schedule_id}`}>{text.schedule_id}</a>;
-      },
-    },
-    {
-      title: "구분",
-      dataIndex: "contract",
-      render: (text, record) => {
-        return "";
-      },
-    },
-    {
-      title: "상품명",
-      dataIndex: "space",
-      render: (text, record) => {
-        return text.name;
-      },
-    },
-    {
-      title: "유형",
-      dataIndex: "contract",
-      render: (text, record) => {
-        return "";
-      },
-    },
-    {
-      title: "요일",
-      dataIndex: "product",
-      render: (text, record) => {
-        return "";
-      },
-    },
-    {
-      title: "시간제",
-      dataIndex: "schedule",
-      render: (text, record) => {
-        let renderText = "";
-
-        const startArray = text.start_time.split(" ");
-        const endArray = text.end_time.split(" ");
-
-        const startDate = startArray[0];
-        const startTime = startArray[1];
-        const endDate = endArray[0];
-        const endTime = endArray[1];
-
-        renderText = `${startTime}~${endTime}`;
-
-        return renderText;
-      },
-    },
-    {
-      title: "시작일",
-      dataIndex: "schedule",
-      render: (text, record) => {
-        let renderText = "";
-
-        const startArray = text.start_time.split(" ");
-        const endArray = text.end_time.split(" ");
-
-        const startDate = startArray[0];
-        const startTime = startArray[1];
-        const endDate = endArray[0];
-        const endTime = endArray[1];
-
-        renderText = startDate;
-
-        return renderText;
-      },
-    },
-    {
-      title: "종료일",
-      dataIndex: "schedule",
-      render: (text, record) => {
-        let renderText = "";
-
-        const startArray = text.start_time.split(" ");
-        const endArray = text.end_time.split(" ");
-
-        const startDate = startArray[0];
-        const startTime = startArray[1];
-        const endDate = endArray[0];
-        const endTime = endArray[1];
-
-        renderText = endDate;
-
-        return renderText;
-      },
-    },
-    {
-      title: "사용일수",
-      dataIndex: "time_diff",
-    },
-    {
-      title: "사용 지점",
-      dataIndex: "pay_method",
-      // render: (text, record) => {
-      //   let renderText = "";
-
-      //   if (text.type == "personal") {
-      //     renderText = "개인 카드 결제";
-      //   } else {
-      //     renderText = "법인 카드 결제";
-      //   }
-
-      //   return renderText;
-      // },
-    },
-    {
-      title: "사용 공간",
-      dataIndex: "pay_method",
-      // render: (text, record) => {
-      //   let renderText = "";
-
-      //   if (text.type == "personal") {
-      //     renderText = "개인 카드 결제";
-      //   } else {
-      //     renderText = "법인 카드 결제";
-      //   }
-
-      //   return renderText;
-      // },
-    },
-    {
-      title: "생성 일시",
-      dataIndex: "contract",
-      render: (text, record) => {
-        return text.regdate;
-      },
-    },
-  ];
 
   const PAGE_SIZE = 5;
 
@@ -582,7 +211,6 @@ const ContractDetail = (props) => {
         const data = response.data.item;
         setContractDetail(data);
         console.log(`data`, data);
-        // setOrderList(data);
       })
       .catch((error) => {
         console.log(`error`, error);
@@ -975,7 +603,7 @@ const ContractDetail = (props) => {
             >
               <Table
                 size="middle"
-                columns={orderColumns}
+                columns={contractOrderColumns}
                 rowKey={(record) => record.order.order_id}
                 dataSource={orderList}
                 pagination={orderPagination}
@@ -1024,7 +652,7 @@ const ContractDetail = (props) => {
             >
               <Table
                 size="middle"
-                columns={voucherColumns}
+                columns={contractVoucherColumns}
                 rowKey={(record) => record.order.order_id}
                 dataSource={voucherList}
                 pagination={voucherPagination}
@@ -1040,7 +668,7 @@ const ContractDetail = (props) => {
             >
               <Table
                 size="middle"
-                columns={serviceColumns}
+                columns={contractServiceColumns}
                 rowKey={(record) => record.contract.contract_id}
                 dataSource={serviceList}
                 pagination={servicePagination}

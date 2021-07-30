@@ -604,3 +604,79 @@ export const serviceOrderListColumns = [
     },
   },
 ];
+
+// 계약 상세 - 청구 결제 정보
+// /admin/contract/order/list
+export const contractOrderColumns = [
+  {
+    title: "청구 ID",
+    dataIndex: "order",
+    render: (text, record) => {
+      return <a href={`/order/${record.order.order_id}`}>{text.order_id}</a>;
+    },
+  },
+  {
+    title: "구분",
+    dataIndex: "contract",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (text.contract_type === "membership") {
+        renderText = "멤버십";
+      } else if (text.contract_type === "service") {
+        renderText = "부가서비스";
+      } else if (text.contract_type === "voucher") {
+        renderText = "이용권";
+      }
+
+      return renderText;
+    },
+  },
+  {
+    title: "청구 항목",
+    dataIndex: "product",
+    render: (text, record) => {
+      return text.name;
+    },
+  },
+  {
+    title: "청구 금액",
+    dataIndex: "order",
+    render: (text, record) => {
+      return text.amount.toLocaleString("ko");
+    },
+  },
+  {
+    title: "청구일",
+    dataIndex: "order",
+    render: (text, record) => {
+      return text.regdate;
+    },
+  },
+  {
+    title: "결제 상태",
+    dataIndex: "payment",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (text.status == "wait") {
+        renderText = "대기";
+      } else if (text.status == "buy") {
+        renderText = "결제";
+      } else if (text.status == "unpaid") {
+        renderText = "미납";
+      } else if (text.status == "canceld") {
+        renderText = "취소";
+      }
+
+      return renderText;
+    },
+  },
+  {
+    title: "생성 일시",
+    dataIndex: "order",
+    render: (text, record) => {
+      return text.regdate;
+    },
+  },
+];

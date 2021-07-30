@@ -157,3 +157,141 @@ export const serviceListColumns = [
     },
   },
 ];
+
+// 계약 상세 - 부가 서비스 이용 정보
+// /admin/contract/service/list
+export const contractServiceColumns = [
+  {
+    title: "예약 ID",
+    dataIndex: "schedule",
+    render: (text, record) => {
+      return <a href={`/service/${text.schedule_id}`}>{text.schedule_id}</a>;
+    },
+  },
+  {
+    title: "구분",
+    dataIndex: "contract",
+    render: (text, record) => {
+      return "";
+    },
+  },
+  {
+    title: "상품명",
+    dataIndex: "space",
+    render: (text, record) => {
+      return text.name;
+    },
+  },
+  {
+    title: "유형",
+    dataIndex: "contract",
+    render: (text, record) => {
+      return "";
+    },
+  },
+  {
+    title: "요일",
+    dataIndex: "product",
+    render: (text, record) => {
+      return "";
+    },
+  },
+  {
+    title: "시간제",
+    dataIndex: "schedule",
+    render: (text, record) => {
+      let renderText = "";
+
+      const startArray = text.start_time.split(" ");
+      const endArray = text.end_time.split(" ");
+
+      const startDate = startArray[0];
+      const startTime = startArray[1];
+      const endDate = endArray[0];
+      const endTime = endArray[1];
+
+      renderText = `${startTime}~${endTime}`;
+
+      return renderText;
+    },
+  },
+  {
+    title: "시작일",
+    dataIndex: "schedule",
+    render: (text, record) => {
+      let renderText = "";
+
+      const startArray = text.start_time.split(" ");
+      const endArray = text.end_time.split(" ");
+
+      const startDate = startArray[0];
+      const startTime = startArray[1];
+      const endDate = endArray[0];
+      const endTime = endArray[1];
+
+      renderText = startDate;
+
+      return renderText;
+    },
+  },
+  {
+    title: "종료일",
+    dataIndex: "schedule",
+    render: (text, record) => {
+      let renderText = "";
+
+      const startArray = text.start_time.split(" ");
+      const endArray = text.end_time.split(" ");
+
+      const startDate = startArray[0];
+      const startTime = startArray[1];
+      const endDate = endArray[0];
+      const endTime = endArray[1];
+
+      renderText = endDate;
+
+      return renderText;
+    },
+  },
+  {
+    title: "사용일수",
+    dataIndex: "time_diff",
+  },
+  {
+    title: "사용 지점",
+    dataIndex: "pay_method",
+    // render: (text, record) => {
+    //   let renderText = "";
+
+    //   if (text.type == "personal") {
+    //     renderText = "개인 카드 결제";
+    //   } else {
+    //     renderText = "법인 카드 결제";
+    //   }
+
+    //   return renderText;
+    // },
+  },
+  {
+    title: "사용 공간",
+    dataIndex: "pay_method",
+    // render: (text, record) => {
+    //   let renderText = "";
+
+    //   if (text.type == "personal") {
+    //     renderText = "개인 카드 결제";
+    //   } else {
+    //     renderText = "법인 카드 결제";
+    //   }
+
+    //   return renderText;
+    // },
+  },
+  {
+    title: "생성 일시",
+    dataIndex: "contract",
+    render: (text, record) => {
+      return text.regdate;
+    },
+  },
+];
