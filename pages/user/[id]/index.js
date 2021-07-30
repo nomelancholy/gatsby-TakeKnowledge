@@ -6,226 +6,10 @@ import { useRouter } from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import axios from "axios";
+import { userOrderListColumns } from "@utils/columns/order";
+import { userContractListColumns } from "@utils/columns/contract";
 
 const UserDetail = (props) => {
-  // 상품 이용 내역 grid 정의
-  const userContractColumns = [
-    {
-      title: "계약 ID",
-      dataIndex: "contract_id",
-    },
-    {
-      title: "계약 상태",
-      dataIndex: "status",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text === "wait") {
-          renderText = "계약 신청(입금전)";
-        } else if (text === "buy") {
-          renderText = "계약 신청(이용전)";
-        } else if (text === "pay") {
-          renderText = "계약 완료(이용중)";
-        } else if (text === "refund") {
-          renderText = "계약 해지(환불)";
-        } else if (text === "expired") {
-          renderText = "계약 해지(만료)";
-        } else if (text === "terminate") {
-          renderText = "계약 해지(중도)";
-        } else if (text === "canceled") {
-          renderText = "계약 해지(취소)";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "멤버십 상품",
-      dataIndex: "rateplan",
-      render: (text, record) => {
-        return text.product.name;
-      },
-    },
-    {
-      title: "결제 방식",
-      dataIndex: "name",
-      render: (text, record) => {
-        // return <a href={`/payment/${record.rateplan_id}`}>{text}</a>;
-      },
-    },
-    {
-      title: "결제 유형",
-      dataIndex: "rateplan",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.product.pay_demand == "pre") {
-          renderText = "선불";
-        } else if (text.product.pay_demand == "deffered") {
-          renderText = "후불";
-        } else if (text.product.pay_demand == "last") {
-          renderText = "말일 결제";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "시작일",
-      dataIndex: "start_date",
-    },
-    {
-      title: "정기 결제일",
-      dataIndex: "next_paydate",
-    },
-    {
-      title: "취소일",
-      dataIndex: "cancel_date",
-    },
-    {
-      title: "해지일",
-      dataIndex: "teminate_date",
-    },
-    {
-      title: "만료일",
-      dataIndex: "expired_date",
-    },
-    {
-      title: "생성 일시",
-      dataIndex: "regdate",
-    },
-  ];
-
-  // 청구 grid 정의
-  const orderColumns = [
-    {
-      title: "청구 ID",
-      dataIndex: "order",
-      render: (text, record) => {
-        return text.order_id;
-      },
-    },
-    {
-      title: "계약 ID",
-      dataIndex: "contract",
-      render: (text, record) => {
-        return text.contract_id;
-      },
-    },
-    {
-      title: "계약 상태",
-      dataIndex: "contract",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.status === "wait") {
-          renderText = "계약 신청(입금전)";
-        } else if (text.status === "buy") {
-          renderText = "계약 신청(이용전)";
-        } else if (text.status === "pay") {
-          renderText = "계약 완료(이용중)";
-        } else if (text.status === "refund") {
-          renderText = "계약 해지(환불)";
-        } else if (text.status === "expired") {
-          renderText = "계약 해지(만료)";
-        } else if (text.status === "terminate") {
-          renderText = "계약 해지(중도)";
-        } else if (text.status === "canceled") {
-          renderText = "계약 해지(취소)";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "멤버십 상품",
-      dataIndex: "product",
-      render: (text, record) => {
-        return text.name;
-      },
-    },
-    {
-      title: "결제 방식",
-      dataIndex: "pay_method",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.type == "personal") {
-          renderText = "개인 카드 결제";
-        } else {
-          renderText = "법인 카드 결제";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "결제 유형",
-      dataIndex: "product",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.pay_demand == "pre") {
-          renderText = "선불";
-        } else if (text.pay_demand == "deffered") {
-          renderText = "후불";
-        } else if (text.pay_demand == "last") {
-          renderText = "말일 결제";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "결제 일자",
-      dataIndex: "contract",
-      render: (text, record) => {
-        return text.regdate;
-      },
-    },
-    {
-      title: "청구 금액",
-      dataIndex: "order",
-      render: (text, record) => {
-        return text.amount.toLocaleString("ko-KR");
-      },
-    },
-    {
-      title: "결제 금액",
-      dataIndex: "payment",
-      render: (text, record) => {
-        return text.total.toLocaleString("ko-KR");
-      },
-    },
-    {
-      title: "결제 상태",
-      dataIndex: "payment",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.status == "wait") {
-          renderText = "대기";
-        } else if (text.status == "buy") {
-          renderText = "결제";
-        } else if (text.status == "unpaid") {
-          renderText = "미납";
-        } else if (text.status == "canceld") {
-          renderText = "취소";
-        }
-
-        return renderText;
-      },
-    },
-
-    {
-      title: "생성 일시",
-      dataIndex: "order",
-      render: (text, record) => {
-        return text.regdate;
-      },
-    },
-  ];
-
   const PAGE_SIZE = 5;
 
   // 유저 상품 이용 내역 테이블 페이지, 로딩
@@ -549,7 +333,7 @@ const UserDetail = (props) => {
         <Card title="상품 이용 내역">
           <Table
             size="middle"
-            columns={userContractColumns}
+            columns={userContractListColumns}
             rowKey={(record) => record.contract_id}
             dataSource={userContractList}
             pagination={userContractPagination}
@@ -560,7 +344,7 @@ const UserDetail = (props) => {
         <Card title="청구 내역">
           <Table
             size="middle"
-            columns={orderColumns}
+            columns={userOrderListColumns}
             rowKey={(record) => record.order_id}
             dataSource={userOrderList}
             pagination={userOrderPagination}
