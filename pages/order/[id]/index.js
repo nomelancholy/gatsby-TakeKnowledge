@@ -17,6 +17,11 @@ import { useRouter } from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import axios from "axios";
+import {
+  billingColumns,
+  orderItmesColumns,
+  paymentColumns,
+} from "@utils/columns/order";
 
 const ContractDetail = (props) => {
   const radioStyle = {
@@ -24,229 +29,6 @@ const ContractDetail = (props) => {
     height: "30px",
     lineHeight: "30px",
   };
-
-  const orderItmesColumns = [
-    {
-      title: "항목",
-      dataIndex: "name",
-      // render: (text, record) => {
-      //   const renderText = `${text.order_id}`;
-      //   return renderText;
-      // },
-    },
-    {
-      title: "할인쿠폰",
-      dataIndex: "coupon",
-      // render: (text, record) => {
-      //   const renderText = `${text.order_id}`;
-      //   return renderText;
-      // },
-    },
-    {
-      title: "금액",
-      dataIndex: "amount",
-      // render: (text, record) => {
-      //   const renderText = `${text.order_id}`;
-      //   return renderText;
-      // },
-    },
-    {
-      title: "청구 일자",
-      dataIndex: "order_date",
-      // render: (text, record) => {
-      //   const renderText = `${text.order_id}`;
-      //   return renderText;
-      // },
-    },
-    {
-      title: "청구 사유",
-      dataIndex: "reason",
-      render: (text, record) => {
-        return <Input style={{ width: 160 }}></Input>;
-      },
-    },
-  ];
-
-  // 청구서 테이블 컬럼 정의
-  const orderColumns = [
-    {
-      title: "청구 ID",
-      dataIndex: "order",
-      render: (text, record) => {
-        const renderText = `${text.order_id}`;
-        return renderText;
-      },
-    },
-    {
-      title: "처리 상태",
-      dataIndex: "contract",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.status === "wait") {
-          renderText = "계약 신청(입금전)";
-        } else if (text.status === "buy") {
-          renderText = "계약 신청(이용전)";
-        } else if (text.status === "pay") {
-          renderText = "계약 완료(이용중)";
-        } else if (text.status === "refund") {
-          renderText = "계약 해지(환불)";
-        } else if (text.status === "expired") {
-          renderText = "계약 해지(만료)";
-        } else if (text.status === "terminate") {
-          renderText = "계약 해지(중도)";
-        } else if (text.status === "canceled") {
-          renderText = "계약 해지(취소)";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "발송 시간",
-      dataIndex: "group_id",
-    },
-    {
-      title: "email 발송 상태",
-      dataIndex: "contract",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.contract_type === "service") {
-          renderText = "부가서비스";
-        } else if (text.contract_type === "membershipt") {
-          renderText = "멤버십";
-        } else if (text.contract_type === "voucher") {
-          renderText = "이용권";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "파일명",
-      dataIndex: "product",
-      render: (text, record) => {
-        return text.name;
-      },
-    },
-    {
-      title: "등록자",
-      dataIndex: "contract",
-      render: (text, record) => {
-        console.log(`text`, text);
-        return text.next_paydate;
-      },
-    },
-    {
-      title: "다운로드",
-      dataIndex: "pay_method",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.type == "personal") {
-          renderText = "개인 카드 결제";
-        } else {
-          renderText = "법인 카드 결제";
-        }
-
-        return renderText;
-      },
-    },
-  ];
-
-  // 결제 내역 columns 정의
-  const paymentColumns = [
-    {
-      title: "결제 ID",
-      dataIndex: "payment_id",
-    },
-    {
-      title: "결제 카드",
-      dataIndex: "user_paymethod",
-      render: (text, record) => {
-        return text.name;
-      },
-    },
-    {
-      title: "결제 유형",
-      dataIndex: "user_paymethod",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.type == "personal") {
-          renderText = "개인 카드 결제";
-        } else {
-          renderText = "법인 카드 결제";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "결제 방식",
-      dataIndex: "product",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.pay_demand == "pre") {
-          renderText = "선불";
-        } else if (text.pay_demand == "deffered") {
-          renderText = "후불";
-        } else if (text.pay_demand == "last") {
-          renderText = "말일 결제";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "결제 금액",
-      dataIndex: "total",
-      render: (text, record) => {
-        return text.toLocaleString("ko");
-      },
-    },
-    {
-      title: "결제 상태",
-      dataIndex: "status",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text === "wait") {
-          renderText = "대기(예정), 결제일 전";
-        } else if (text === "buy") {
-          renderText = "결제";
-        } else if (text === "unpaid") {
-          renderText = "미납, 결제일 후";
-        } else if (text === "canceled") {
-          renderText = "취소";
-        } else if (text === "fail") {
-          renderText = "실패";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "등록자",
-      dataIndex: "",
-      render: (text, record) => {
-        return "System";
-      },
-    },
-    {
-      title: "등록 일시",
-      dataIndex: "regdate",
-    },
-    {
-      title: "환불",
-      dataIndex: "",
-      render: (text, record) => {
-        return <Button>환불</Button>;
-      },
-    },
-  ];
 
   const PAGE_SIZE = 5;
 
@@ -684,17 +466,17 @@ const ContractDetail = (props) => {
           </Select>
           <Button>결제</Button>
         </Card>
-        <Card title="청구서">
+        {/* <Card title="청구서">
           <Table
             size="middle"
-            columns={orderColumns}
+            columns={billingColumns}
             rowKey={(record) => record.order.order_id}
             dataSource={orderList}
             pagination={orderPagination}
             loading={orderLoading}
             onChange={handleOrderTableChange}
           />
-        </Card>
+        </Card> */}
 
         <Col>
           <Card

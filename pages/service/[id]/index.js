@@ -18,6 +18,7 @@ import { useRouter } from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import axios from "axios";
+import { serviceOrderListColumns } from "@utils/columns/order";
 
 const ServiceDetail = (props) => {
   const radioStyle = {
@@ -25,80 +26,6 @@ const ServiceDetail = (props) => {
     height: "30px",
     lineHeight: "30px",
   };
-
-  const orderColumns = [
-    {
-      title: "청구 ID",
-      dataIndex: "order",
-      render: (text, record) => {
-        return <a href={`/order/${record.order.order_id}`}>{text.order_id}</a>;
-      },
-    },
-    {
-      title: "구분",
-      dataIndex: "contract",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.contract_type === "membership") {
-          renderText = "멤버십";
-        } else if (text.contract_type === "service") {
-          renderText = "부가서비스";
-        } else if (text.contract_type === "voucher") {
-          renderText = "이용권";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "청구 항목",
-      dataIndex: "product",
-      render: (text, record) => {
-        return text.name;
-      },
-    },
-    {
-      title: "청구 금액",
-      dataIndex: "order",
-      render: (text, record) => {
-        return text.amount.toLocaleString("ko");
-      },
-    },
-    {
-      title: "청구일",
-      dataIndex: "order",
-      render: (text, record) => {
-        return text.regdate;
-      },
-    },
-    {
-      title: "결제 상태",
-      dataIndex: "payment",
-      render: (text, record) => {
-        let renderText = "";
-
-        if (text.status == "wait") {
-          renderText = "대기";
-        } else if (text.status == "buy") {
-          renderText = "결제";
-        } else if (text.status == "unpaid") {
-          renderText = "미납";
-        } else if (text.status == "canceld") {
-          renderText = "취소";
-        }
-
-        return renderText;
-      },
-    },
-    {
-      title: "생성 일시",
-      dataIndex: "order",
-      render: (text, record) => {
-        return text.regdate;
-      },
-    },
-  ];
 
   const PAGE_SIZE = 5;
 
@@ -491,7 +418,7 @@ const ServiceDetail = (props) => {
         >
           <Table
             size="middle"
-            columns={orderColumns}
+            columns={serviceOrderListColumns}
             rowKey={(record) => record.order.order_id}
             dataSource={orderList}
             pagination={pagination}
