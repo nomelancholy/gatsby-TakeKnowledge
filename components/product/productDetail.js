@@ -122,11 +122,6 @@ const ProductDetail = (props) => {
     }
   }, []);
 
-  useEffect(() => {
-    console.log(`logoImage`, logoImage);
-    console.log(`productImageList`, productImageList);
-  }, [logoImage, productImageList]);
-
   // productData 세팅되면 알맞는 엘리먼트에 binding
   useEffect(() => {
     if (productInfo) {
