@@ -11,6 +11,7 @@ import {
   Tabs,
   Select,
   DatePicker,
+  Pagination,
 } from "antd";
 
 import React, { useState, useEffect } from "react";
@@ -539,6 +540,34 @@ const ContractDetail = (props) => {
   // 상담 메모 히스토리
   const [historyForm] = Form.useForm();
 
+  const [memoHistoryTotal, setMemoHistoryTotal] = useState(1);
+  const [memoHistoryList, setMemoHistoryList] = useState([]);
+
+  const getMemoHistory = (params) => {
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/contract/history/list`,
+        {
+          ...params,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        const data = response.data;
+        setMemoHistoryTotal(data.total);
+        setMemoHistoryList(data.items);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
+
   useEffect(() => {
     // 청구/결제 상세 내용 조회
     axios
@@ -565,6 +594,10 @@ const ContractDetail = (props) => {
       page: 1,
       size: PAGE_SIZE,
       // contract_type: "service",
+      contract_id: id,
+    });
+
+    getMemoHistory({
       contract_id: id,
     });
   }, []);
@@ -694,6 +727,44 @@ const ContractDetail = (props) => {
   }, [contractDetail]);
 
   const [paymentModalVisible, setPaymentModalVisible] = useState(false);
+
+  const [contractCancelModalVisible, setContractCancelModalVisible] =
+    useState(false);
+
+  const handleMemoSubmit = (values) => {
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/contract/history/add`,
+        {
+          contract_id: Number(id),
+          subject: values.subject,
+          content: values.content,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        if (response.status === 200) {
+          getMemoHistory({ contract_id: id });
+        }
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
+
+  const [memoMinPage, setMemoMinPage] = useState(0);
+  const [memoMaxPage, setMemoMaxPage] = useState(1);
+
+  const handleHistoryChange = (value) => {
+    setMemoMinPage(value - 1);
+    setMemoMaxPage(value);
+  };
 
   return (
     <>
@@ -982,33 +1053,161 @@ const ContractDetail = (props) => {
               bodyStyle={{ padding: "1rem" }}
               className="mb-4"
             >
-              <Form form={memoForm}>
-                <Form.Item name="title" label="">
-                  <Input disabled />
+              <Form form={memoForm} onFinish={handleMemoSubmit}>
+                <Form.Item name="subject" label="">
+                  <Input />
                 </Form.Item>
                 <Form.Item name="content" label="">
-                  <Input.TextArea disabled />
+                  <Input.TextArea />
                 </Form.Item>
+                <Button type="primary" htmlType="submit">
+                  저장
+                </Button>
               </Form>
             </Card>
 
-            <Card
-              title={`상담 메모 히스토리`}
-              bodyStyle={{ padding: "1rem" }}
-              className="mb-4"
-            >
-              <Form form={historyForm}>
-                <Form.Item name="title" label="">
-                  <Input disabled />
-                </Form.Item>
-                <Form.Item name="content" label="">
-                  <Input.TextArea disabled />
-                </Form.Item>
-              </Form>
-            </Card>
+            {memoHistoryList.slice(memoMinPage, memoMaxPage).map((memo) => (
+              <Card
+                title={`상담 메모 히스토리`}
+                bodyStyle={{ padding: "1rem" }}
+                className="mb-4"
+              >
+                <Input disabled value={memo.subject} />
+                <Input.TextArea disabled value={memo.content} />
+              </Card>
+            ))}
+
+            <Pagination
+              onChange={handleHistoryChange}
+              defaultCurrent={1}
+              defaultPageSize={1}
+              total={memoHistoryTotal}
+            />
+
             <Button>계약 시작일 변경</Button>
             <Button>계약 연장</Button>
-            <Button>계약 취소 / 해지</Button>
+            <Button
+              onClick={() => {
+                setContractCancelModalVisible(true);
+              }}
+            >
+              계약 취소 / 해지
+            </Button>
+
+            <Modal
+              width={1000}
+              visible={contractCancelModalVisible}
+              okText="해지 완료"
+              cancelText="취소"
+              onOk={() => {
+                // router.push("/payment");
+              }}
+              onCancel={() => {
+                setContractCancelModalVisible(false);
+              }}
+            >
+              <Card title={"계약 취소/해지"} style={{ width: 800 }}>
+                <Card title={"월 정기 납부 내역"}>
+                  <Table
+                    size="middle"
+                    columns={orderColumns}
+                    rowKey={(record) => record.order.order_id}
+                    dataSource={orderList}
+                    pagination={orderPagination}
+                    loading={orderLoading}
+                    onChange={handleOrderTableChange}
+                  />
+                </Card>
+                <Card title={"해지 유형"}>
+                  <Form>
+                    <Form.Item>
+                      <Input></Input>
+                    </Form.Item>
+                    <Form.Item label="계약 신청일">
+                      <Input></Input>
+                    </Form.Item>
+                    <Form.Item label="계약 시작일">
+                      <Input></Input>
+                    </Form.Item>
+                    <Form.Item label="청구 일">
+                      <Input></Input>
+                    </Form.Item>
+                    <Form.Item label="계약 해지일">
+                      <DatePicker></DatePicker>
+                    </Form.Item>
+                  </Form>
+                </Card>
+                <Card title={"월 이용 요금 일할 계산 & 위약금"}>
+                  <Form form={orderRequestForm}>
+                    <Form.Item name="order_item" label="청구 시작일">
+                      <Select>
+                        <Select.Option value="membership">멤버십</Select.Option>
+                        <Select.Option value="coworking">
+                          코워킹룸
+                        </Select.Option>
+                        <Select.Option value="locker">
+                          스마트 락커
+                        </Select.Option>
+                        <Select.Option value="penalty">패널티</Select.Option>
+                      </Select>
+                    </Form.Item>
+                    <Form.Item name="order_date" label="청구 종료일">
+                      <DatePicker></DatePicker>
+                    </Form.Item>
+                    <Form.Item
+                      namme="memo"
+                      label="계약 해지일 (=계약 해지 예정일)"
+                    >
+                      <Input.TextArea></Input.TextArea>
+                    </Form.Item>
+                    <Form.Item namme="total" label="월 이용 요금(A)">
+                      <Input disabled />
+                    </Form.Item>
+                    <Form.Item
+                      namme="total"
+                      label="사용 일수(청구 시작일 ~ 계약 해지일)"
+                    >
+                      <Input disabled />
+                    </Form.Item>
+                    <Form.Item
+                      namme="total"
+                      label="일할 이용 요금 (B) * (월 이용료/(청구 종료일 - 해지일)) * 사용일수"
+                    >
+                      <Input disabled />
+                    </Form.Item>
+                    <Form.Item
+                      namme="total"
+                      label="해지 위약금(C) * (월 이용료 * 0.1)"
+                    >
+                      <Input disabled />
+                    </Form.Item>
+                    <Form.Item namme="total" label="환불 금액 (A-B-C)">
+                      <Input disabled />
+                    </Form.Item>
+                  </Form>
+                </Card>
+                <Card>
+                  <Form form={contractStatusForm}>
+                    <Form.Item name="status" label="계약 상태">
+                      <Radio.Group>
+                        <Radio style={radioStyle} value={"active"}>
+                          월 정기 해지
+                        </Radio>
+                        <Radio style={radioStyle} value={"inactive"}>
+                          청약 철회 해지
+                        </Radio>
+                        <Radio style={radioStyle} value={"inactive"}>
+                          전체 환불
+                        </Radio>
+                        <Radio style={radioStyle} value={"inactive"}>
+                          일할 계산
+                        </Radio>
+                      </Radio.Group>
+                    </Form.Item>
+                  </Form>
+                </Card>
+              </Card>
+            </Modal>
 
             <Row type="flex" align="middle" className="py-4">
               <span className="px-2 w-10"></span>

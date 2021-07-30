@@ -1,4 +1,16 @@
-import { Button, Form, Input, Row, Modal, Card, Radio, Table, Col } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  Row,
+  Modal,
+  Card,
+  Radio,
+  Table,
+  Col,
+  DatePicker,
+  Select,
+} from "antd";
 
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
@@ -277,6 +289,9 @@ const ServiceDetail = (props) => {
     }
   }, [serviceDetail]);
 
+  const [scheduleCancelMoalVisible, setScheduleCancelMoalVisible] =
+    useState(false);
+
   return (
     <>
       <Card
@@ -484,8 +499,121 @@ const ServiceDetail = (props) => {
             onChange={handleTableChange}
           />
         </Card>
-        <Button>예약 취소/해지</Button>
+        <Button
+          onClick={() => {
+            setScheduleCancelMoalVisible(true);
+          }}
+        >
+          예약 취소/해지
+        </Button>
       </Card>
+      <Modal
+        width={1000}
+        visible={scheduleCancelMoalVisible}
+        okText="예약 취소"
+        cancelText="취소"
+        onOk={() => {
+          // router.push("/payment");
+        }}
+        onCancel={() => {
+          setScheduleCancelMoalVisible(false);
+        }}
+      >
+        <Card title={"부가서비스 취소"} style={{ width: 800 }}>
+          <Card title={"부가서비스 신청 정보"}>
+            {/* <Table
+              size="middle"
+              columns={orderColumns}
+              rowKey={(record) => record.order.order_id}
+              dataSource={orderList}
+              pagination={orderPagination}
+              loading={orderLoading}
+              onChange={handleOrderTableChange}
+            /> */}
+          </Card>
+          <Card title={"부가서비스 이용 요금 정보"}>
+            <Form>
+              <Form.Item>
+                <Input></Input>
+              </Form.Item>
+              <Form.Item label="계약 신청일">
+                <Input></Input>
+              </Form.Item>
+              <Form.Item label="계약 시작일">
+                <Input></Input>
+              </Form.Item>
+              <Form.Item label="청구 일">
+                <Input></Input>
+              </Form.Item>
+              <Form.Item label="계약 해지일">
+                <DatePicker></DatePicker>
+              </Form.Item>
+            </Form>
+          </Card>
+          <Card title={"부가서비스 일할 계산 (* 환불 액 계산 식)"}>
+            <Form>
+              <Form.Item name="order_item" label="청구 시작일">
+                <Select>
+                  <Select.Option value="membership">멤버십</Select.Option>
+                  <Select.Option value="coworking">코워킹룸</Select.Option>
+                  <Select.Option value="locker">스마트 락커</Select.Option>
+                  <Select.Option value="penalty">패널티</Select.Option>
+                </Select>
+              </Form.Item>
+              <Form.Item name="order_date" label="청구 종료일">
+                <DatePicker></DatePicker>
+              </Form.Item>
+              <Form.Item namme="memo" label="계약 해지일 (=계약 해지 예정일)">
+                <Input.TextArea></Input.TextArea>
+              </Form.Item>
+              <Form.Item namme="total" label="월 이용 요금(A)">
+                <Input disabled />
+              </Form.Item>
+              <Form.Item
+                namme="total"
+                label="사용 일수(청구 시작일 ~ 계약 해지일)"
+              >
+                <Input disabled />
+              </Form.Item>
+              <Form.Item
+                namme="total"
+                label="일할 이용 요금 (B) * (월 이용료/(청구 종료일 - 해지일)) * 사용일수"
+              >
+                <Input disabled />
+              </Form.Item>
+              <Form.Item
+                namme="total"
+                label="해지 위약금(C) * (월 이용료 * 0.1)"
+              >
+                <Input disabled />
+              </Form.Item>
+              <Form.Item namme="total" label="환불 금액 (A-B-C)">
+                <Input disabled />
+              </Form.Item>
+            </Form>
+          </Card>
+          <Card>
+            <Form>
+              <Form.Item name="status" label="계약 상태">
+                <Radio.Group>
+                  <Radio style={radioStyle} value={"active"}>
+                    월 정기 해지
+                  </Radio>
+                  <Radio style={radioStyle} value={"inactive"}>
+                    청약 철회 해지
+                  </Radio>
+                  <Radio style={radioStyle} value={"inactive"}>
+                    전체 환불
+                  </Radio>
+                  <Radio style={radioStyle} value={"inactive"}>
+                    일할 계산
+                  </Radio>
+                </Radio.Group>
+              </Form.Item>
+            </Form>
+          </Card>
+        </Card>
+      </Modal>
 
       <Row type="flex" align="middle" className="py-4">
         <span className="px-2 w-10"></span>
