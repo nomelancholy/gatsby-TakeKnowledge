@@ -62,10 +62,6 @@ const ProductDetail = (props) => {
   const [generatedProductId, setGeneratedProductId] = useState(undefined);
 
   // file 관련 state
-  const [fileList, setFileList] = useState([]);
-  const [previewVisible, setPreviewVisible] = useState(false);
-  const [previewImage, setPreviewImage] = useState("");
-
   const [logoImage, setLogoImage] = useState([]);
   const [logoPreviewVisible, setLogoPreviewVisible] = useState(false);
   const [logoPreviewImage, setLogoPreviewImage] = useState("");
@@ -74,6 +70,7 @@ const ProductDetail = (props) => {
   const [productImagePreviewVisible, setProductImagePreviewVisible] =
     useState(false);
   const [productPreviewImage, setProductPreviewImage] = useState("");
+  const [removedFileList, setRemovedFileList] = useState([]);
 
   const [okModalVisible, setOkModalVisible] = useState(false);
 
@@ -125,6 +122,11 @@ const ProductDetail = (props) => {
     }
   }, []);
 
+  useEffect(() => {
+    console.log(`logoImage`, logoImage);
+    console.log(`productImageList`, productImageList);
+  }, [logoImage, productImageList]);
+
   // productData 세팅되면 알맞는 엘리먼트에 binding
   useEffect(() => {
     if (productInfo) {
@@ -156,22 +158,22 @@ const ProductDetail = (props) => {
         week_limit: productInfo.week_limit,
       });
 
-      console.log(`productInfo`, productInfo);
-      if (productInfo.images.logo) {
-        // productInfo.images.map((image) => {
-        //   console.log(`image`, image);
-        // });
-        // productInfo.images.map((image) => {
-        // const newObj = {
-        //   thumbUrl: image.image_path,
-        //   image_key: image.image_key,
-        // };
-        // if (Object.keys(image) === "logo") {
-        //   setLogoImage(newObj);
-        // } else {
-        //   setProductImageList([...productImageList, image]);
-        // }
-        // });
+      // 이미지 파일 세팅
+      const productImages = [];
+      if (productInfo.images) {
+        Object.entries(productInfo.images).map((image) => {
+          const newObj = {
+            thumbUrl: image[1],
+            image_key: image[0],
+          };
+
+          if (image[0] === "logo") {
+            setLogoImage([newObj]);
+          } else {
+            productImages.push(newObj);
+          }
+        });
+        setProductImageList(productImages);
       }
 
       // 운영 시간 시작 / 끝 시간
@@ -202,10 +204,6 @@ const ProductDetail = (props) => {
         form.setFieldsValue({
           working_days: workingDays,
         });
-      }
-
-      if (productInfo.images) {
-        // 이미지 추가되면 작업 필요
       }
 
       // 옵션으로 내려줄 spot list 조회
@@ -248,6 +246,8 @@ const ProductDetail = (props) => {
   const handleSpotRegisterSubmit = (values) => {
     const formData = new FormData();
 
+    console.log(`values`, values);
+
     formData.append("type", values.type);
     formData.append("plan_spot", values.plan_spot);
     formData.append("memo", values.memo);
@@ -266,10 +266,16 @@ const ProductDetail = (props) => {
       formData.append("logo", values.logo[0].originFileObj);
     }
 
+    if (removedFileList.length > 0) {
+      formData.append("del_images", JSON.stringify(removedFileList));
+    }
+
     // 상품 이미지 처리
     if (values.productImages) {
       values.productImages.map((image, index) => {
-        formData.append(`image${index + 1}`, image.originFileObj);
+        if (!image.image_key) {
+          formData.append(`image${index + 1}`, image.originFileObj);
+        }
       });
     }
     formData.append("start_time", startTime);
@@ -347,10 +353,27 @@ const ProductDetail = (props) => {
     setType(value);
   };
 
-  // 파일 변경
-  const handleLogoChange = ({ fileList }) => {
-    form.setFieldsValue({ logo: fileList });
-    setLogoImage(fileList);
+  // 로고 변경
+  const handleLogoChange = ({ file }) => {
+    if (file.status === "done") {
+      // 파일 추가
+      setLogoImage([...logoImage, file]);
+      form.setFieldsValue({ logo: [...logoImage, file] });
+    } else if (file.status === "removed") {
+      // 파일 삭제
+
+      // 삭제된 파일 list 에서 삭제
+      const newFileList = logoImage.filter((fileObj) => fileObj !== file);
+      setLogoImage(newFileList);
+      form.setFieldsValue({ logo: newFileList });
+
+      if (file.image_key) {
+        // 서버에서 받아온 파일인 경우
+        // 서버에서 삭제하기 위한 배열 세팅
+        const newRemovedFileList = [...removedFileList, file.image_key];
+        setRemovedFileList(newRemovedFileList);
+      }
+    }
   };
 
   const handleLogoPreview = (file) => {
@@ -358,11 +381,30 @@ const ProductDetail = (props) => {
     setLogoPreviewImage(file.url || file.thumbUrl);
   };
 
-  const handleProductImagesChange = ({ fileList }) => {
-    form.setFieldsValue({ productImages: fileList });
-    setProductImageList(fileList);
-  };
+  // 상품 이미지 변경
+  const handleProductImagesChange = ({ file }) => {
+    if (file.status === "done") {
+      // 파일 추가
+      setProductImageList([...productImageList, file]);
+      form.setFieldsValue({ productImages: [...productImageList, file] });
+    } else if (file.status === "removed") {
+      // 파일 삭제
 
+      // 삭제된 파일 list 에서 삭제
+      const newFileList = productImageList.filter(
+        (fileObj) => fileObj !== file
+      );
+      setProductImageList(newFileList);
+      form.setFieldsValue({ productImageList: newFileList });
+
+      if (file.image_key) {
+        // 서버에서 받아온 파일인 경우
+        // 서버에서 삭제하기 위한 배열 세팅
+        const newRemovedFileList = [...removedFileList, file.image_key];
+        setRemovedFileList(newRemovedFileList);
+      }
+    }
+  };
   const handleProductImagesPreview = (file) => {
     setProductImagePreviewVisible(true);
     setProductPreviewImage(file.url || file.thumbUrl);
@@ -586,7 +628,9 @@ const ProductDetail = (props) => {
                   onChange={handleStartTimeChange}
                 >
                   {TIMES.map((time) => (
-                    <Select.Option value={time}>{time}</Select.Option>
+                    <Select.Option key={time} value={time}>
+                      {time}
+                    </Select.Option>
                   ))}
                 </Select>
                 <Select
@@ -596,14 +640,18 @@ const ProductDetail = (props) => {
                   onChange={handleEndTimeChange}
                 >
                   {TIMES.map((time) => (
-                    <Select.Option value={time}>{time}</Select.Option>
+                    <Select.Option key={time} value={time}>
+                      {time}
+                    </Select.Option>
                   ))}
                 </Select>
               </Form.Item>
               <Form.Item name="week_limit" label="주간 이용 한도">
                 <Select defaultValue="-" style={{ width: 120 }}>
                   {DAYS.map((day) => (
-                    <Select.Option value={day}>{day}</Select.Option>
+                    <Select.Option key={day} value={day}>
+                      {day}
+                    </Select.Option>
                   ))}
                 </Select>
               </Form.Item>

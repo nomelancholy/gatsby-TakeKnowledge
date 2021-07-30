@@ -167,10 +167,16 @@ const SpaceCard = (props) => {
 
     data.append("options", JSON.stringify(options));
 
+    if (removedFileList.length > 0) {
+      data.append("del_images", JSON.stringify(removedFileList));
+    }
+
     // 파일 처리
     if (values.images) {
       values.images.map((image, index) => {
-        data.append(`image${index + 1}`, image.originFileObj);
+        if (!image.image_key) {
+          data.append(`image${index + 1}`, image.originFileObj);
+        }
       });
     }
 
@@ -225,7 +231,7 @@ const SpaceCard = (props) => {
       // 삭제된 파일 list 에서 삭제
       const newFileList = fileList.filter((fileObj) => fileObj !== file);
       setFileList(newFileList);
-      form.setFieldsValue(newFileList);
+      form.setFieldsValue({ images: newFileList });
 
       if (file.image_key) {
         // 서버에서 받아온 파일인 경우

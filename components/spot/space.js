@@ -100,6 +100,10 @@ const Space = (props) => {
       formData.append(`${type}_desc`, values.desc);
     }
 
+    if (removedFileList.length > 0) {
+      formData.append("del_images", JSON.stringify(removedFileList));
+    }
+
     if (values.images) {
       values.images.map((image, index) => {
         // image_key가 있는 파일은 이미 서버에 등록되어 있기 때문에 제외
@@ -140,7 +144,7 @@ const Space = (props) => {
       // 삭제된 파일 list 에서 삭제
       const newFileList = fileList.filter((fileObj) => fileObj !== file);
       setFileList(newFileList);
-      form.setFieldsValue(newFileList);
+      form.setFieldsValue({ images: newFileList });
 
       if (file.image_key) {
         // 서버에서 받아온 파일인 경우

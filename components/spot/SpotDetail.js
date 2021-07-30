@@ -238,7 +238,7 @@ const SpotDetail = (props) => {
       // 삭제된 파일 list 에서 삭제
       const newFileList = fileList.filter((fileObj) => fileObj !== file);
       setFileList(newFileList);
-      form.setFieldsValue(newFileList);
+      form.setFieldsValue({ images: newFileList });
 
       if (file.image_key) {
         // 서버에서 받아온 파일인 경우
