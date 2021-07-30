@@ -28,7 +28,7 @@ const PostEditor = dynamic(() => import("@utils/Editor"), {
   ssr: false,
 });
 
-const PaymentDetail = (props) => {
+const RateplanDetail = (props) => {
   const { rateplanId, token } = props;
 
   // 요금제 시작/종료일
@@ -348,4 +348,4 @@ const PaymentDetail = (props) => {
   );
 };
 
-export default connect((state) => state)(PaymentDetail);
+export default connect((state) => state)(RateplanDetail);

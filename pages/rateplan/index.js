@@ -23,7 +23,7 @@ import initialize from "@utils/initialize";
 import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
 
-const Payment = (props) => {
+const Rateplan = (props) => {
   // Grid Column 정의
   const columns = [
     {
@@ -58,7 +58,7 @@ const Payment = (props) => {
       title: "요금제 이름",
       dataIndex: "name",
       render: (text, record) => {
-        return <a href={`/payment/${record.rateplan_id}`}>{text}</a>;
+        return <a href={`/rateplan/${record.rateplan_id}`}>{text}</a>;
       },
     },
     {
@@ -276,7 +276,7 @@ const Payment = (props) => {
         <Button
           type="primary"
           onClick={() => {
-            Router.push("/payment/new");
+            Router.push("/rateplan/new");
           }}
         >
           <PlusOutlined />
@@ -363,4 +363,4 @@ export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
   return { props: initialize(ctx) };
 });
 
-export default connect((state) => state)(Payment);
+export default connect((state) => state)(Rateplan);
