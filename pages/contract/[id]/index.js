@@ -9,6 +9,8 @@ import {
   Table,
   Col,
   Tabs,
+  Select,
+  DatePicker,
 } from "antd";
 
 import React, { useState, useEffect } from "react";
@@ -528,6 +530,8 @@ const ContractDetail = (props) => {
   const [contractForm] = Form.useForm();
   // 청구 내용
   const [chargeForm] = Form.useForm();
+  // 청구 하기
+  const [orderRequestForm] = Form.useForm();
   // 상품 정보
   const [productForm] = Form.useForm();
   // 상담 메모
@@ -673,8 +677,6 @@ const ContractDetail = (props) => {
         }
       );
 
-      console.log(`workingDays`, workingDays);
-
       productForm.setFieldsValue({
         product_id: contractDetail.rateplan.product.product_id,
         name: contractDetail.rateplan.product.name,
@@ -688,123 +690,10 @@ const ContractDetail = (props) => {
       });
       memoForm.setFieldsValue({});
       historyForm.setFieldsValue({});
-      // console.log(`orderList`, orderList);
-      // // 회원 정보
-      // userForm.setFieldsValue({
-      //   // 회원 ID
-      //   uid: orderList.user.uid,
-      //   // 멤버 이름
-      //   user_name: orderList.user.user_name,
-      //   // 아이디
-      //   // 핸드폰 번호
-      //   // 대표 결제 카드
-      // });
-      // // 계약 상태 세팅
-      // let contractStatus = "";
-      // switch (orderList.contract.status) {
-      //   case "wait":
-      //     contractStatus = "구매 대기";
-      //     break;
-      //   case "buy":
-      //     contractStatus = "구매";
-      //     break;
-      //   case "pay":
-      //     contractStatus = "이용 시작";
-      //     break;
-      //   case "refund":
-      //     contractStatus = "환불";
-      //     break;
-      //   case "expired":
-      //     contractStatus = "종료";
-      //     break;
-      //   case "terminate":
-      //     contractStatus = "해지";
-      //     break;
-      //   case "canceled":
-      //     contractStatus = "취소";
-      //     break;
-      //   default:
-      //     break;
-      // }
-      // // 계약 정보
-      // contractForm.setFieldsValue({
-      //   // 멤버십 상품
-      //   product_name: orderList.product.name,
-      //   // 계약 상태
-      //   status: contractStatus,
-      //   // 계약 ID
-      //   contract_id: orderList.contract.contract_id,
-      //   // 계약 시작일
-      //   start_date: orderList.contract.regdate,
-      //   // 계약 신청일
-      //   // 연장 회차
-      //   // 정기 결제일
-      //   next_paydate: orderList.contract.next_paydate,
-      //   // 적용 요금제
-      // });
-      // // 청구 유형 세팅
-      // let contractType;
-      // switch (orderList.contract.contract_type) {
-      //   case "membership":
-      //     contractType = "멤버십";
-      //     break;
-      //   case "service":
-      //     contractType = "부가서비스";
-      //     break;
-      //   case "voucher":
-      //     contractType = "이용권";
-      //     break;
-      //   default:
-      //     break;
-      // }
-      // let payDemand = "";
-      // switch (orderList.product.pay_demand) {
-      //   case "pre":
-      //     payDemand = "선불";
-      //     break;
-      //   case "deffered":
-      //     payDemand = "후불";
-      //     break;
-      //   case "last":
-      //     payDemand = "말일 결제";
-      //     break;
-      //   default:
-      //     break;
-      // }
-      // // 청구 내용
-      // chargeForm.setFieldsValue({
-      //   // 청구 유형
-      //   contract_type: contractType,
-      //   // 결제 방식
-      //   pay_method:
-      //     orderList.pay_method.type === "personal"
-      //       ? "개인 카드결제"
-      //       : "법인 카드 결제",
-      //   // 결제 유형
-      //   pay_demand: payDemand,
-      //   // 청구 기간
-      //   // 정기 결제일자
-      //   next_paydate: orderList.contract.next_paydate,
-      //   // 청구 상태
-      //   // 총 금액
-      //   total: orderList.payment.total,
-      // });
-      // form.setFieldsValue({
-      //   // 노출 여부
-      //   state: userDetail.state,
-      //   // 카테고리 1
-      //   classification: userDetail.classification,
-      //   // 카테고리 2
-      //   category: userDetail.category,
-      //   // 작성자
-      //   user_name: userDetail.user.user_name,
-      //   // 제목
-      //   title: userDetail.title,
-      //   // 내용
-      //   content: userDetail.content,
-      // });
     }
   }, [contractDetail]);
+
+  const [paymentModalVisible, setPaymentModalVisible] = useState(false);
 
   return (
     <>
@@ -1001,7 +890,15 @@ const ContractDetail = (props) => {
             </Card>
             <Card
               title="청구/결제 정보"
-              extra={<Button onClick={console.log(`a`)}>청구하기</Button>}
+              extra={
+                <Button
+                  onClick={() => {
+                    setPaymentModalVisible(true);
+                  }}
+                >
+                  청구하기
+                </Button>
+              }
               bodyStyle={{ padding: "1rem" }}
               className="mb-4"
             >
@@ -1015,6 +912,39 @@ const ContractDetail = (props) => {
                 onChange={handleOrderTableChange}
               />
             </Card>
+            <Modal
+              visible={paymentModalVisible}
+              okText="결제하기"
+              cancelText="취소"
+              onOk={() => {
+                router.push("/payment");
+              }}
+              onCancel={() => {
+                setPaymentModalVisible(false);
+              }}
+            >
+              <Card title={"청구하기"}>
+                <Form form={orderRequestForm}>
+                  <Form.Item name="order_item" label="청구 항목">
+                    <Select>
+                      <Select.Option value="membership">멤버십</Select.Option>
+                      <Select.Option value="coworking">코워킹룸</Select.Option>
+                      <Select.Option value="locker">스마트 락커</Select.Option>
+                      <Select.Option value="penalty">패널티</Select.Option>
+                    </Select>
+                  </Form.Item>
+                  <Form.Item name="order_date" label="청구 일자">
+                    <DatePicker></DatePicker>
+                  </Form.Item>
+                  <Form.Item namme="memo" label="메모">
+                    <Input.TextArea></Input.TextArea>
+                  </Form.Item>
+                  <Form.Item namme="total" label="청구 요금">
+                    <Input disabled />
+                  </Form.Item>
+                </Form>
+              </Card>
+            </Modal>
             {/* 
             <Card
               title={`이용권 정보`}
