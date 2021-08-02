@@ -1,4 +1,15 @@
-import { Button, Form, Input, Row, Modal, Card, Radio, Table, Col } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  Row,
+  Modal,
+  Card,
+  Radio,
+  Table,
+  Col,
+  Pagination,
+} from "antd";
 
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
@@ -139,7 +150,18 @@ const UserDetail = (props) => {
   // 상담 메모
   const [counselingForm] = Form.useForm();
   // 회원 메모
-  const [memoForm] = Form.useForm();
+  const [userMemoForm] = Form.useForm();
+
+  const [userMemoMinPage, setUserMemoMinPage] = useState(0);
+  const [userMemoMaxPage, setUserMemoMaxPage] = useState(1);
+
+  const [userMemoHistoryTotal, setUserMemoHistoryTotal] = useState(1);
+  const [userMemoHistoryList, setUserMemoHistoryList] = useState([]);
+
+  const handleUserMemoHistoryChange = (value) => {
+    setUserMemoMinPage(value - 1);
+    setUserMemoMaxPage(value);
+  };
 
   useEffect(() => {
     // 유저 상세 정보 조회
@@ -162,7 +184,34 @@ const UserDetail = (props) => {
     getUserContractList({ page: 1, size: PAGE_SIZE, uid: id });
     // 유저 청구 내역 조회
     getUserOrderList({ page: 1, size: PAGE_SIZE, uid: id });
+    // 유저 회원 메모 조회
+    getUserMemoHistoryList({ uid: id });
   }, []);
+
+  const getUserMemoHistoryList = (params) => {
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/user/memo/list`,
+        {
+          ...params,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        const data = response.data;
+        setUserMemoHistoryTotal(data.total);
+        setUserMemoHistoryList(data.items);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
 
   useEffect(() => {
     // 유저 정보 세팅되면
@@ -221,6 +270,32 @@ const UserDetail = (props) => {
 
     // 회원 메모
   }, [userDetail]);
+
+  const handleUserMemoSubmit = (values) => {
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/user/memo/add`,
+        {
+          uid: Number(id),
+          content: values.content,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        if (response.status === 200) {
+          getUserMemoHistoryList({ uid: id });
+        }
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
 
   return (
     <>
@@ -361,10 +436,10 @@ const UserDetail = (props) => {
           >
             <Form form={counselingForm} layout="vertical">
               <Form.Item name="title">
-                <Input disabled />
+                <Input />
               </Form.Item>
               <Form.Item name="content">
-                <Input.TextArea disabled />
+                <Input.TextArea />
               </Form.Item>
             </Form>
           </Card>
@@ -375,12 +450,38 @@ const UserDetail = (props) => {
             bodyStyle={{ padding: "1rem" }}
             className="mb-4"
           >
-            <Form form={memoForm} layout="vertical">
-              <Form.Item name="memo">
-                <Input disabled />
+            <Form
+              form={userMemoForm}
+              layout="vertical"
+              onFinish={handleUserMemoSubmit}
+            >
+              <Form.Item name="content">
+                <Input />
               </Form.Item>
+              <Button type="primary" htmlType="submit">
+                저장
+              </Button>
             </Form>
           </Card>
+
+          {userMemoHistoryList
+            .slice(userMemoMinPage, userMemoMaxPage)
+            .map((memo) => (
+              <Card
+                title={`회원 메모 히스토리`}
+                bodyStyle={{ padding: "1rem" }}
+                className="mb-4"
+              >
+                <Input disabled value={memo.content} />
+              </Card>
+            ))}
+
+          <Pagination
+            onChange={handleUserMemoHistoryChange}
+            defaultCurrent={1}
+            defaultPageSize={1}
+            total={userMemoHistoryTotal}
+          />
         </Col>
       </Card>
 
