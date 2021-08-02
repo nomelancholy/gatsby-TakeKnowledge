@@ -1,10 +1,23 @@
-import { Button, Form, Input, Modal, Card, Col, Select } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  Modal,
+  Card,
+  Col,
+  Select,
+  Table,
+  DatePicker,
+  TimePicker,
+} from "antd";
 
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 import { useForm } from "antd/lib/form/Form";
 import CheckableTag from "@components/elements/CheckableTag";
+import TimeTable from "@components/elements/TimeTable";
+import moment, { locale } from "moment";
 
 const ProductSpot = (props) => {
   const { spotInfo, productId, handleSpotDeleted, optionSpotList, token } =
@@ -24,15 +37,25 @@ const ProductSpot = (props) => {
 
   const [form] = useForm();
 
-  // 사용 가능 시간 세팅 state
-  const [monTime, setMonTime] = useState("0-24");
-  const [tueTime, setTueTime] = useState("0-24");
-  const [wedTime, setWedTime] = useState("0-24");
-  const [thuTime, setThuTime] = useState("0-24");
-  const [friTime, setFriTime] = useState("0-24");
-  const [satTime, setSatTime] = useState("0-0");
-  const [sunTime, setSunTime] = useState("0-0");
+  // 서버 전송용 사용 가능 시간 state
+  const [monTime, setMonTime] = useState("");
+  const [tueTime, setTueTime] = useState("");
+  const [wedTime, setWedTime] = useState("");
+  const [thuTime, setThuTime] = useState("");
+  const [friTime, setFriTime] = useState("");
+  const [satTime, setSatTime] = useState("");
+  const [sunTime, setSunTime] = useState("");
 
+  // TimePicker 값 세팅용 사용 가능 시간 state
+  const [monSettingTime, setMonSettingTime] = useState([]);
+  const [tueSettingTime, setTueSettingTime] = useState([]);
+  const [wedSettingTime, setWedSettingTime] = useState([]);
+  const [thuSettingTime, setThuSettingTime] = useState([]);
+  const [friSettingTime, setFriSettingTime] = useState([]);
+  const [satSettingTime, setSatSettingTime] = useState([]);
+  const [sunSettingTime, setSunSettingTime] = useState([]);
+
+  // 사용 가능 스팟 등록 / 수정 구분
   const [isActive, setIsActive] = useState(true);
 
   useEffect(() => {
@@ -60,18 +83,63 @@ const ProductSpot = (props) => {
         spot: spotInfo.spot.spot_id,
       });
 
-      setMonTime(`${spotInfo.timetable.mon_st}-${spotInfo.timetable.mon_end}`);
-      setTueTime(`${spotInfo.timetable.tue_st}-${spotInfo.timetable.tue_end}`);
-      setWedTime(`${spotInfo.timetable.wed_st}-${spotInfo.timetable.wed_end}`);
-      setThuTime(`${spotInfo.timetable.thu_st}-${spotInfo.timetable.thu_end}`);
-      setFriTime(`${spotInfo.timetable.fri_st}-${spotInfo.timetable.fri_end}`);
-      setSatTime(`${spotInfo.timetable.sat_st}-${spotInfo.timetable.sat_end}`);
-      setSunTime(`${spotInfo.timetable.sun_st}-${spotInfo.timetable.sun_end}`);
+      const monTime = [
+        moment(spotInfo.timetable.mon_st, "HH"),
+        moment(spotInfo.timetable.mon_end, "HH"),
+      ];
+
+      setMonSettingTime(monTime);
+
+      const tueTime = [
+        moment(spotInfo.timetable.tue_st, "HH"),
+        moment(spotInfo.timetable.tue_end, "HH"),
+      ];
+
+      setTueSettingTime(tueTime);
+
+      const wedTime = [
+        moment(spotInfo.timetable.wed_st, "HH"),
+        moment(spotInfo.timetable.wed_end, "HH"),
+      ];
+
+      setWedSettingTime(wedTime);
+
+      const thuTime = [
+        moment(spotInfo.timetable.thu_st, "HH"),
+        moment(spotInfo.timetable.thu_end, "HH"),
+      ];
+
+      setThuSettingTime(thuTime);
+
+      const friTime = [
+        moment(spotInfo.timetable.fri_st, "HH"),
+        moment(spotInfo.timetable.fri_end, "HH"),
+      ];
+
+      setFriSettingTime(friTime);
+
+      const satTime = [
+        moment(spotInfo.timetable.sat_st, "HH"),
+        moment(spotInfo.timetable.sat_end, "HH"),
+      ];
+
+      setSatSettingTime(satTime);
+
+      const sunTime = [
+        moment(spotInfo.timetable.sun_st, "HH"),
+        moment(spotInfo.timetable.sun_end, "HH"),
+      ];
+
+      setSunSettingTime(sunTime);
     } else {
       // 새로 등록하는 경우
       setIsNew(true);
     }
   }, []);
+
+  useEffect(() => {
+    console.log(`monSettingTime`, monSettingTime);
+  }, [monSettingTime]);
 
   // 수정 or 등록 버튼 클릭
   const handleSpotChangeSumbit = (values) => {
@@ -139,28 +207,28 @@ const ProductSpot = (props) => {
     setDeleteModalVisible(false);
   };
 
-  const handleTime = (e) => {
-    switch (e.target.name) {
+  const handleTime = (day, time) => {
+    switch (day) {
       case "mon":
-        setMonTime(e.target.value);
+        setMonTime(time);
         break;
       case "tue":
-        setTueTime(e.target.value);
+        setTueTime(time);
         break;
       case "wed":
-        setWedTime(e.target.value);
+        setWedTime(time);
         break;
       case "thu":
-        setThuTime(e.target.value);
+        setThuTime(time);
         break;
       case "fri":
-        setFriTime(e.target.value);
+        setFriTime(time);
         break;
       case "sat":
-        setSatTime(e.target.value);
+        setSatTime(time);
         break;
       case "sun":
-        setSunTime(e.target.value);
+        setSunTime(time);
         break;
       default:
         break;
@@ -169,6 +237,7 @@ const ProductSpot = (props) => {
 
   // 옵션 스팟이 바뀔 때 사용 가능 공간 변경
   const handleOptionSpotChange = (value) => {
+    console.log(`value`, value);
     const spotConfig = {
       method: "get",
       url: `${process.env.BACKEND_API}/admin/spot/get/${value}`,
@@ -306,20 +375,165 @@ const ProductSpot = (props) => {
           )}
 
           <Form.Item name="schedule" label="사용 가능 시간">
-            월{" "}
-            <Input name="mon" value={monTime} onChange={(e) => handleTime(e)} />
-            화{" "}
-            <Input name="tue" value={tueTime} onChange={(e) => handleTime(e)} />
-            수{" "}
-            <Input name="wed" value={wedTime} onChange={(e) => handleTime(e)} />
-            목{" "}
-            <Input name="thu" value={thuTime} onChange={(e) => handleTime(e)} />
-            금{" "}
-            <Input name="fri" value={friTime} onChange={(e) => handleTime(e)} />
-            토{" "}
-            <Input name="sat" value={satTime} onChange={(e) => handleTime(e)} />
-            일{" "}
-            <Input name="sun" value={sunTime} onChange={(e) => handleTime(e)} />
+            <div>
+              {/* TO-DO : dragabble timetable */}
+              {/* <TimeTable /> */}
+              {/* <Table
+              columns={columns}
+              dataSource={tableData}
+              onRow={(record, rowIndex) => {
+                return {
+                  onClick: (event) => {
+                    console.log(`event`, event);
+                  }, // click row
+                  onDoubleClick: (event) => {}, // double click row
+                  onContextMenu: (event) => {}, // right button click row
+                  onMouseEnter: (event) => {}, // mouse enter row
+                  onMouseLeave: (event) => {}, // mouse leave row
+                };
+              }}
+            ></Table> */}
+              월{" "}
+              <TimePicker.RangePicker
+                showTime={{ format: "HH" }}
+                format="HH"
+                placeholder={["Start Time", "End Time"]}
+                value={monSettingTime}
+                onChange={(date, dateString) => {
+                  const day = "mon";
+                  let time = "";
+
+                  if (dateString[1] == "00") {
+                    time = `${dateString[0]}-24`;
+                  } else {
+                    time = dateString.join("-");
+                  }
+
+                  handleTime(day, time);
+                  setMonSettingTime(date);
+                }}
+              />
+              화{" "}
+              <TimePicker.RangePicker
+                showTime={{ format: "HH" }}
+                format="HH"
+                placeholder={["Start Time", "End Time"]}
+                value={tueSettingTime}
+                onChange={(date, dateString) => {
+                  const day = "tue";
+                  let time = "";
+
+                  if (dateString[1] == "00") {
+                    time = `${dateString[0]}-24`;
+                  } else {
+                    time = dateString.join("-");
+                  }
+
+                  handleTime(day, time);
+                  setTueSettingTime(date);
+                }}
+              />
+              수{" "}
+              <TimePicker.RangePicker
+                showTime={{ format: "HH" }}
+                format="HH"
+                placeholder={["Start Time", "End Time"]}
+                value={wedSettingTime}
+                onChange={(date, dateString) => {
+                  const day = "wed";
+                  let time = "";
+
+                  if (dateString[1] == "00") {
+                    time = `${dateString[0]}-24`;
+                  } else {
+                    time = dateString.join("-");
+                  }
+
+                  handleTime(day, time);
+                  setWedSettingTime(date);
+                }}
+              />
+              목{" "}
+              <TimePicker.RangePicker
+                showTime={{ format: "HH" }}
+                format="HH"
+                placeholder={["Start Time", "End Time"]}
+                value={thuSettingTime}
+                onChange={(date, dateString) => {
+                  const day = "thu";
+                  let time = "";
+
+                  if (dateString[1] == "00") {
+                    time = `${dateString[0]}-24`;
+                  } else {
+                    time = dateString.join("-");
+                  }
+
+                  handleTime(day, time);
+                  setThuSettingTime(date);
+                }}
+              />
+              금{" "}
+              <TimePicker.RangePicker
+                showTime={{ format: "HH" }}
+                format="HH"
+                value={friSettingTime}
+                placeholder={["Start Time", "End Time"]}
+                onChange={(date, dateString) => {
+                  const day = "fri";
+                  let time = "";
+
+                  if (dateString[1] == "00") {
+                    time = `${dateString[0]}-24`;
+                  } else {
+                    time = dateString.join("-");
+                  }
+
+                  handleTime(day, time);
+                  setFriSettingTime(date);
+                }}
+              />
+              토{" "}
+              <TimePicker.RangePicker
+                showTime={{ format: "HH" }}
+                format="HH"
+                value={satSettingTime}
+                placeholder={["Start Time", "End Time"]}
+                onChange={(date, dateString) => {
+                  const day = "sat";
+                  let time = "";
+
+                  if (dateString[1] == "00") {
+                    time = `${dateString[0]}-24`;
+                  } else {
+                    time = dateString.join("-");
+                  }
+
+                  handleTime(day, time);
+                  setSatSettingTime(date);
+                }}
+              />
+              일{" "}
+              <TimePicker.RangePicker
+                showTime={{ format: "HH" }}
+                format="HH"
+                value={sunSettingTime}
+                placeholder={["Start Time", "End Time"]}
+                onChange={(date, dateString) => {
+                  const day = "sun";
+                  let time = "";
+
+                  if (dateString[1] == "00") {
+                    time = `${dateString[0]}-24`;
+                  } else {
+                    time = dateString.join("-");
+                  }
+
+                  handleTime(day, time);
+                  setSunSettingTime(date);
+                }}
+              />
+            </div>
           </Form.Item>
           {isActive && (
             <>
