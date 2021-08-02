@@ -738,7 +738,7 @@ const ContractDetail = (props) => {
                 <Card title={"월 정기 납부 내역"}>
                   <Table
                     size="middle"
-                    columns={orderColumns}
+                    columns={contractOrderColumns}
                     rowKey={(record) => record.order.order_id}
                     dataSource={orderList}
                     pagination={orderPagination}
