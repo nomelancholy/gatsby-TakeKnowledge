@@ -12,18 +12,20 @@ import {
   Select,
   DatePicker,
   Pagination,
+  Anchor,
+  Checkbox,
 } from "antd";
 
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { useRouter } from "next/router";
+import Router, { useRouter } from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import axios from "axios";
-import Checkbox from "antd/lib/checkbox/Checkbox";
 import { contractOrderColumns } from "@utils/columns/order";
 import { contractServiceColumns } from "@utils/columns/service";
 import { contractVoucherColumns } from "@utils/columns/product";
+import ContractCancelModal from "@components/contract/CancelModal";
 
 const ContractDetail = (props) => {
   const radioStyle = {
@@ -52,6 +54,9 @@ const ContractDetail = (props) => {
   const handleOrderTableChange = (pagination) => {
     setOrderPagination(pagination);
   };
+
+  const [monthlyCostCalculatePagination, setMonthlyCostCalculatePagination] =
+    useState({});
 
   const [voucherPagination, setVoucherPagination] = useState({});
   const [voucherLoading, setVoucherLoading] = useState(false);
@@ -95,8 +100,12 @@ const ContractDetail = (props) => {
           pageSize: data.size,
         };
 
-        // pageInfo 세팅
+        // 청구/결제 정보 pageInfo 세팅
         setOrderPagination(pageInfo);
+
+        setMonthlyCostCalculatePagination(pageInfo);
+
+        // 취소/해지 Modal - 월 정기 납부 내역 pageInfo 세팅
 
         // 로딩바 세팅
         setOrderLoading(false);
@@ -256,8 +265,36 @@ const ContractDetail = (props) => {
           break;
       }
 
+      // HTML Set
+      setUserIdElements(
+        <Anchor>
+          <Anchor.Link
+            href={`/user/${contractDetail.user.uid}`}
+            title={contractDetail.user.uid}
+          />
+        </Anchor>
+      );
+
+      setRateplanElements(
+        <Anchor>
+          <Anchor.Link
+            href={`/rateplan/${contractDetail.rateplan.rateplan_id}`}
+            title={contractDetail.rateplan.name}
+          />
+        </Anchor>
+      );
+
+      setproductIdElements(
+        <Anchor>
+          <Anchor.Link
+            href={`/product/${contractDetail.rateplan.product.product_id}`}
+            title={contractDetail.rateplan.product.product_id}
+          />
+        </Anchor>
+      );
+
       userForm.setFieldsValue({
-        uid: contractDetail.user.uid,
+        // uid: contractDetail.user.uid,
         user_role: userRole,
         user_name: contractDetail.user.user_name,
         user_login: contractDetail.user.user_login,
@@ -281,7 +318,7 @@ const ContractDetail = (props) => {
         terminate_date: contractDetail.terminate_date,
       });
       chargeForm.setFieldsValue({
-        rateplan_name: contractDetail.rateplan.name,
+        // rateplan_name: contractDetail.rateplan.name,
         product_price: contractDetail.rateplan.price.toLocaleString("ko"),
         dc_price: contractDetail.rateplan.dc_price.toLocaleString("ko"),
         total: (
@@ -339,7 +376,7 @@ const ContractDetail = (props) => {
       );
 
       productForm.setFieldsValue({
-        product_id: contractDetail.rateplan.product.product_id,
+        // product_id: contractDetail.rateplan.product.product_id,
         name: contractDetail.rateplan.product.name,
         product_type: productType,
         service_type: serviceType,
@@ -394,6 +431,12 @@ const ContractDetail = (props) => {
     setMemoMaxPage(value);
   };
 
+  const [userIdElements, setUserIdElements] = useState(<></>);
+  const [rateplanElements, setRateplanElements] = useState(<></>);
+  const [productIdElements, setproductIdElements] = useState(<></>);
+
+  const [rateplan, setRateplan] = useState(<></>);
+
   return (
     <>
       <Tabs defaultActiveKey="1">
@@ -439,7 +482,7 @@ const ContractDetail = (props) => {
                 <Form.Item name="group_id" label="그룹 ID">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="number" label="사업자 등록 번호">
+                <Form.Item name="business_number" label="사업자 등록 번호">
                   <Input disabled />
                 </Form.Item>
                 <Form.Item name="address" label="사업자 주소">
@@ -463,7 +506,7 @@ const ContractDetail = (props) => {
             >
               <Form form={userForm} layout="vertical">
                 <Form.Item name="uid" label="회원 ID">
-                  <Input disabled />
+                  {userIdElements}
                 </Form.Item>
                 <Form.Item name="user_role" label="회원 타입">
                   <Input disabled />
@@ -539,7 +582,7 @@ const ContractDetail = (props) => {
             >
               <Form form={chargeForm} layout="vertical">
                 <Form.Item name="rateplan_name" label="적용 요금제">
-                  <Input disabled />
+                  {rateplanElements}
                 </Form.Item>
                 <Form.Item name="product_price" label="멤버십 상품요금(A)">
                   <Input disabled />
@@ -559,7 +602,7 @@ const ContractDetail = (props) => {
             >
               <Form form={productForm} layout="vertical">
                 <Form.Item name="product_id" label="상품 ID">
-                  <Input disabled />
+                  {productIdElements}
                 </Form.Item>
                 <Form.Item name="name" label="상품 명">
                   <Input disabled />
@@ -721,121 +764,14 @@ const ContractDetail = (props) => {
             >
               계약 취소 / 해지
             </Button>
-
-            <Modal
-              width={1000}
+            <ContractCancelModal
               visible={contractCancelModalVisible}
-              okText="해지 완료"
-              cancelText="취소"
-              onOk={() => {
-                // router.push("/payment");
-              }}
-              onCancel={() => {
-                setContractCancelModalVisible(false);
-              }}
-            >
-              <Card title={"계약 취소/해지"} style={{ width: 800 }}>
-                <Card title={"월 정기 납부 내역"}>
-                  <Table
-                    size="middle"
-                    columns={contractOrderColumns}
-                    rowKey={(record) => record.order.order_id}
-                    dataSource={orderList}
-                    pagination={orderPagination}
-                    loading={orderLoading}
-                    onChange={handleOrderTableChange}
-                  />
-                </Card>
-                <Card title={"해지 유형"}>
-                  <Form>
-                    <Form.Item>
-                      <Input></Input>
-                    </Form.Item>
-                    <Form.Item label="계약 신청일">
-                      <Input></Input>
-                    </Form.Item>
-                    <Form.Item label="계약 시작일">
-                      <Input></Input>
-                    </Form.Item>
-                    <Form.Item label="청구 일">
-                      <Input></Input>
-                    </Form.Item>
-                    <Form.Item label="계약 해지일">
-                      <DatePicker></DatePicker>
-                    </Form.Item>
-                  </Form>
-                </Card>
-                <Card title={"월 이용 요금 일할 계산 & 위약금"}>
-                  <Form form={orderRequestForm}>
-                    <Form.Item name="order_item" label="청구 시작일">
-                      <Select>
-                        <Select.Option value="membership">멤버십</Select.Option>
-                        <Select.Option value="coworking">
-                          코워킹룸
-                        </Select.Option>
-                        <Select.Option value="locker">
-                          스마트 락커
-                        </Select.Option>
-                        <Select.Option value="penalty">패널티</Select.Option>
-                      </Select>
-                    </Form.Item>
-                    <Form.Item name="order_date" label="청구 종료일">
-                      <DatePicker></DatePicker>
-                    </Form.Item>
-                    <Form.Item
-                      namme="memo"
-                      label="계약 해지일 (=계약 해지 예정일)"
-                    >
-                      <Input.TextArea></Input.TextArea>
-                    </Form.Item>
-                    <Form.Item namme="total" label="월 이용 요금(A)">
-                      <Input disabled />
-                    </Form.Item>
-                    <Form.Item
-                      namme="total"
-                      label="사용 일수(청구 시작일 ~ 계약 해지일)"
-                    >
-                      <Input disabled />
-                    </Form.Item>
-                    <Form.Item
-                      namme="total"
-                      label="일할 이용 요금 (B) * (월 이용료/(청구 종료일 - 해지일)) * 사용일수"
-                    >
-                      <Input disabled />
-                    </Form.Item>
-                    <Form.Item
-                      namme="total"
-                      label="해지 위약금(C) * (월 이용료 * 0.1)"
-                    >
-                      <Input disabled />
-                    </Form.Item>
-                    <Form.Item namme="total" label="환불 금액 (A-B-C)">
-                      <Input disabled />
-                    </Form.Item>
-                  </Form>
-                </Card>
-                <Card>
-                  <Form form={contractStatusForm}>
-                    <Form.Item name="status" label="계약 상태">
-                      <Radio.Group>
-                        <Radio style={radioStyle} value={"active"}>
-                          월 정기 해지
-                        </Radio>
-                        <Radio style={radioStyle} value={"inactive"}>
-                          청약 철회 해지
-                        </Radio>
-                        <Radio style={radioStyle} value={"inactive"}>
-                          전체 환불
-                        </Radio>
-                        <Radio style={radioStyle} value={"inactive"}>
-                          일할 계산
-                        </Radio>
-                      </Radio.Group>
-                    </Form.Item>
-                  </Form>
-                </Card>
-              </Card>
-            </Modal>
+              setVisible={setContractCancelModalVisible}
+              contractDetail={contractDetail}
+              orderList={orderList}
+              pagination={monthlyCostCalculatePagination}
+              setPagination={setMonthlyCostCalculatePagination}
+            />
 
             <Row type="flex" align="middle" className="py-4">
               <span className="px-2 w-10"></span>
