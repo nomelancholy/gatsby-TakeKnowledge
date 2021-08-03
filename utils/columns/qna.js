@@ -10,10 +10,11 @@ export const qnaListColumns = [
     title: "문의 유형",
     dataIndex: "classification",
   },
-  {
-    title: "카테고리",
-    dataIndex: "category",
-  },
+  // 기획 변경으로 주석 처리 (21.08.03)
+  // {
+  //   title: "카테고리",
+  //   dataIndex: "category",
+  // },
   {
     title: "제목",
     dataIndex: "title",
@@ -25,7 +26,7 @@ export const qnaListColumns = [
     title: "요청자(멤버 ID)",
     dataIndex: "user",
     render: (text, record) => {
-      return text.user_name;
+      return `${text.user_name}(${text.uid})`;
     },
   },
   {
