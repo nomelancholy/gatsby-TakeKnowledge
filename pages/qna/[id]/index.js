@@ -7,27 +7,36 @@ import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import axios from "axios";
 
+const radioStyle = {
+  display: "inline",
+  height: "30px",
+  lineHeight: "30px",
+};
+
 const QnaDetail = (props) => {
   const router = useRouter();
+  // qid
   const { id } = router.query;
   const { user, isLoggedIn, token } = props.auth;
 
   // detail로 들어온 경우 문의하기 정보 저장 state
   const [qnaDetail, setQnaDetail] = useState(undefined);
 
+  // Modal 관련 state
   const [okModalVisible, setOkModalVisible] = useState(false);
   const [removeModalVisible, setRemoveModalVisible] = useState(false);
 
   // 답장을 단 적이 있는 경우 (작성/수정 flag)
   const [replyQid, setReplyQid] = useState(undefined);
 
-  const radioStyle = {
-    display: "inline",
-    height: "30px",
-    lineHeight: "30px",
-  };
-
-  const [form] = Form.useForm();
+  // 처리 상태
+  const [statusForm] = Form.useForm();
+  // 카테고리
+  const [categoryForm] = Form.useForm();
+  // 문의하기 내용
+  const [questionForm] = Form.useForm();
+  // 답장
+  const [replyForm] = Form.useForm();
 
   // 문의 상세 조회
   useEffect(() => {
@@ -41,7 +50,6 @@ const QnaDetail = (props) => {
       })
       .then((response) => {
         const qnaDetail = response.data.item;
-        console.log(`qnaDetail`, qnaDetail);
         setQnaDetail(qnaDetail);
       })
       .catch((error) => {
@@ -50,48 +58,63 @@ const QnaDetail = (props) => {
   }, []);
 
   useEffect(() => {
-    // 요금제 정보 세팅되면
+    // 문의 상세 정보 세팅되면
     if (qnaDetail) {
-      form.setFieldsValue({
-        // 노출 여부
+      // 처리 상태
+      statusForm.setFieldsValue({
         status: qnaDetail.status,
+      });
+
+      // 카테고리
+      categoryForm.setFieldsValue({
         // 카테고리 1
         classification: qnaDetail.classification,
         // 카테고리 2
         category: qnaDetail.category,
+      });
+
+      // 문의하기 내용
+      questionForm.setFieldsValue({
         // 작성자
-        user_name: qnaDetail.user.user_name,
+        // user_name: qnaDetail.user.user_name,
         // 제목
         title: qnaDetail.title,
         // 내용
         content: qnaDetail.content,
       });
 
+      // 답장
       if (qnaDetail.reply) {
-        form.setFieldsValue({
+        replyForm.setFieldsValue({
           // 답장
           reply: qnaDetail.reply.content,
           // 담당자
           reply_user: qnaDetail.reply.user.user_name,
+          // 답장 생성 일시
+          reply_regdate: qnaDetail.reply.regdate,
         });
-
+        // 답장이 있는 경우 저장 버튼 클릭시 수정으로 보내야 하므로 qid 세팅
         setReplyQid(qnaDetail.reply.qid);
       }
     }
   }, [qnaDetail]);
 
   // 저장 버튼 클릭
-  const handleReplyRegisterSubmit = (values) => {
+  const handleReplyRegisterSubmit = () => {
     let url = "";
 
     url = `${process.env.BACKEND_API}/user/qna/write`;
 
     const formData = new FormData();
 
-    formData.append("title", values.title);
-    formData.append("classification", values.classification);
-    formData.append("category", values.category);
-    formData.append("content", values.reply);
+    const { title } = questionForm.getFieldValue();
+    const { classification, category } = categoryForm.getFieldValue();
+    const { reply } = replyForm.getFieldValue();
+
+    formData.append("title", title);
+    formData.append("classification", classification);
+    formData.append("category", category);
+    formData.append("content", reply);
     formData.append("parent", id);
 
     if (replyQid) {
@@ -150,60 +173,90 @@ const QnaDetail = (props) => {
         bodyStyle={{ padding: "1rem" }}
         className="mb-4"
       >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleReplyRegisterSubmit}
+        <Card
+          title={`처리 상태`}
+          bodyStyle={{ padding: "1rem" }}
+          className="mb-4"
         >
-          <Form.Item name="status" label="처리 상태">
-            <Radio.Group>
-              <Radio style={radioStyle} value={"wait"}>
-                대기
-              </Radio>
-              <Radio style={radioStyle} value={"done"}>
-                헤결
-              </Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item name="classification" label="카테고리 1">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="category" label="카테고리 2">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="user_name" label="작성자">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="title" label="제목">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="content" label="내용">
-            <Input.TextArea disabled />
-          </Form.Item>
-          <Form.Item name="reply" label="답장">
-            <Input.TextArea />
-          </Form.Item>
-          {replyQid && (
-            <Form.Item name="reply_user" label="담당자">
+          <Form form={statusForm}>
+            <Form.Item name="status">
+              <Radio.Group disabled>
+                <Radio style={radioStyle} value={"wait"}>
+                  대기
+                </Radio>
+                <Radio style={radioStyle} value={"done"}>
+                  해결
+                </Radio>
+                <Radio style={radioStyle} value={"trash"}>
+                  삭제
+                </Radio>
+              </Radio.Group>
+            </Form.Item>
+          </Form>
+        </Card>
+        <Card
+          title={`카테고리`}
+          bodyStyle={{ padding: "1rem" }}
+          className="mb-4"
+        >
+          <Form form={categoryForm}>
+            <Form.Item name="classification" label="카테고리 1">
               <Input disabled />
             </Form.Item>
-          )}
+            <Form.Item name="category" label="카테고리 2">
+              <Input disabled />
+            </Form.Item>
+          </Form>
+        </Card>
+        <Card
+          title={`문의하기 내용`}
+          bodyStyle={{ padding: "1rem" }}
+          className="mb-4"
+        >
+          <Form form={questionForm}>
+            {/* 기획 수정 사항 반영 - 주석 처리 21-08-03 */}
+            {/* <Form.Item name="user_name" label="작성자">
+              <Input disabled />
+            </Form.Item> */}
+            <Form.Item name="title" label="제목">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="content" label="내용">
+              <Input.TextArea disabled />
+            </Form.Item>
+          </Form>
+        </Card>
+        <Card title={`답장`} bodyStyle={{ padding: "1rem" }} className="mb-4">
+          <Form form={replyForm}>
+            <Form.Item name="reply" label="내용">
+              <Input.TextArea />
+            </Form.Item>
+            {replyQid && (
+              <>
+                <Form.Item name="reply_user" label="담당자">
+                  <Input disabled />
+                </Form.Item>
+                <Form.Item name="reply_regdate" label="생성 일시">
+                  <Input disabled />
+                </Form.Item>
+              </>
+            )}
+          </Form>
+        </Card>
 
-          <Button type="primary" htmlType="submit">
-            저장
-          </Button>
-          <Button
-            onClick={() => {
-              setRemoveModalVisible(true);
-            }}
-          >
-            삭제
-          </Button>
-        </Form>
+        <Button type="primary" onClick={handleReplyRegisterSubmit}>
+          저장
+        </Button>
+        <Button
+          onClick={() => {
+            setRemoveModalVisible(true);
+          }}
+        >
+          삭제
+        </Button>
         <Modal
           visible={okModalVisible}
           okText="확인"
-          cancelText="취소"
           onOk={() => {
             router.push("/qna");
           }}
@@ -212,16 +265,16 @@ const QnaDetail = (props) => {
           }}
           cancelButtonProps={{ style: { display: "none" } }}
         >
-          {"답변 등록 완료"}
+          {replyQid ? "답변 수정 완료" : "답변 등록 완료"}
         </Modal>
         <Modal
           visible={removeModalVisible}
           okText="확인"
+          cancelText="취소"
           onOk={handleRemove}
           onCancel={() => {
             setRemoveModalVisible(false);
           }}
-          cancelButtonProps={{ style: { display: "none" } }}
         >
           {"삭제하시겠습니까?"}
         </Modal>
