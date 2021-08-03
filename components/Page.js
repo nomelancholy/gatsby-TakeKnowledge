@@ -2,7 +2,7 @@ import { Container, Inner } from "./styles/Page";
 import { Layout, Spin } from "antd";
 import { useEffect, useState } from "react";
 
-import Header from "./Header";
+import HeaderPage from "@pages/header";
 import SidebarMenu from "./SidebarMenu";
 import { ThemeProvider } from "styled-components";
 import { theme } from "./styles/GlobalStyles";
@@ -39,7 +39,7 @@ const Page = ({ router, children }) => {
             state.boxed ? "boxed shadow-sm" : ""
           }`}
         >
-          {!isNotDashboard && <Header />}
+          {!isNotDashboard && <HeaderPage />}
           <Layout className="workspace">
             {!isNotDashboard && (
               <SidebarMenu

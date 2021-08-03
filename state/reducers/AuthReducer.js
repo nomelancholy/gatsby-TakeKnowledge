@@ -28,6 +28,7 @@ const authReducer = (state = initialState, action) => {
         isLoggedIn: true,
         token: action.payload,
         user: action.user,
+        msg: null,
       };
 
       const remember = action.remember ? action.remember : false;
@@ -46,7 +47,7 @@ const authReducer = (state = initialState, action) => {
       // code : 필요시 분기처리 용 code
       // msg : 간단한 에러 메시지
       // comment : 상세 에러 메시지
-      const { code, msg, comment } = action.payload.response.data.detail;
+      const { code, msg, comment } = action.payload;
 
       return {
         ...state,

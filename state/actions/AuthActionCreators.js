@@ -1,5 +1,9 @@
 import axios from "axios";
-import { AUTHENTICATE, DEAUTHENTICATE } from "./AuthActionConstants";
+import {
+  AUTHENTICATE,
+  AUTHENTICATE_FAILED,
+  DEAUTHENTICATE,
+} from "./AuthActionConstants";
 import { removeCookie } from "@utils/cookie";
 
 const authenticate = ({ user_login, user_pass, remember = false }, type) => {
@@ -18,13 +22,21 @@ const authenticate = ({ user_login, user_pass, remember = false }, type) => {
         }
       )
       .then((response) => {
-        if (response.status == 200 && response.data.user_role === "ffadmin") {
+        if (response.status !== 200) return;
+        if (response.data.user_role === "ffadmin") {
           const user = response.data;
           dispatch({
             type: AUTHENTICATE,
             payload: user.Authorization,
             user: user,
             remember: remember,
+          });
+        } else {
+          dispatch({
+            type: AUTHENTICATE_FAILED,
+            payload: {
+              msg: "관리자 페이지 접근 권한이 없습니다",
+            },
           });
         }
       })

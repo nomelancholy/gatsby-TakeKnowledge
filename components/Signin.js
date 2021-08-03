@@ -18,7 +18,7 @@ const Content = styled.div`
 
 const Signin = (props) => {
   const { dispatch } = props;
-  const { isLoggedIn } = props.auth;
+  const { isLoggedIn, msg } = props.auth;
 
   const [form] = Form.useForm();
   const [state] = useAppState();
@@ -99,6 +99,7 @@ const Signin = (props) => {
             <Button type="primary" htmlType="submit" block className="mt-3">
               Log in
             </Button>
+            {msg && <p>{msg}</p>}
           </FormItem>
         </Form>
       </Content>
