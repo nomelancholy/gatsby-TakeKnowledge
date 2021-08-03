@@ -24,6 +24,17 @@ export const spotListcolumns = [
   {
     title: "최대 허용 수",
     dataIndex: "seat_limit",
+    render: (text, record) => {
+      if (text === null) {
+        return 0;
+      } else {
+        return text;
+      }
+    },
+  },
+  {
+    title: "선호하는 멤버",
+    dataIndex: "fav_count",
   },
   {
     title: "라운지",

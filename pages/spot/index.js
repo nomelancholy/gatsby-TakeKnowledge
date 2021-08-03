@@ -54,7 +54,6 @@ const Spot = (props) => {
       )
       .then((response) => {
         const data = response.data;
-        console.log(`spot data`, data);
 
         setSpotList(data.items);
 
@@ -121,6 +120,46 @@ const Spot = (props) => {
     getSpotList({ ...params, ...searchParams });
   };
 
+  const handleAddSpot = () => {
+    const formData = new FormData();
+
+    const excerpt = {
+      lounge: false,
+      meeting: false,
+      coworking: false,
+      qa: false,
+      locker: false,
+      fb: false,
+      unmanned: false,
+      phone: false,
+    };
+
+    formData.append("name", "신규");
+    formData.append("property", "fivespot");
+    formData.append("status", "inactive");
+    formData.append("operation_time", "연중무휴, 24시간");
+    formData.append("seat_capacity", 0);
+
+    const config = {
+      method: "post",
+      url: `${process.env.BACKEND_API}/admin/spot/add`,
+      headers: {
+        Authorization: decodeURIComponent(token),
+      },
+      data: formData,
+    };
+
+    axios(config)
+      .then(function (response) {
+        if (response.status === 200) {
+          getSpotList(params);
+        }
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
+
   return (
     <>
       <h3>스팟 관리</h3>
@@ -133,17 +172,12 @@ const Spot = (props) => {
           }}
         >
           <SlidersOutlined />
-          <span>필터</span>
+          필터
         </Button>
         <span className="px-2 w-10"></span>
-        <Button
-          type="primary"
-          onClick={() => {
-            Router.push(`/spot/new`);
-          }}
-        >
+        <Button type="primary" onClick={handleAddSpot}>
           <PlusOutlined />
-          <span>등록</span>
+          등록
         </Button>
       </Row>
 
