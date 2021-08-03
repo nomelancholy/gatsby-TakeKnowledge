@@ -38,6 +38,7 @@ const SpaceCard = (props) => {
 
   // 모달 관련 state
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [okModalVisible, setOkModalVisible] = useState(false);
 
   // 라디오 state
   const [property, setProperty] = useState("");
@@ -133,7 +134,6 @@ const SpaceCard = (props) => {
   }, []);
 
   const handleSpaceChangeSumbit = (values) => {
-    console.log(`values`, values);
     let data = new FormData();
 
     let url = "";
@@ -191,7 +191,9 @@ const SpaceCard = (props) => {
 
     axios(config)
       .then(function (response) {
-        console.log(JSON.stringify(response.data));
+        if (response.data.msg && response.data.msg === "OK") {
+          setOkModalVisible(true);
+        }
       })
       .catch(function (error) {
         console.log(error);
@@ -259,7 +261,7 @@ const SpaceCard = (props) => {
 
   return (
     <Col className="mb-4">
-      <Card bodyStyle={{ background: "lightgray" }}>
+      <Card>
         {!isNew && (
           <>
             <Button onClick={() => setDeleteModalVisible(true)}>삭제</Button>
@@ -323,18 +325,34 @@ const SpaceCard = (props) => {
             <Input />
           </Form.Item>
           <Form.Item name="seat_capacity" label="인원">
-            <InputNumber onChange={handleSeatCapacityChange} />
+            <InputNumber min={0} onChange={handleSeatCapacityChange} />
           </Form.Item>
-          <Form.Item name="max_seat_capacity" label="최대 인원">
-            <InputNumber disabled={true} />
-          </Form.Item>
+          {type === "lounge" && (
+            <Form.Item name="max_seat_capacity" label="최대 인원">
+              <InputNumber disabled={true} />
+            </Form.Item>
+          )}
+
           <Form.Item name="floor" label="층 정보">
-            <InputNumber label={"층"} />
+            <InputNumber min={0} label={"층"} />
           </Form.Item>
           <Button type="primary" htmlType="submit">
             {isNew ? "등록" : "수정"}
           </Button>
         </Form>
+        <Modal
+          visible={okModalVisible}
+          okText="확인"
+          onOk={() => {
+            setOkModalVisible(false);
+          }}
+          onCancel={() => {
+            setOkModalVisible(false);
+          }}
+          cancelButtonProps={{ style: { display: "none" } }}
+        >
+          {isNew ? `${title} 등록 완료` : `${title} 수정 완료`}
+        </Modal>
       </Card>
     </Col>
   );

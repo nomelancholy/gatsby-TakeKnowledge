@@ -21,28 +21,22 @@ import NextHead from "next/head";
 import Space from "./Space";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
+import { isOrdered } from "immutable";
+
+const radioStyle = {
+  display: "inline",
+  height: "30px",
+  lineHeight: "30px",
+};
 
 const SpotDetail = (props) => {
   const { spotId } = props;
   const { token } = props.auth;
 
-  const radioStyle = {
-    display: "inline",
-    height: "30px",
-    lineHeight: "30px",
-  };
-
   const router = useRouter();
-
-  // new / detial 구분 state
-  const [registerMode, setRegisterMode] = useState(true);
 
   // spot 관련 state
   const [spotInfo, setSpotInfo] = useState(undefined);
-  const [status, setStatus] = useState(true);
-  const [property, setProperty] = useState(true);
-  const [generatedSpotId, setGeneratedSpotId] = useState(undefined);
-
   // file 관련 state
 
   const [fileList, setFileList] = useState([]);
@@ -67,8 +61,6 @@ const SpotDetail = (props) => {
 
   useEffect(() => {
     if (spotId) {
-      setRegisterMode(false);
-
       axios
         .get(`${process.env.BACKEND_API}/admin/spot/get/${spotId}`, {
           headers: {
@@ -79,14 +71,11 @@ const SpotDetail = (props) => {
         })
         .then((response) => {
           const spotData = response.data;
-          console.log(`spotData`, spotData);
           setSpotInfo(spotData);
         })
         .catch((error) => {
           console.log(`error`, error);
         });
-    } else {
-      setRegisterMode(true);
     }
   }, []);
 
@@ -172,16 +161,32 @@ const SpotDetail = (props) => {
 
     const formData = new FormData();
 
+    formData.append("spot_id", spotId);
     formData.append("name", values.name);
-    formData.append("nickname", values.nickname);
+    if (values.nickname) {
+      formData.append("nickname", values.nickname);
+    }
+
     formData.append("property", values.property);
     formData.append("status", values.status);
     formData.append("address", values.address);
     formData.append("address_etc", values.address_etc);
-    formData.append("content", values.content);
+    if (values.content) {
+      formData.append("content", values.content);
+    }
+
     formData.append("operation_time", values.operation_time);
     formData.append("seat_capacity", values.seat_capacity);
     formData.append("excerpt", JSON.stringify(excerpt));
+
+    // formData 확인
+    // for (let key of formData.keys()) {
+    //   console.log(key);
+    // }
+
+    // for (let value of formData.values()) {
+    //   console.log(value);
+    // }
 
     if (removedFileList.length > 0) {
       formData.append("del_images", JSON.stringify(removedFileList));
@@ -197,14 +202,7 @@ const SpotDetail = (props) => {
       });
     }
 
-    let url = "";
-
-    if (registerMode) {
-      url = `${process.env.BACKEND_API}/admin/spot/add`;
-    } else {
-      formData.append("spot_id", spotId);
-      url = `${process.env.BACKEND_API}/admin/spot/update`;
-    }
+    const url = `${process.env.BACKEND_API}/admin/spot/update`;
 
     const config = {
       method: "post",
@@ -217,9 +215,8 @@ const SpotDetail = (props) => {
 
     axios(config)
       .then(function (response) {
-        setOkModalVisible(true);
-        if (registerMode) {
-          setGeneratedSpotId(response.data.item.spot_id);
+        if (response.status === 200) {
+          setOkModalVisible(true);
         }
       })
       .catch(function (error) {
@@ -258,14 +255,6 @@ const SpotDetail = (props) => {
     form.setFieldsValue({
       max_seat_capacity: Math.floor(seat_capacity * 1.5),
     });
-  };
-
-  const handleStatusChange = (e) => {
-    setStatus(e.target.value);
-  };
-
-  const handlePropertyChange = (e) => {
-    setProperty(e.target.value);
   };
 
   const userAddressEtcRef = useRef(null);
@@ -307,7 +296,7 @@ const SpotDetail = (props) => {
               onFinish={handleSpotRegisterSubmit}
             >
               <Form.Item name="status" label="스팟 활성 / 비활성">
-                <Radio.Group onChange={handleStatusChange} value={status}>
+                <Radio.Group>
                   <Radio style={radioStyle} value={"active"}>
                     활성
                   </Radio>
@@ -319,33 +308,60 @@ const SpotDetail = (props) => {
                   </Radio>
                 </Radio.Group>
               </Form.Item>
-              <Form.Item name="name" label="스팟 명" initialValue="신규">
+              <Form.Item
+                name="name"
+                label="스팟 명"
+                rules={[
+                  { required: true, message: "스팟명은 필수 입력 사항입니다" },
+                ]}
+              >
                 <Input />
               </Form.Item>
-              {registerMode ? null : (
-                <Form.Item name="spot_id" label="스팟 ID">
-                  <InputNumber min={1} disabled={true} />
-                </Form.Item>
-              )}
-
+              <Form.Item name="spot_id" label="스팟 ID">
+                <InputNumber min={1} disabled={true} />
+              </Form.Item>
               <Form.Item name="nickname" label="스팟 별칭">
                 <Input />
               </Form.Item>
-              <Form.Item name="address" label="주소">
-                <Input onFocus={showAddressPopup} />
+              <Form.Item
+                name="address"
+                label="주소"
+                rules={[
+                  { required: true, message: "주소는 필수 입력 사항입니다" },
+                ]}
+              >
+                <Input onClick={showAddressPopup} />
               </Form.Item>
-              <Form.Item name="address_etc" label="상세 주소">
+              <Form.Item
+                name="address_etc"
+                label="상세 주소"
+                rules={[
+                  {
+                    required: true,
+                    message: "상세 주소는 필수 입력 사항입니다",
+                  },
+                ]}
+              >
                 <Input ref={userAddressEtcRef} />
               </Form.Item>
               <Form.Item
                 name="operation_time"
                 label="운영 시간"
-                initialValue="연중무휴, 24시간"
+                rules={[
+                  {
+                    required: true,
+                    message: "운영 시간은 필수 입력 사항입니다",
+                  },
+                ]}
               >
                 <Input />
               </Form.Item>
               <Form.Item name="seat_capacity" label="인원">
-                <InputNumber onChange={handleSeatCapacityChange} />
+                <InputNumber
+                  min={0}
+                  defaultValue={0}
+                  onChange={handleSeatCapacityChange}
+                />
               </Form.Item>
               <Form.Item name="max_seat_capacity" label="최대 인원">
                 <InputNumber disabled={true} />
@@ -386,7 +402,7 @@ const SpotDetail = (props) => {
                 <Checkbox.Group options={facilityInfoOptions} />
               </Form.Item>
               <Form.Item name="property" label="파이브스팟 전용">
-                <Radio.Group onChange={handlePropertyChange} value={property}>
+                <Radio.Group>
                   <Radio style={radioStyle} value={"fivespot"}>
                     전용
                   </Radio>
@@ -403,38 +419,40 @@ const SpotDetail = (props) => {
               visible={okModalVisible}
               okText="확인"
               onOk={() => setOkModalVisible(false)}
+              onCancel={() => setOkModalVisible(false)}
+              cancelButtonProps={{ style: { display: "none" } }}
             >
-              스팟 등록 완료
+              스팟 수정 완료
             </Modal>
           </Card>
           {/* 공간 정보 */}
-          {(spotId || generatedSpotId) && spotInfo && (
+          {spotId && spotInfo && (
             <>
               <Space
                 key="lounge"
                 type="lounge"
-                spotId={spotId ? spotId : generatedSpotId}
+                spotId={spotId}
                 desc={spotInfo.lounge_desc}
                 images={spotInfo.images}
               />
               <Space
                 key="meeting"
                 type="meeting"
-                spotId={spotId ? spotId : generatedSpotId}
+                spotId={spotId}
                 desc={spotInfo.meeting_desc}
                 images={spotInfo.images}
               />
               <Space
                 key="coworking"
                 type="coworking"
-                spotId={spotId ? spotId : generatedSpotId}
+                spotId={spotId}
                 desc={spotInfo.coworking_desc}
                 images={spotInfo.images}
               />
               {/* <Space
                 key="locker"
                 type="locker"
-                spotId={spotId ? spotId : generatedSpotId}
+                spotId={spotId}
                 desc={spotInfo.locker_desc}
                 images={spotInfo.images}
               /> */}

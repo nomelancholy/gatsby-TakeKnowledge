@@ -96,7 +96,7 @@ const Space = (props) => {
     const formData = new FormData();
 
     formData.append("spot_id", spotId);
-    if (values.desc) {
+    if (values.desc !== undefined) {
       formData.append(`${type}_desc`, values.desc);
     }
 
@@ -190,11 +190,22 @@ const Space = (props) => {
             <Input.TextArea rows={3}></Input.TextArea>
           </Form.Item>
           <Form.Item name="list" label={`${title} 리스트`}>
-            {spaceList &&
+            {spaceList && spaceList.length !== 0 ? (
               spaceList.map((spaceObj) => {
                 return <Tag key={spaceObj.space_id}>{spaceObj.space.name}</Tag>;
-              })}
+              })
+            ) : (
+              <>-</>
+            )}
           </Form.Item>
+          <Button
+            type="primary"
+            onClick={() => {
+              Router.push(`/spot/${spotId}/${type}`);
+            }}
+          >
+            {`${title} 관리`}
+          </Button>
           <Button type="primary" htmlType="submit">
             저장
           </Button>
@@ -202,18 +213,11 @@ const Space = (props) => {
             visible={okModalVisible}
             okText="확인"
             onOk={() => setOkModalVisible(false)}
+            cancelButtonProps={{ style: { display: "none" } }}
           >
             {title} 정보 등록 완료
           </Modal>
         </Form>
-        <Button
-          type="primary"
-          onClick={() => {
-            Router.push(`/spot/${spotId}/${type}`);
-          }}
-        >
-          {`${title} 관리`}
-        </Button>
       </Card>
     </>
   );
