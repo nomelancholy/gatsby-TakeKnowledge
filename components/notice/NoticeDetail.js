@@ -25,14 +25,21 @@ const NoticeDetail = (props) => {
 
   const [noticeInfo, setNoticeInfo] = useState(undefined);
 
-  // 에디터 관련 state
+  // 에디터 컨텐츠 state
   const [content, setContent] = useState("");
 
   const [okModalVisible, setOkModalVisible] = useState(false);
+
+  // 공지 상태
+  const [statusForm] = Form.useForm();
+  // 공지 제목 / 내용
+  const [contentsForm] = Form.useForm();
+
   const [form] = Form.useForm();
 
   useEffect(() => {
     if (noticeId) {
+      // 수정일 경우
       setRegisterMode(false);
 
       const config = {
@@ -48,7 +55,6 @@ const NoticeDetail = (props) => {
         )
         .then(function (response) {
           const noticeInfo = response.data.item;
-          console.log(`noticeInfo`, noticeInfo);
           setNoticeInfo(noticeInfo);
         })
         .catch(function (error) {
@@ -62,25 +68,32 @@ const NoticeDetail = (props) => {
   // noticeInfo 세팅되면 알맞는 엘리먼트에 binding
   useEffect(() => {
     if (noticeInfo) {
-      form.setFieldsValue({
+      // 공지 상태
+      statusForm.setFieldsValue({
         status: noticeInfo.status,
         type: noticeInfo.type,
         sticky: noticeInfo.sticky,
-        title: noticeInfo.title,
       });
 
+      // 공지 제목 / 내용
+      contentsForm.setFieldsValue({
+        title: noticeInfo.title,
+      });
       setContent(noticeInfo.content);
     }
   }, [noticeInfo]);
 
   // 저장 버튼 클릭
-  const handleNoticeRegisterSubmit = (values) => {
+  const handleNoticeRegisterSubmit = () => {
+    const { type, sticky, status } = statusForm.getFieldValue();
+    const { title } = contentsForm.getFieldValue();
+
     let data = {
-      type: values.type,
-      title: values.title,
+      type: type,
+      title: title,
       content: content,
-      sticky: values.sticky,
-      status: values.status,
+      sticky: sticky,
+      status: status,
     };
 
     let url = "";
@@ -124,57 +137,64 @@ const NoticeDetail = (props) => {
         bodyStyle={{ padding: "1rem" }}
         className="mb-4"
       >
-        <Form form={form} onFinish={handleNoticeRegisterSubmit}>
-          <Form.Item name="status" label="공지 노출 여부">
-            <Radio.Group>
-              <Radio style={radioStyle} value={"publish"}>
-                노출
-              </Radio>
-              <Radio style={radioStyle} value={"private"}>
-                미노출
-              </Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item name="type" label="공지 유형">
-            <Radio.Group>
-              <Radio style={radioStyle} value={"normal"}>
-                일반 공지
-              </Radio>
-              {/* <Radio style={radioStyle} value={"group"}>
-                그룹 공지
-              </Radio> */}
-              <Radio style={radioStyle} value={"spot"}>
-                지점 공지
-              </Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item name="sticky" label="상단 노출">
-            <Radio.Group>
-              <Radio style={radioStyle} value={1}>
-                노출
-              </Radio>
-              <Radio style={radioStyle} value={0}>
-                미노출
-              </Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item name="title" label="제목">
-            <Input />
-          </Form.Item>
-          <Form.Item name="content" label="내용">
-            <PostEditor onChange={handleEditorChange} setContents={content} />
-          </Form.Item>
+        <Card bodyStyle={{ padding: "1rem" }} className="mb-4">
+          <Form form={statusForm}>
+            <Form.Item name="status" label="공지 노출 여부">
+              <Radio.Group>
+                <Radio style={radioStyle} value={"publish"}>
+                  노출
+                </Radio>
+                <Radio style={radioStyle} value={"private"}>
+                  미노출
+                </Radio>
+              </Radio.Group>
+            </Form.Item>
+            <Form.Item name="type" label="공지 유형">
+              <Radio.Group>
+                <Radio style={radioStyle} value={"normal"}>
+                  일반 공지
+                </Radio>
+                <Radio style={radioStyle} value={"group"}>
+                  그룹 공지
+                </Radio>
+                <Radio style={radioStyle} value={"spot"}>
+                  지점 공지
+                </Radio>
+              </Radio.Group>
+            </Form.Item>
+            <Form.Item name="sticky" label="상단 노출">
+              <Radio.Group>
+                <Radio style={radioStyle} value={1}>
+                  노출
+                </Radio>
+                <Radio style={radioStyle} value={0}>
+                  미노출
+                </Radio>
+              </Radio.Group>
+            </Form.Item>
+          </Form>
+        </Card>
+        <Card bodyStyle={{ padding: "1rem" }} className="mb-4">
+          <Form form={contentsForm}>
+            <Form.Item name="title" label="제목">
+              <Input />
+            </Form.Item>
+            <Form.Item name="content" label="내용">
+              <PostEditor onChange={handleEditorChange} setContents={content} />
+            </Form.Item>
+          </Form>
+        </Card>
 
-          <Button type="primary" htmlType="submit">
-            저장
-          </Button>
-        </Form>
+        <Button type="primary" onClick={handleNoticeRegisterSubmit}>
+          저장
+        </Button>
         <Modal
           visible={okModalVisible}
           okText="확인"
           onOk={() => {
             router.push("/notice");
           }}
+          cancelButtonProps={{ style: { display: "none" } }}
         >
           {registerMode ? "공지 등록 완료" : "공지 수정 완료"}
         </Modal>

@@ -133,12 +133,9 @@ const Notice = (props) => {
 
   return (
     <>
-      <h3>알림(공지) 관리</h3>
+      <h3>공지 관리</h3>
 
       <Row type="flex" align="middle" className="py-3">
-        {/* <Button type="primary">
-          <SearchOutlined></SearchOutlined>검색
-        </Button> */}
         <Button
           type="primary"
           onClick={() => {
