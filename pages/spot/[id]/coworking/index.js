@@ -8,6 +8,13 @@ import initialize from "@utils/initialize";
 
 const Cowork = (props) => {
   const { user, isLoggedIn, token } = props.auth;
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+  }, [isLoggedIn]);
+
   const router = useRouter();
   const { id } = router.query;
   const [type, setType] = useState("");

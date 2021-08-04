@@ -19,6 +19,12 @@ const QnaDetail = (props) => {
   const { id } = router.query;
   const { user, isLoggedIn, token } = props.auth;
 
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+  }, [isLoggedIn]);
+
   // detail로 들어온 경우 문의하기 정보 저장 state
   const [qnaDetail, setQnaDetail] = useState(undefined);
 

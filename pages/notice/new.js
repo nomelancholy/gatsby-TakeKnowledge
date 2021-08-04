@@ -12,7 +12,7 @@ const NoticeWrite = (props) => {
     if (!isLoggedIn) {
       Router.push("/");
     }
-  }, []);
+  }, [isLoggedIn]);
 
   return <NoticeDetail noticeId={null} token={token} />;
 };

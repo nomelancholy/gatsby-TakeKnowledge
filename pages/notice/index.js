@@ -20,6 +20,12 @@ const Notice = (props) => {
 
   const { user, isLoggedIn, token } = props.auth;
 
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+  }, [isLoggedIn]);
+
   const [noticeList, setNoticeList] = useState([]);
 
   const [pagination, setPagination] = useState({});

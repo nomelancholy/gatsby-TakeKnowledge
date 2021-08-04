@@ -8,6 +8,13 @@ import initialize from "@utils/initialize";
 const SpotWithId = (props) => {
   const router = useRouter();
   const { id } = router.query;
+  const { user, isLoggedIn, token } = props.auth;
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+  }, [isLoggedIn]);
 
   return (
     <>

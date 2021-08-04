@@ -14,7 +14,7 @@ const NoticeWithId = (props) => {
     if (!isLoggedIn) {
       Router.push("/");
     }
-  }, []);
+  }, [isLoggedIn]);
 
   return <NoticeDetail noticeId={id} token={token} />;
 };

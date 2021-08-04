@@ -110,6 +110,12 @@ const Qna = (props) => {
 
   const { user, isLoggedIn, token } = props.auth;
 
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+  }, [isLoggedIn]);
+
   const [qnaList, setQnaList] = useState([]);
 
   const [loading, setLoading] = useState(false);

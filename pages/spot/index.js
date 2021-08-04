@@ -14,6 +14,12 @@ import { spotListcolumns } from "@utils/columns/spot";
 const Spot = (props) => {
   const { user, isLoggedIn, token } = props.auth;
 
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+  }, [isLoggedIn]);
+
   // 조회해온 spot list
   const [spotList, setSpotList] = useState([]);
 
