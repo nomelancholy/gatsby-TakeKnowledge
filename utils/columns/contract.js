@@ -10,7 +10,7 @@ export const contractListColumns = [
     title: "계약자명",
     dataIndex: "user",
     render: (text, record) => {
-      console.log(`record`, record);
+      // console.log(`record`, record);
       return (
         <a href={`/contract/${record.contract_id}`}>
           {`${text.user_name}(${text.uid})`}
@@ -56,7 +56,14 @@ export const contractListColumns = [
   },
   {
     title: "선호 지점",
-    dataIndex: "-",
+    dataIndex: "user",
+    render: (text, record) => {
+      let renderText = "-";
+      if (text.fav_spot) {
+      }
+
+      return renderText;
+    },
   },
   {
     title: "시작일",
@@ -121,9 +128,12 @@ export const userContractListColumns = [
   },
   {
     title: "결제 방식",
-    dataIndex: "name",
+    dataIndex: "rateplan",
     render: (text, record) => {
-      // return <a href={`/payment/${record.rateplan_id}`}>{text}</a>;
+      const pay_method = text.product.pay_method;
+      const renderText =
+        pay_method === "credit_card" ? "카드 결제" : "계좌 이체";
+      return renderText;
     },
   },
   {
