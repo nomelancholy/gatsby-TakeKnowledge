@@ -262,10 +262,11 @@ const UserDetail = (props) => {
       // 선호하는 스팟 변경
       axios
         .post(
-          `${process.env.BACKEND_API}/user/card/favorite`,
+          `${process.env.BACKEND_API}/user/fav_spot/edit`,
           {
-            uid: id,
-            customer_uid: selectedCard,
+            uid: Number(id),
+            spot_id: selectedSpot,
+            favorite: 1,
           },
           {
             headers: {
@@ -409,23 +410,23 @@ const UserDetail = (props) => {
         // 상세 주소
         address_etc: userDetail.user_profile[0].address_etc,
       });
+
+      // 선호 지점 옵션으로 사용할 활성화 된 스팟 조회
+      getActiveSpotList({ page: 1, size: 100, status: "active" });
+
+      // 2차
+      // // 그룹 정보
+      // if (userDetail.user_role !== "group") {
+      //   groupForm.setFieldsValue({
+      //     group: "개인",
+      //   });
+      // } else {
+      //   // 그룹 정보 세팅
+      // }
+
+      // 3차
+      // 회원 메모
     }
-
-    // 선호 지점 옵션으로 사용할 활성화 된 스팟 조회
-    getActiveSpotList({ page: 1, size: 100, status: "active" });
-
-    // 2차
-    // // 그룹 정보
-    // if (userDetail.user_role !== "group") {
-    //   groupForm.setFieldsValue({
-    //     group: "개인",
-    //   });
-    // } else {
-    //   // 그룹 정보 세팅
-    // }
-
-    // 3차
-    // 회원 메모
   }, [userDetail]);
 
   // activeSpotList 불러오면
