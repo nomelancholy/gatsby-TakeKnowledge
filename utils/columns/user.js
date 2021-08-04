@@ -6,7 +6,7 @@ export const userListColumns = [
     dataIndex: "uid",
   },
   {
-    title: "계약자명",
+    title: "회원명",
     dataIndex: "user_name",
     render: (text, record) => {
       return <a href={`/user/${record.uid}`}>{text}</a>;
@@ -14,53 +14,66 @@ export const userListColumns = [
   },
   {
     title: "회원 구분",
-    dataIndex: "user_role",
+    dataIndex: "has_contract",
+    render: (text, record) => {
+      return text ? "멤버" : "회원";
+    },
+  },
+  {
+    title: "회원 역할",
+    dataIndex: "user_role_ext",
     render: (text, record) => {
       let renderText = "";
-      if (text === "ffadmin") {
-        renderText = "관리자";
-      } else if (text === "member") {
-        renderText = "멤버";
-      } else if (text === "group") {
-        renderText = "그룹";
-      } else if (text === "user") {
-        renderText = "회원";
+
+      switch (text) {
+        case "ffadmin":
+          renderText = "파이브스팟 어드민";
+          break;
+        case "member":
+          renderText = "일반";
+          break;
+        case "group_member":
+          renderText = "그룹 멤버";
+          break;
+        case "group_master":
+          renderText = "그룹 관리자 멤버";
+          break;
+        case "group_admin":
+          renderText = "그룹 관리자";
+          break;
+        default:
+          break;
       }
 
       return renderText;
     },
   },
   {
-    title: "계약자 타입",
-    dataIndex: "contract",
+    title: "그룹/개인",
+    dataIndex: "user_role",
     render: (text, record) => {
-      let renderText = "";
+      let renderText = "개인";
 
-      if (text === null) {
-        renderText = "계약 없음";
-      } else if (text.status === "wait") {
-        renderText = "구매 대기";
-      } else if (text.status === "buy") {
-        renderText = "구매";
-      } else if (text.status === "pay") {
-        renderText = "계약중";
-      } else if (text.status === "refund") {
-        renderText = "환불";
-      } else if (text.status === "expired") {
-        renderText = "종료";
-      } else if (text.status === "terminate") {
-        renderText = "해지";
-      } else if (text.status === "canceled") {
-        renderText = "취소";
+      if (text === "group") {
+        renderText = `그룹`;
       }
 
       return renderText;
     },
   },
-  // {
-  //   title: "그룹명(그룹id)",
-  //   dataIndex: "-",
-  // },
+  {
+    title: "그룹명(그룹id)",
+    dataIndex: "user_role",
+    render: (text, record) => {
+      let renderText = "-";
+
+      if (text === "group") {
+        renderText = `${record.group_name}(${record.group_id})`;
+      }
+
+      return renderText;
+    },
+  },
   {
     title: "카드 등록 여부",
     dataIndex: "registed_card",
@@ -69,7 +82,7 @@ export const userListColumns = [
     },
   },
   {
-    title: "활성/휴면 여부",
+    title: "회원 상태",
     dataIndex: "user_status",
     render: (text, record) => {
       let renderText = "";
@@ -77,9 +90,6 @@ export const userListColumns = [
       switch (text) {
         case "active":
           renderText = "활성";
-          break;
-        case "inactive":
-          renderText = "비활성";
           break;
         case "sleep":
           renderText = "휴면";
@@ -95,7 +105,7 @@ export const userListColumns = [
     },
   },
   {
-    title: "생성 일시",
+    title: "가입 일자",
     dataIndex: "regdate",
   },
 ];

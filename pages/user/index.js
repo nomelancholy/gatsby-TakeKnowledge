@@ -19,20 +19,20 @@ const User = (props) => {
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(false);
 
+  // 검색 필터 Modal
   const [filterModalOpen, setFilterModalOpen] = useState(false);
-
+  // 검색 Form
   const [searchForm] = useForm();
 
   // 페이지 사이즈
   const PAGE_SIZE = 20;
 
   const [params, setParams] = useState({
-    uid: undefined,
     user_name: undefined,
-    user_role: undefined,
-    contract_status: undefined,
-    has_card: undefined,
+    has_contract: undefined,
+    user_role_ext: undefined,
     status: undefined,
+    registed_card: undefined,
     page: 1,
     size: PAGE_SIZE,
   });
@@ -76,14 +76,6 @@ const User = (props) => {
       });
   };
 
-  useEffect(() => {
-    if (!isLoggedIn) {
-      Router.push("/");
-    }
-
-    getUserList(params);
-  }, []);
-
   // 테이블 페이지 변경시
   const handleTableChange = (pagination) => {
     setPagination(pagination);
@@ -92,39 +84,51 @@ const User = (props) => {
     getUserList({ ...params, page: pagination.current });
   };
 
+  // 검색 버튼 클릭
   const handleSearch = () => {
-    const searchFormValues = searchForm.getFieldsValue();
+    const { user_name, has_contract, user_role_ext, status, registed_card } =
+      searchForm.getFieldsValue();
 
     const searchParams = {
-      uid: searchFormValues.uid,
-      user_name: searchFormValues.user_name,
-      user_role: searchFormValues.user_role,
-      contract_status: searchFormValues.contract_status,
-      has_card: searchFormValues.has_card,
-      status: searchFormValues.status,
+      user_name: user_name,
+      has_contract: has_contract,
+      user_role_ext: user_role_ext,
+      status: status,
+      registed_card: registed_card,
       page: 1,
     };
 
     getUserList({ ...params, ...searchParams });
   };
 
+  // 초기화 버튼 클릭
   const handleReset = () => {
     // form Item reset
     searchForm.resetFields();
 
     // params state reset
     const searchParams = {
-      uid: undefined,
       user_name: undefined,
-      user_role: undefined,
-      contract_status: undefined,
-      has_card: undefined,
+      has_contract: undefined,
+      user_role_ext: undefined,
       status: undefined,
+      registed_card: undefined,
       page: 1,
     };
 
     getUserList({ ...params, ...searchParams });
   };
+
+  // 로그인 체크
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    getUserList(params);
+  }, []);
 
   return (
     <>
@@ -170,29 +174,24 @@ const User = (props) => {
             }
           }}
         >
-          <Form.Item name="uid" label="멤버 ID">
+          <Form.Item name="user_name" label="회원명">
             <Input />
           </Form.Item>
-          <Form.Item name="user_name" label="계약자명">
-            <Input />
-          </Form.Item>
-          <Form.Item name="user_role" label="회원 구분">
+          <Form.Item name="has_contract" label="회원 구분">
             <Select style={{ width: 160 }}>
-              <Select.Option value="ffadmin">관리자</Select.Option>
-              <Select.Option value="member">멤버</Select.Option>
-              <Select.Option value="group">그룹</Select.Option>
+              <Select.Option value={true}>멤버</Select.Option>
+              <Select.Option value={false}>회원</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item name="contract_status" label="계약자 타입">
+          <Form.Item name="user_role_ext" label="회원 역할">
             <Select style={{ width: 160 }}>
-              <Select.Option value="">계약 없음</Select.Option>
-              <Select.Option value="wait">구매 대기</Select.Option>
-              <Select.Option value="buy">구매</Select.Option>
-              <Select.Option value="pay">계약중</Select.Option>
-              <Select.Option value="refund">환불</Select.Option>
-              <Select.Option value="expired">종료</Select.Option>
-              <Select.Option value="terminate">해지</Select.Option>
-              <Select.Option value="canceled">취소</Select.Option>
+              <Select.Option value="ffadmin">파이브스팟 어드민</Select.Option>
+              <Select.Option value="member">일반</Select.Option>
+              <Select.Option value="group_admin">그룹 관리자</Select.Option>
+              <Select.Option value="group_member">그룹 멤버</Select.Option>
+              <Select.Option value="group_master">
+                그룹 관리자멤버
+              </Select.Option>
             </Select>
           </Form.Item>
           {/* <Form.Item name="group_id" label="그룹 ID">
@@ -202,18 +201,17 @@ const User = (props) => {
             <Select style={{ width: 160 }}>
             </Select>
           </Form.Item> */}
-          <Form.Item name="has_card" label="카드 등록 여부">
+          <Form.Item name="status" label="회원 상태">
+            <Select style={{ width: 160 }}>
+              <Select.Option value="active">활성</Select.Option>
+              <Select.Option value="sleep">휴면</Select.Option>
+              <Select.Option value="leave">탈퇴</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="registed_card" label="카드 등록 여부">
             <Select style={{ width: 160 }}>
               <Select.Option value={true}>등록</Select.Option>
               <Select.Option value={false}>미등록</Select.Option>
-            </Select>
-          </Form.Item>
-          <Form.Item name="status" label="활성/휴면 여부">
-            <Select style={{ width: 160 }}>
-              <Select.Option value="active">활성</Select.Option>
-              <Select.Option value="inactive">비활성</Select.Option>
-              <Select.Option value="sleep">휴면</Select.Option>
-              <Select.Option value="leave">탈퇴</Select.Option>
             </Select>
           </Form.Item>
         </Form>
