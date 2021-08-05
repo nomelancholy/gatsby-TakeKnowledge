@@ -23,6 +23,12 @@ import { contractListColumns } from "@utils/columns/contract";
 const Contract = (props) => {
   const { user, isLoggedIn, token } = props.auth;
 
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+  }, [isLoggedIn]);
+
   const [contractList, setContractList] = useState([]);
 
   const [pagination, setPagination] = useState({});
@@ -53,7 +59,7 @@ const Contract = (props) => {
     uid: undefined,
     user_name: undefined,
     status: undefined,
-    product_name: undefined,
+    contract_type: undefined,
     start_date_start: undefined,
     start_date_end: undefined,
     end_date_start: undefined,
@@ -83,7 +89,6 @@ const Contract = (props) => {
       )
       .then((response) => {
         const data = response.data;
-        // console.log(`data`, data);
         setContractList(data.items);
 
         // 페이지 네이션 정보 세팅
@@ -129,7 +134,7 @@ const Contract = (props) => {
       uid: searchFormValues.uid,
       user_name: searchFormValues.user_name,
       status: searchFormValues.status,
-      product_name: searchFormValues.product_name,
+      contract_type: searchFormValues.contract_type,
       start_date_start: contractStartDateStart,
       start_date_end: contractStartDateEnd,
       end_date_start: contractEndDateStart,
@@ -163,7 +168,7 @@ const Contract = (props) => {
       uid: undefined,
       user_name: undefined,
       status: undefined,
-      product_name: undefined,
+      contract_type: undefined,
       start_date_start: undefined,
       start_date_end: undefined,
       end_date_start: undefined,
@@ -215,6 +220,11 @@ const Contract = (props) => {
           layout="vertical"
           name="form_in_modal"
           initialValues={{ modifier: "public" }}
+          onKeyUp={(e) => {
+            if (e.key === "Enter") {
+              handleSearch();
+            }
+          }}
         >
           <Form.Item name="contract_id" label="계약 ID">
             <Input />
@@ -233,29 +243,21 @@ const Contract = (props) => {
           </Form.Item> */}
           <Form.Item name="status" label="계약 상태">
             <Select style={{ width: 160 }}>
-              <Select.Option value="wait">계약 신청</Select.Option>
+              <Select.Option value="buy">계약 신청</Select.Option>
               <Select.Option value="canceled">계약 취소</Select.Option>
               <Select.Option value="pay">계약 완료(이용중)</Select.Option>
               <Select.Option value="expired">계약 해지(만료)</Select.Option>
               <Select.Option value="terminate">계약 해지(중도)</Select.Option>
+              <Select.Option value="withdraw">
+                계약 해지(청약 철회)
+              </Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item name="product_name" label="멤버십 상품">
+          <Form.Item name="contract_type" label="상품 구분">
             <Select style={{ width: 160 }}>
-              <Select.Option value="all_spot">ALL SPOT</Select.Option>
-              <Select.Option value="one_spot">ONE_SPOT</Select.Option>
-            </Select>
-          </Form.Item>
-          <Form.Item name="expiration_scheduled" label="만료 예정">
-            <Select style={{ width: 160 }}>
-              <Select.Option value="true">해당</Select.Option>
-              <Select.Option value="false">미해당</Select.Option>
-            </Select>
-          </Form.Item>
-          <Form.Item name="terminatation_scheduled" label="해지 예정">
-            <Select style={{ width: 160 }}>
-              <Select.Option value="true">해당</Select.Option>
-              <Select.Option value="false">미해당</Select.Option>
+              <Select.Option value="membership">멤버십</Select.Option>
+              <Select.Option value="voucher">이용권</Select.Option>
+              <Select.Option value="service">부가서비스</Select.Option>
             </Select>
           </Form.Item>
 
