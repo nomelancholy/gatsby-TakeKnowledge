@@ -18,11 +18,8 @@ import { useRouter } from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import axios from "axios";
-import { userOrderListColumns } from "@utils/columns/order";
-import {
-  userContractListColumns,
-  contractListColumns,
-} from "@utils/columns/contract";
+import { orderListColumns } from "@utils/columns/order";
+import { contractListColumns } from "@utils/columns/contract";
 
 const radioStyle = {
   display: "inline",
@@ -694,10 +691,9 @@ const UserDetail = (props) => {
           />
         </Card>
         <Card title="청구 내역">
-          {/* TO-DO 컬럼 변경 */}
           <Table
             size="middle"
-            columns={userOrderListColumns}
+            columns={orderListColumns}
             rowKey={(record) => record.order_id}
             dataSource={userOrderList}
             pagination={userOrderPagination}
