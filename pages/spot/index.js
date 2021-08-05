@@ -14,12 +14,6 @@ import { spotListcolumns } from "@utils/columns/spot";
 const Spot = (props) => {
   const { user, isLoggedIn, token } = props.auth;
 
-  useEffect(() => {
-    if (!isLoggedIn) {
-      Router.push("/");
-    }
-  }, [isLoggedIn]);
-
   // 조회해온 spot list
   const [spotList, setSpotList] = useState([]);
 
@@ -82,63 +76,9 @@ const Spot = (props) => {
       });
   };
 
-  useEffect(() => {
-    if (!isLoggedIn) {
-      Router.push("/");
-    }
-
-    getSpotList(params);
-  }, []);
-
-  // 테이블 페이지 변경시
-  const handleTableChange = (pagination) => {
-    setPagination(pagination);
-
-    // 호출
-    getSpotList({ ...params, page: pagination.current });
-  };
-
-  const handleSearch = () => {
-    const searchFormValues = searchForm.getFieldsValue();
-
-    const searchParams = {
-      spot_id: searchFormValues.spot_id,
-      name: searchFormValues.name,
-      status: searchFormValues.status,
-      page: 1,
-    };
-
-    getSpotList({ ...params, ...searchParams });
-  };
-
-  const handleReset = () => {
-    // form Item reset
-    searchForm.resetFields();
-
-    // params state reset
-    const searchParams = {
-      spot_id: undefined,
-      name: undefined,
-      status: undefined,
-      page: 1,
-    };
-
-    getSpotList({ ...params, ...searchParams });
-  };
-
+  // 등록 버튼 클릭시
   const handleAddSpot = () => {
     const formData = new FormData();
-
-    const excerpt = {
-      lounge: false,
-      meeting: false,
-      coworking: false,
-      qa: false,
-      locker: false,
-      fb: false,
-      unmanned: false,
-      phone: false,
-    };
 
     formData.append("name", "신규");
     formData.append("property", "fivespot");
@@ -165,6 +105,55 @@ const Spot = (props) => {
         console.log(error);
       });
   };
+
+  // 테이블 페이지 변경시
+  const handleTableChange = (pagination) => {
+    setPagination(pagination);
+
+    // 호출
+    getSpotList({ ...params, page: pagination.current });
+  };
+
+  // 검색
+
+  const handleSearch = () => {
+    const searchFormValues = searchForm.getFieldsValue();
+
+    const searchParams = {
+      spot_id: searchFormValues.spot_id,
+      name: searchFormValues.name,
+      status: searchFormValues.status,
+      page: 1,
+    };
+
+    getSpotList({ ...params, ...searchParams });
+  };
+
+  // 검색 초기화
+  const handleReset = () => {
+    // form Item reset
+    searchForm.resetFields();
+
+    // params state reset
+    const searchParams = {
+      spot_id: undefined,
+      name: undefined,
+      status: undefined,
+      page: 1,
+    };
+
+    getSpotList({ ...params, ...searchParams });
+  };
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    getSpotList(params);
+  }, []);
 
   return (
     <>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { useRouter } from "next/router";
 import SpotDetail from "../../../components/spot/SpotDetail";
