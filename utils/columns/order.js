@@ -543,7 +543,7 @@ export const contractOrderColumns = [
     },
   },
   {
-    title: "청구 항목",
+    title: "상품명",
     dataIndex: "product",
     render: (text, record) => {
       return text.name;

@@ -63,6 +63,9 @@ export const contractListColumns = [
   {
     title: "선호 지점",
     dataIndex: "favorite_spot",
+    render: (text, record) => {
+      return text ? text : "-";
+    },
   },
   {
     title: "시작일",

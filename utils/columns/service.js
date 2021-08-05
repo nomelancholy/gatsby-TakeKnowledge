@@ -9,7 +9,7 @@ export const serviceListColumns = [
     },
   },
   {
-    title: "계약자명",
+    title: "사용자",
     dataIndex: "user",
     render: (text, record) => {
       return (
@@ -19,47 +19,54 @@ export const serviceListColumns = [
       );
     },
   },
+  // 2차
+  // {
+  //   title: "신청자",
+  //   dataIndex: "user",
+  //   render: (text, record) => {
+  //     return (
+  //       <a href={`/service/${record.schedule.schedule_id}`}>
+  //         {`${text.user_name}(${text.uid})`}
+  //       </a>
+  //     );
+  //   },
+  // },
   {
-    title: "계약 상태",
+    title: "예약 상태",
     dataIndex: "contract",
     render: (text, record) => {
       let renderText = "";
 
-      const status = text.status;
-
-      if (status === "wait") {
-        renderText = "계좌이체 대기";
-      } else if (status === "buy") {
-        renderText = "구매";
-      } else if (status === "pay") {
-        renderText = "이용중";
-      } else if (status === "refund") {
-        renderText = "환불";
-      } else if (status === "expired") {
-        renderText = "종료";
-      } else if (status === "terminate") {
-        renderText = "해지";
-      } else if (status === "canceled") {
-        renderText = "취소";
+      switch (text.status) {
+        case "buy":
+          renderText = "예약";
+          break;
+        case "canceled":
+          renderText = "예약 취소";
+          break;
+        case "pay":
+          renderText = "계약 완료(이용중)";
+          break;
+        case "expired":
+          renderText = "계약 해지 (만료)";
+          break;
+        case "terminate":
+          renderText = "계약 해지 (중도)";
+          break;
+        default:
+          break;
       }
 
       return renderText;
     },
   },
   {
-    title: "부가서비스",
+    title: "상품 유형",
     dataIndex: "space",
     render: (text, record) => {
       let renderText = "";
 
-      // console.log(`record`, record);
-
-      // console.log(`text.product`, text.product.type);
-      // console.log(`type`, type);
-
       const type = text.type;
-
-      // console.log(`type`, type);
 
       switch (type) {
         case "lounge":
@@ -82,30 +89,14 @@ export const serviceListColumns = [
     },
   },
   {
-    title: "사용 시간",
-    dataIndex: "time_diff",
-    // render: (text, record) => {
-    //   let renderText = "";
-
-    //   if (text.product.time_unit === "day") {
-    //     const endDate = new Date(record.end_date);
-    //     const startDate = new Date(record.start_date);
-
-    //     const diffDate =
-    //       (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24) +
-    //       1;
-
-    //     renderText = `${diffDate} 일`;
-    //   } else {
-    //     const diffTimes = text.product.end_time - text.product.start_time;
-    //     renderText = `${diffTimes} 시간`;
-    //   }
-
-    //   return renderText;
-    // },
+    title: "상품명",
+    dataIndex: "space",
+    render: (text, record) => {
+      return text.name;
+    },
   },
   {
-    title: "사용 지점",
+    title: "지점명",
     dataIndex: "spot",
     render: (text, record) => {
       return text.name;
@@ -121,7 +112,7 @@ export const serviceListColumns = [
     },
   },
   {
-    title: "결제일",
+    title: "결제 상태",
     dataIndex: "payment",
     render: (text, record) => {
       const payDate = text.regdate.split(" ")[0];
@@ -129,31 +120,31 @@ export const serviceListColumns = [
     },
   },
   {
-    title: "사용 시작일",
+    title: "생성 시간",
+    dataIndex: "payment",
+    render: (text, record) => {
+      return text.regdate;
+    },
+  },
+  {
+    title: "시작 시간",
     dataIndex: "contract",
     render: (text, record) => {
       return text.start_date;
     },
   },
   {
-    title: "사용 종료일",
+    title: "종료 시간",
     dataIndex: "contract",
     render: (text, record) => {
       return text.end_date;
     },
   },
   {
-    title: "취소일시",
+    title: "취소 시간",
     dataIndex: "contract",
     render: (text, record) => {
       return text.cancel_date;
-    },
-  },
-  {
-    title: "생성 일시",
-    dataIndex: "contract",
-    render: (text, record) => {
-      return text.regdate;
     },
   },
 ];
