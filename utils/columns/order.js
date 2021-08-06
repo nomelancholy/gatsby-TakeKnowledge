@@ -49,6 +49,16 @@ export const orderListColumns = [
           break;
       }
 
+      if (record.contract.end_date) {
+        renderText += `
+        (${record.contract.start_date}~${record.contract.end_date})
+        `;
+      } else {
+        renderText += `
+         (${record.contract.start_date}~)
+         `;
+      }
+
       return renderText;
     },
   },
