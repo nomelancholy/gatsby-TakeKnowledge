@@ -115,34 +115,52 @@ export const serviceListColumns = [
     title: "결제 상태",
     dataIndex: "payment",
     render: (text, record) => {
-      const payDate = text.regdate.split(" ")[0];
-      return payDate;
+      let renderText = "";
+
+      switch (text.status) {
+        case "wait":
+          renderText = "예정";
+          break;
+        case "buy":
+          renderText = "완료";
+          break;
+        case "fail":
+          renderText = "실패";
+          break;
+        case "refund":
+          renderText = "환불";
+          break;
+        default:
+          break;
+      }
+
+      return renderText;
     },
   },
   {
     title: "생성 시간",
-    dataIndex: "payment",
+    dataIndex: "schedule",
     render: (text, record) => {
       return text.regdate;
     },
   },
   {
     title: "시작 시간",
-    dataIndex: "contract",
+    dataIndex: "schedule",
     render: (text, record) => {
-      return text.start_date;
+      return text.start_time.split(" ")[0];
     },
   },
   {
     title: "종료 시간",
-    dataIndex: "contract",
+    dataIndex: "schedule",
     render: (text, record) => {
-      return text.end_date;
+      return text.end_time.split(" ")[0];
     },
   },
   {
     title: "취소 시간",
-    dataIndex: "contract",
+    dataIndex: "schedule",
     render: (text, record) => {
       return text.cancel_date;
     },

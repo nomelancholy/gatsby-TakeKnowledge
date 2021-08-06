@@ -10,11 +10,11 @@ export const qnaListColumns = [
     title: "문의 유형",
     dataIndex: "classification",
   },
-  // 기획 변경으로 주석 처리 (21.08.03)
-  // {
-  //   title: "카테고리",
-  //   dataIndex: "category",
-  // },
+
+  {
+    title: "문의 유형 2",
+    dataIndex: "category",
+  },
   {
     title: "제목",
     dataIndex: "title",

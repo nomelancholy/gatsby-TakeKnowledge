@@ -57,6 +57,8 @@ const Product = (props) => {
         const data = response.data;
         setProductList(data.items);
 
+        console.log(`data`, data);
+
         // 페이지 네이션 정보 세팅
         const pageInfo = {
           current: data.page,

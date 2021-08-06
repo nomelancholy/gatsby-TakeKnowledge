@@ -1,9 +1,14 @@
 // productListColumns 요일 render 함수
 const renderWorkingDays = (value, row, index) => {
+  // console.log(`value`, value);
+  // console.log(`row`, row);
+  // console.log(`index`, index);
   let workingDays = [];
+  let dayCheckFlag = false;
 
   Object.entries(value).filter((obj) => {
     if (obj[1]) {
+      dayCheckFlag = true;
       workingDays.push(obj[0]);
     }
   });
@@ -60,6 +65,7 @@ export const productListColumns = [
       return renderText;
     },
   },
+
   {
     title: "상품명",
     dataIndex: "name",
@@ -67,63 +73,113 @@ export const productListColumns = [
       return <a href={`/product/${record.product_id}`}>{text}</a>;
     },
   },
+
   {
-    title: "멤버십 유형",
+    title: "상품 카테고리",
+    dataIndex: "category",
+  },
+  {
+    title: "정산 유형",
     dataIndex: "service_type",
     render: (text, record) => {
       let renderText = "";
-      if (text === "accumulate") {
-        renderText = "기본형";
-      } else if (text === "deduction") {
-        renderText = "차감형";
+
+      switch (text) {
+        case "accumulate":
+          renderText = "기본형";
+          break;
+        case "deduction":
+          renderText = "차감형";
+          break;
+        default:
+          break;
       }
 
       return renderText;
     },
   },
   {
-    title: "결제 유형",
-    dataIndex: "pay_demand",
+    title: "하위 스팟 권한 범위",
+    dataIndex: "plan_spot",
     render: (text, record) => {
       let renderText = "";
-      if (text === "pre") {
-        renderText = "선불";
-      } else if (text === "deffered") {
-        renderText = "후불";
+
+      switch (text) {
+        case "many":
+          renderText = "전체";
+          break;
+        case "single":
+          renderText = "택 1";
+          break;
+        default:
+          break;
       }
 
       return renderText;
     },
   },
   {
-    title: "요일",
-    dataIndex: "working_days",
-    render: renderWorkingDays,
-  },
-  {
-    title: "시작시간",
-    dataIndex: "start_time",
-  },
-  {
-    title: "종료시간",
-    dataIndex: "end_time",
-  },
-  {
-    title: "사용 가능 공간ID",
-    dataIndex: "spaces",
+    title: "포함된 스팟 수",
+    dataIndex: "-",
     render: (text, record) => {
-      return text.join(", ");
+      let renderText = "";
+
+      // switch (text) {
+      //   case "many":
+      //     renderText = "전체";
+      //     break;
+      //   case "single":
+      //     renderText = "택 1";
+      //     break;
+      //   default:
+      //     break;
+      // }
+
+      return renderText;
     },
   },
   {
-    title: "활성/비활성",
-    dataIndex: "status",
+    title: "차감 단위",
+    dataIndex: "time_unit",
     render: (text, record) => {
       let renderText = "";
-      if (text === "active") {
-        renderText = "활성";
-      } else if (text === "inactive") {
-        renderText = "비활성";
+
+      switch (text) {
+        case "day":
+          renderText = "일";
+          break;
+        case "hour":
+          renderText = "시간";
+          break;
+        default:
+          break;
+      }
+
+      return renderText;
+    },
+  },
+  {
+    title: "권한 제공 기간",
+    dataIndex: "period_amount",
+  },
+  {
+    title: "권한 제공 기간 단위",
+    dataIndex: "period_unit",
+    render: (text, record) => {
+      let renderText = "";
+
+      switch (text) {
+        case "hour":
+          renderText = "시간";
+          break;
+        case "day":
+          renderText = "일";
+          break;
+        case "month":
+          renderText = "월";
+          break;
+        default:
+          break;
       }
 
       return renderText;

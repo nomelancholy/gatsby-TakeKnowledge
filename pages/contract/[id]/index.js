@@ -558,54 +558,30 @@ const ContractDetail = (props) => {
       // 상품 페이지 링크 연결용 product_id 세팅
       setProductId(contractDetail.rateplan.product.product_id);
 
-      // 상품 정보
-      productForm.setFieldsValue({
-        // 상품명
-        name: contractDetail.rateplan.product.name,
-        product_type: productType,
-        service_type: serviceType,
-        paymethod: "",
-        working_days: workingDays,
-        start_time: contractDetail.rateplan.product.start_time,
-        end_time: contractDetail.rateplan.product.end_time,
-        spaces: contractDetail.rateplan.product.spaces.join(", "),
-      });
+      let productType = "";
 
-      // 링크연결용 rateplan_id 세팅
-      setRateplanId(contractDetail.rateplan.rateplan_id);
-      setRateplanName(contractDetail.rateplan.name);
-
-      //
-      rateplanForm.setFieldsValue({
-        // rateplan_name: contractDetail.rateplan.name,
-        product_price: contractDetail.rateplan.price.toLocaleString("ko"),
-        dc_price: contractDetail.rateplan.dc_price.toLocaleString("ko"),
-        total: (
-          contractDetail.rateplan.price - contractDetail.rateplan.dc_price
-        ).toLocaleString("ko"),
-      });
-
-      let planSpot = "";
-
-      switch (contractDetail.rateplan.product.plan_spot) {
-        case "all_spot":
-          planSpot = "ALL SPOT";
+      switch (contractDetail.rateplan.product.type) {
+        case "service":
+          productType = "부가서비스";
           break;
-        case "one_spot":
-          planSpot = "ONE SPOT";
+        case "membership":
+          productType = "멤버십";
+          break;
+        case "voucher":
+          productType = "이용권";
           break;
         default:
           break;
       }
 
-      let productType = "";
+      let planSpot = "";
 
-      switch (contractDetail.rateplan.product.type) {
-        case "membership":
-          productType = "멤버십";
+      switch (contractDetail.rateplan.product.plan_spot) {
+        case "many":
+          planSpot = "전체";
           break;
-        case "service":
-          productType = "부가 서비스";
+        case "single":
+          planSpot = "택 1";
           break;
         default:
           break;
@@ -623,6 +599,75 @@ const ContractDetail = (props) => {
         default:
           break;
       }
+
+      let timeUnit = "";
+
+      switch (contractDetail.rateplan.product.time_unit) {
+        case "day":
+          timeUnit = "일";
+          break;
+        case "hour":
+          timeUnit = "시간";
+          break;
+        default:
+          break;
+      }
+
+      let periodUnit = "";
+
+      switch (contractDetail.rateplan.product.period_unit) {
+        case "hour":
+          periodUnit = "시간";
+          break;
+        case "day":
+          periodUnit = "일";
+          break;
+        case "month":
+          periodUnit = "월";
+          break;
+        default:
+          break;
+      }
+
+      // console.log(`object`, object);
+
+      // 상품 정보
+      productForm.setFieldsValue({
+        // 상품명
+        name: contractDetail.rateplan.product.name,
+        // 상품 구분
+        product_type: productType,
+        // 상품 카테고리
+        category: contractDetail.rateplan.product.name,
+        // 하위 스팟 권한 범위
+        plan_spot: planSpot,
+        // 정산 유형
+        service_type: serviceType,
+        // 권한 제공 기간
+        period_amount: contractDetail.rateplan.product.period_amount,
+        // 차감 단위
+        time_unit: timeUnit,
+        // 권한 제공 기간 단위
+        period_unit: periodUnit,
+        // 자동 결제
+        pay_extend: contractDetail.rateplan.product.pay_extend
+          ? contractDetail.rateplan.product.pay_extend
+          : false,
+      });
+
+      // 링크연결용 rateplan_id 세팅
+      setRateplanId(contractDetail.rateplan.rateplan_id);
+      setRateplanName(contractDetail.rateplan.name);
+
+      //
+      rateplanForm.setFieldsValue({
+        // rateplan_name: contractDetail.rateplan.name,
+        product_price: contractDetail.rateplan.price.toLocaleString("ko"),
+        dc_price: contractDetail.rateplan.dc_price.toLocaleString("ko"),
+        total: (
+          contractDetail.rateplan.price - contractDetail.rateplan.dc_price
+        ).toLocaleString("ko"),
+      });
 
       let workingDays = [];
 
@@ -867,7 +912,7 @@ const ContractDetail = (props) => {
                 <Form.Item name="time_unit" label="차감 단위">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="period_unit " label="권한 제공 기간 단위">
+                <Form.Item name="period_unit" label="권한 제공 기간 단위">
                   <Input disabled />
                 </Form.Item>
                 <Form.Item name="pay_extend" label="자동 결제">

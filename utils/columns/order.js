@@ -52,12 +52,21 @@ export const orderListColumns = [
       return renderText;
     },
   },
-  // {
-  //   title: "그룹",
-  //   dataIndex: "group_id",
-  // },
   {
-    title: "구분",
+    title: "그룹 유형",
+    dataIndex: "user",
+    render: (text, record) => {
+      let renderText = "개인";
+
+      if (text.user_role === "group") {
+        renderText = `그룹`;
+      }
+
+      return renderText;
+    },
+  },
+  {
+    title: "상품 구분",
     dataIndex: "contract",
     render: (text, record) => {
       let renderText = "";
@@ -189,6 +198,9 @@ export const orderListColumns = [
       let renderText = "";
 
       switch (text.status) {
+        case "wait":
+          renderText = "예정";
+          break;
         case "buy":
           renderText = "완료";
           break;

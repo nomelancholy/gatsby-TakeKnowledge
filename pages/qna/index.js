@@ -311,7 +311,7 @@ const Qna = (props) => {
               ))}
             </Select>
           </Form.Item>
-          <Form.Item name="category" label="카테고리">
+          <Form.Item name="category" label="문의 유형 2">
             <Select style={{ width: 200 }}>
               {categoryOptions.map((option) => (
                 <Select.Option key={option} value={option}>

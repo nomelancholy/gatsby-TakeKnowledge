@@ -72,6 +72,7 @@ const Order = (props) => {
       )
       .then((response) => {
         const data = response.data;
+        console.log(`data`, data);
         setOrderList(data.items);
 
         // 페이지 네이션 정보 세팅
