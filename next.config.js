@@ -4,16 +4,6 @@ if (typeof require !== "undefined") {
 
 const webpack = require("webpack");
 const withPlugins = require("next-compose-plugins");
-const withTM = require("next-transpile-modules")([
-  "@fullcalendar/react",
-  "@fullcalendar/common",
-  "@fullcalendar/timeline",
-  "@fullcalendar/interaction",
-  "@fullcalendar/resource-timeline",
-  "@fullcalendar/daygrid",
-  "@fullcalendar/timegrid",
-  "@fullcalendar/scrollgrid",
-]);
 const withCss = require("@zeit/next-css");
 const withLess = require("@zeit/next-less");
 nextConfig = {
@@ -84,4 +74,4 @@ nextConfig = {
     return config;
   },
 };
-module.exports = withPlugins([withCss, withLess, withTM], nextConfig);
+module.exports = withPlugins([withCss, withLess], nextConfig);
