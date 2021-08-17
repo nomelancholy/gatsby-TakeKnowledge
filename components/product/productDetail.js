@@ -98,18 +98,17 @@ const ProductDetail = (props) => {
   useEffect(() => {
     if (productId) {
       setRegisterMode(false);
+
+      const config = {
+        headers: {
+          "Content-Type": "application/json;charset=UTF-8",
+          "Access-Control-Allow-Origin": "*",
+          Authorization: decodeURIComponent(token),
+        },
+      };
+
       axios
-        .post(
-          `${process.env.BACKEND_API}/product/get`,
-          { product_id: productId },
-          {
-            headers: {
-              "Content-Type": "application/json;charset=UTF-8",
-              "Access-Control-Allow-Origin": "*",
-              Authorization: decodeURIComponent(token),
-            },
-          }
-        )
+        .get(`${process.env.BACKEND_API}/product/get/${productId}`, config)
         .then((response) => {
           const productData = response.data;
           setProductInfo(productData);

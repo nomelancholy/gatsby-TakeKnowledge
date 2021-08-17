@@ -1,11 +1,19 @@
 if (typeof require !== "undefined") {
   require.extensions[".less"] = (file) => {};
 }
-
 const webpack = require("webpack");
 const withPlugins = require("next-compose-plugins");
+const withTM = require("next-transpile-modules")([
+  "@fullcalendar/common",
+  "@fullcalendar/core",
+  "@fullcalendar/interaction",
+  "@fullcalendar/react",
+  "@fullcalendar/resource-timegrid",
+  "@fullcalendar/resource-timeline",
+]);
 const withCss = require("@zeit/next-css");
 const withLess = require("@zeit/next-less");
+const withSass = require("@zeit/next-sass");
 nextConfig = {
   cssLoaderOptions: {
     importLoaders: 1,
@@ -74,4 +82,4 @@ nextConfig = {
     return config;
   },
 };
-module.exports = withPlugins([withCss, withLess], nextConfig);
+module.exports = withPlugins([withCss, withLess, withSass], nextConfig);

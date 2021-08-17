@@ -17,7 +17,12 @@ import axios from "axios";
 import { useForm } from "antd/lib/form/Form";
 import CheckableTag from "@components/elements/CheckableTag";
 import TimeTable from "@components/elements/TimeTable";
+import FullCalendar from "@fullcalendar/react";
+import interactionPlugin from "@fullcalendar/interaction";
+import timegridPlugin from "@fullcalendar/resource-timegrid";
 import moment, { locale } from "moment";
+import { format, addMinutes } from "date-fns";
+import { FullCalendarLicense } from "@utils/config";
 
 const ProductSpot = (props) => {
   const { spotInfo, productId, handleSpotDeleted, optionSpotList, token } =
@@ -393,7 +398,7 @@ const ProductSpot = (props) => {
                 };
               }}
             ></Table> */}
-              월{" "}
+              {/* 월{" "}
               <TimePicker.RangePicker
                 showTime={{ format: "HH" }}
                 format="HH"
@@ -531,6 +536,37 @@ const ProductSpot = (props) => {
 
                   handleTime(day, time);
                   setSunSettingTime(date);
+                }}
+              /> */}
+              <FullCalendar
+                schedulerLicenseKey={FullCalendarLicense}
+                plugins={[interactionPlugin, timegridPlugin]}
+                initialView="resourceTimeGridDay"
+                resource={[
+                  { id: "a", title: "Room A" },
+                  { id: "b", title: "Room B" },
+                  { id: "c", title: "Room C" },
+                  { id: "d", title: "Room D" },
+                ]}
+                eventDisplay="background"
+                height="auto"
+                allDaySlot={false}
+                slotMinTime="00:00:00"
+                slotMaxTime="24:00:00"
+                handleWindowResize={true}
+                selectable={true}
+                selectOverlap={false}
+                unselectAuto={false}
+                slotMinWidth={60}
+                slotLaneContent={(arg) => {
+                  const timeHour = format(arg.date, "H시");
+                  const timeMinutes = format(arg.date, "mm");
+                  return timeMinutes == "00" ? <span>{timeHour}</span> : <></>;
+                }}
+                headerToolbar={{
+                  left: "",
+                  center: "",
+                  right: "",
                 }}
               />
             </div>
