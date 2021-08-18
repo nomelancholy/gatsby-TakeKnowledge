@@ -17,12 +17,8 @@ import axios from "axios";
 import { useForm } from "antd/lib/form/Form";
 import CheckableTag from "@components/elements/CheckableTag";
 import TimeTable from "@components/elements/TimeTable";
-import FullCalendar from "@fullcalendar/react";
-import interactionPlugin from "@fullcalendar/interaction";
-import timegridPlugin from "@fullcalendar/resource-timegrid";
+
 import moment, { locale } from "moment";
-import { format, addMinutes } from "date-fns";
-import { FullCalendarLicense } from "@utils/config";
 
 const ProductSpot = (props) => {
   const { spotInfo, productId, handleSpotDeleted, optionSpotList, token } =
@@ -64,8 +60,9 @@ const ProductSpot = (props) => {
   const [isActive, setIsActive] = useState(true);
 
   useEffect(() => {
+    console.log(`spotInfo`, spotInfo);
     // 내려오는 데이터가 있고 +로 추가한 경우가 아닌지 확인
-    if (spotInfo.length !== 0 && spotInfo.spot) {
+    if (spotInfo.length !== 0 && spotInfo.sm_id) {
       // Option Spot list 중 inactive || trash 인 것들 세팅
       const unavailableSpotList = optionSpotList.filter(
         (spot) => spot.status !== "active"
@@ -73,7 +70,7 @@ const ProductSpot = (props) => {
 
       // spotInfo로 내려온 spot이  unavailableSpotList 에 있는지 확인
       const checkList = unavailableSpotList.filter(
-        (spot) => spot.spot_id === spotInfo.spot.spot_id
+        (spot) => spot.spot_id === spotInfo.sm_id
       );
 
       // isActive 상태값 조절
@@ -81,70 +78,68 @@ const ProductSpot = (props) => {
         setIsActive(false);
       } else {
         // active spot 일 경우 해당 spot의 모든 공간 조회
-        handleOptionSpotChange(spotInfo.spot.spot_id);
+        handleOptionSpotChange(spotInfo.sm_id);
       }
 
+      console.log(`spotInfo.sm_id`, spotInfo.sm_id);
+
       form.setFieldsValue({
-        spot: spotInfo.spot.spot_id,
+        spot: spotInfo.sm_id,
       });
 
-      const monTime = [
-        moment(spotInfo.timetable.mon_st, "HH"),
-        moment(spotInfo.timetable.mon_end, "HH"),
-      ];
+      // const monTime = [
+      //   moment(spotInfo.timetable.mon_st, "HH"),
+      //   moment(spotInfo.timetable.mon_end, "HH"),
+      // ];
 
-      setMonSettingTime(monTime);
+      // setMonSettingTime(monTime);
 
-      const tueTime = [
-        moment(spotInfo.timetable.tue_st, "HH"),
-        moment(spotInfo.timetable.tue_end, "HH"),
-      ];
+      // const tueTime = [
+      //   moment(spotInfo.timetable.tue_st, "HH"),
+      //   moment(spotInfo.timetable.tue_end, "HH"),
+      // ];
 
-      setTueSettingTime(tueTime);
+      // setTueSettingTime(tueTime);
 
-      const wedTime = [
-        moment(spotInfo.timetable.wed_st, "HH"),
-        moment(spotInfo.timetable.wed_end, "HH"),
-      ];
+      // const wedTime = [
+      //   moment(spotInfo.timetable.wed_st, "HH"),
+      //   moment(spotInfo.timetable.wed_end, "HH"),
+      // ];
 
-      setWedSettingTime(wedTime);
+      // setWedSettingTime(wedTime);
 
-      const thuTime = [
-        moment(spotInfo.timetable.thu_st, "HH"),
-        moment(spotInfo.timetable.thu_end, "HH"),
-      ];
+      // const thuTime = [
+      //   moment(spotInfo.timetable.thu_st, "HH"),
+      //   moment(spotInfo.timetable.thu_end, "HH"),
+      // ];
 
-      setThuSettingTime(thuTime);
+      // setThuSettingTime(thuTime);
 
-      const friTime = [
-        moment(spotInfo.timetable.fri_st, "HH"),
-        moment(spotInfo.timetable.fri_end, "HH"),
-      ];
+      // const friTime = [
+      //   moment(spotInfo.timetable.fri_st, "HH"),
+      //   moment(spotInfo.timetable.fri_end, "HH"),
+      // ];
 
-      setFriSettingTime(friTime);
+      // setFriSettingTime(friTime);
 
-      const satTime = [
-        moment(spotInfo.timetable.sat_st, "HH"),
-        moment(spotInfo.timetable.sat_end, "HH"),
-      ];
+      // const satTime = [
+      //   moment(spotInfo.timetable.sat_st, "HH"),
+      //   moment(spotInfo.timetable.sat_end, "HH"),
+      // ];
 
-      setSatSettingTime(satTime);
+      // setSatSettingTime(satTime);
 
-      const sunTime = [
-        moment(spotInfo.timetable.sun_st, "HH"),
-        moment(spotInfo.timetable.sun_end, "HH"),
-      ];
+      // const sunTime = [
+      //   moment(spotInfo.timetable.sun_st, "HH"),
+      //   moment(spotInfo.timetable.sun_end, "HH"),
+      // ];
 
-      setSunSettingTime(sunTime);
+      // setSunSettingTime(sunTime);
     } else {
       // 새로 등록하는 경우
       setIsNew(true);
     }
   }, []);
-
-  useEffect(() => {
-    console.log(`monSettingTime`, monSettingTime);
-  }, [monSettingTime]);
 
   // 수정 or 등록 버튼 클릭
   const handleSpotChangeSumbit = (values) => {
@@ -191,7 +186,7 @@ const ProductSpot = (props) => {
       headers: {
         Authorization: decodeURIComponent(token),
       },
-      data: { spot_id: spotInfo.spot.spot_id, product_id: productId },
+      data: { spot_id: spotInfo.sm_id, product_id: productId },
     };
 
     axios(config)
@@ -202,7 +197,7 @@ const ProductSpot = (props) => {
           // } else {
           //   handleSpotDeleted(false);
           // }
-          handleSpotDeleted(spotInfo.spot.spot_id);
+          handleSpotDeleted(spotInfo.sm_id);
         }
       })
       .catch(function (error) {
@@ -538,37 +533,7 @@ const ProductSpot = (props) => {
                   setSunSettingTime(date);
                 }}
               /> */}
-              <FullCalendar
-                schedulerLicenseKey={FullCalendarLicense}
-                plugins={[interactionPlugin, timegridPlugin]}
-                initialView="resourceTimeGridDay"
-                resource={[
-                  { id: "a", title: "Room A" },
-                  { id: "b", title: "Room B" },
-                  { id: "c", title: "Room C" },
-                  { id: "d", title: "Room D" },
-                ]}
-                eventDisplay="background"
-                height="auto"
-                allDaySlot={false}
-                slotMinTime="00:00:00"
-                slotMaxTime="24:00:00"
-                handleWindowResize={true}
-                selectable={true}
-                selectOverlap={false}
-                unselectAuto={false}
-                slotMinWidth={60}
-                slotLaneContent={(arg) => {
-                  const timeHour = format(arg.date, "H시");
-                  const timeMinutes = format(arg.date, "mm");
-                  return timeMinutes == "00" ? <span>{timeHour}</span> : <></>;
-                }}
-                headerToolbar={{
-                  left: "",
-                  center: "",
-                  right: "",
-                }}
-              />
+              <TimeTable />
             </div>
           </Form.Item>
           {isActive && (
