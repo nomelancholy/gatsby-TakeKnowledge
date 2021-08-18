@@ -108,9 +108,12 @@ const ProductDetail = (props) => {
       };
 
       axios
-        .get(`${process.env.BACKEND_API}/product/get/${productId}`, config)
+        .get(
+          `${process.env.BACKEND_API}/admin/product/get/${productId}`,
+          config
+        )
         .then((response) => {
-          const productData = response.data;
+          const productData = response.data.item;
           setProductInfo(productData);
         })
         .catch((error) => {
