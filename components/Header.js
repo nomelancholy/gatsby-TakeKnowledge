@@ -3,7 +3,6 @@ import { MenuOutlined } from "@ant-design/icons";
 import DashHeader, { Notification } from "./styles/Header";
 
 import Link from "next/link";
-import MockNotifications from "../demos/mock/notifications";
 import { useAppState } from "./shared/AppProvider";
 import { useState } from "react";
 
@@ -16,7 +15,6 @@ const MainHeader = (props) => {
   const { dispatch } = props;
   const [state] = useAppState();
 
-  const [notifications] = useState(MockNotifications);
   return (
     <DashHeader>
       <Header>

@@ -23,7 +23,7 @@ import {
   paymentColumns,
 } from "@utils/columns/order";
 
-const ContractDetail = (props) => {
+const OrderDetail = (props) => {
   const radioStyle = {
     display: "inline",
     height: "30px",
@@ -508,4 +508,4 @@ export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
   return { props: initialize(ctx) };
 });
 
-export default connect((state) => state)(ContractDetail);
+export default connect((state) => state)(OrderDetail);
