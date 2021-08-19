@@ -501,7 +501,7 @@ const ProductDetail = (props) => {
             >
               <Form.Item name="type" label="상품 구분">
                 <Select
-                  defaultValue="-"
+                  initialValues="-"
                   style={{ width: 120 }}
                   onChange={handleTypeChange}
                 >
@@ -512,7 +512,7 @@ const ProductDetail = (props) => {
               </Form.Item>
               {type !== "service" && (
                 <Form.Item name="plan_spot" label="상품 옵션">
-                  <Select defaultValue="-" style={{ width: 120 }}>
+                  <Select initialValues="-" style={{ width: 120 }}>
                     <Select.Option value="one_spot">단일 스팟</Select.Option>
                     <Select.Option value="all_spot">전 스팟</Select.Option>
                   </Select>
@@ -539,7 +539,7 @@ const ProductDetail = (props) => {
                 <Input />
               </Form.Item>
               <Form.Item name="pay_demand" label="결제 유형">
-                <Select defaultValue="-" style={{ width: 120 }}>
+                <Select initialValues="-" style={{ width: 120 }}>
                   <Select.Option value="pre">선불</Select.Option>
                   <Select.Option value="direct">바로결제</Select.Option>
                   <Select.Option value="deffered">후불</Select.Option>
@@ -547,7 +547,7 @@ const ProductDetail = (props) => {
               </Form.Item>
               {type !== "service" && (
                 <Form.Item name="pay_method" label="결제 방식">
-                  <Select defaultValue="-" style={{ width: 120 }}>
+                  <Select initialValues="-" style={{ width: 120 }}>
                     <Select.Option value="credit_card">카드결제</Select.Option>
                     <Select.Option value="bank_trasfer">계좌이체</Select.Option>
                   </Select>
@@ -555,7 +555,7 @@ const ProductDetail = (props) => {
               )}
 
               <Form.Item name="service_type" label="멤버십 유형">
-                <Select defaultValue="-" style={{ width: 120 }}>
+                <Select initialValues="-" style={{ width: 120 }}>
                   <Select.Option value="accumulate">기본형</Select.Option>
                   <Select.Option value="deduction">차감형</Select.Option>
                 </Select>
@@ -655,7 +655,7 @@ const ProductDetail = (props) => {
               </Form.Item>
               <Form.Item name="operation_time" label="운영 시간">
                 <Select
-                  defaultValue="-"
+                  initialValues="-"
                   value={startTime}
                   style={{ width: 120 }}
                   onChange={handleStartTimeChange}
@@ -667,7 +667,7 @@ const ProductDetail = (props) => {
                   ))}
                 </Select>
                 <Select
-                  defaultValue="-"
+                  initialValues="-"
                   value={endTime}
                   style={{ width: 120 }}
                   onChange={handleEndTimeChange}
@@ -680,7 +680,7 @@ const ProductDetail = (props) => {
                 </Select>
               </Form.Item>
               <Form.Item name="week_limit" label="주간 이용 한도">
-                <Select defaultValue="-" style={{ width: 120 }}>
+                <Select initialValues="-" style={{ width: 120 }}>
                   {DAYS.map((day) => (
                     <Select.Option key={day} value={day}>
                       {day}

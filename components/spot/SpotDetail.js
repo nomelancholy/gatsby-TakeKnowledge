@@ -359,7 +359,7 @@ const SpotDetail = (props) => {
               <Form.Item name="seat_capacity" label="인원">
                 <InputNumber
                   min={0}
-                  defaultValue={0}
+                  initialValues={0}
                   onChange={handleSeatCapacityChange}
                 />
               </Form.Item>
