@@ -251,20 +251,24 @@ const Rateplan = (props) => {
           </Form.Item>
 
           <Form.Item name="start_date" label="시작 일자">
-            <DatePicker
-              onChange={(date, dateString) => setStartDateStart(dateString)}
-            />
-            <DatePicker
-              onChange={(date, dateString) => setStartDateEnd(dateString)}
-            />
+            <>
+              <DatePicker
+                onChange={(date, dateString) => setStartDateStart(dateString)}
+              />
+              <DatePicker
+                onChange={(date, dateString) => setStartDateEnd(dateString)}
+              />
+            </>
           </Form.Item>
           <Form.Item name="end_date" label="종료 일자">
-            <DatePicker
-              onChange={(date, dateString) => setEndDateStart(dateString)}
-            />
-            <DatePicker
-              onChange={(date, dateString) => setEndDateEnd(dateString)}
-            />
+            <>
+              <DatePicker
+                onChange={(date, dateString) => setEndDateStart(dateString)}
+              />
+              <DatePicker
+                onChange={(date, dateString) => setEndDateEnd(dateString)}
+              />
+            </>
           </Form.Item>
         </Form>
       </Filter>

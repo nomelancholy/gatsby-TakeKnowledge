@@ -255,50 +255,60 @@ const Contract = (props) => {
           </Form.Item>
 
           <Form.Item name="start_date" label="계약 시작 일자">
-            <DatePicker
-              onChange={(date, dateString) =>
-                setContractStartDateStart(dateString)
-              }
-            />
-            <DatePicker
-              onChange={(date, dateString) =>
-                setContractStartDateEnd(dateString)
-              }
-            />
+            <>
+              <DatePicker
+                onChange={(date, dateString) =>
+                  setContractStartDateStart(dateString)
+                }
+              />
+              <DatePicker
+                onChange={(date, dateString) =>
+                  setContractStartDateEnd(dateString)
+                }
+              />
+            </>
           </Form.Item>
           <Form.Item name="end_date" label="계약 종료 일자">
-            <DatePicker
-              onChange={(date, dateString) =>
-                setContractEndDateStart(dateString)
-              }
-            />
-            <DatePicker
-              onChange={(date, dateString) => setContractEndDateEnd(dateString)}
-            />
+            <>
+              <DatePicker
+                onChange={(date, dateString) =>
+                  setContractEndDateStart(dateString)
+                }
+              />
+              <DatePicker
+                onChange={(date, dateString) =>
+                  setContractEndDateEnd(dateString)
+                }
+              />
+            </>
           </Form.Item>
           <Form.Item name="cancel_date" label="계약 취소 일자">
-            <DatePicker
-              onChange={(date, dateString) =>
-                setContractCancelDateStart(dateString)
-              }
-            />
-            <DatePicker
-              onChange={(date, dateString) =>
-                setContractCancelDateEnd(dateString)
-              }
-            />
+            <>
+              <DatePicker
+                onChange={(date, dateString) =>
+                  setContractCancelDateStart(dateString)
+                }
+              />
+              <DatePicker
+                onChange={(date, dateString) =>
+                  setContractCancelDateEnd(dateString)
+                }
+              />
+            </>
           </Form.Item>
           <Form.Item name="terminate_date" label="계약 해지 일자">
-            <DatePicker
-              onChange={(date, dateString) =>
-                setContractTerminateDateStart(dateString)
-              }
-            />
-            <DatePicker
-              onChange={(date, dateString) =>
-                setContractTerminateDateEnd(dateString)
-              }
-            />
+            <>
+              <DatePicker
+                onChange={(date, dateString) =>
+                  setContractTerminateDateStart(dateString)
+                }
+              />
+              <DatePicker
+                onChange={(date, dateString) =>
+                  setContractTerminateDateEnd(dateString)
+                }
+              />
+            </>
           </Form.Item>
         </Form>
       </Filter>

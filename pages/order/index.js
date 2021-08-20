@@ -233,12 +233,14 @@ const Order = (props) => {
           </Form.Item>
 
           <Form.Item name="next_paydate" label="정기 결제 일자">
-            <DatePicker
-              onChange={(date, dateString) => setOrderDateStart(dateString)}
-            />
-            <DatePicker
-              onChange={(date, dateString) => setOrderDateEnd(dateString)}
-            />
+            <>
+              <DatePicker
+                onChange={(date, dateString) => setOrderDateStart(dateString)}
+              />
+              <DatePicker
+                onChange={(date, dateString) => setOrderDateEnd(dateString)}
+              />
+            </>
           </Form.Item>
         </Form>
       </Filter>
