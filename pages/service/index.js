@@ -198,7 +198,7 @@ const Service = (props) => {
       <Table
         size="middle"
         columns={serviceListColumns}
-        rowKey={(record) => record.contract_id}
+        rowKey={(record) => record.schedule.schedule_id}
         dataSource={serviceList}
         pagination={pagination}
         loading={loading}
