@@ -314,12 +314,14 @@ const Qna = (props) => {
             </Select>
           </Form.Item>
           <Form.Item name="regdate" label="생성 일시">
-            <DatePicker
-              onChange={(date, dateString) => setRegdateStart(dateString)}
-            />
-            <DatePicker
-              onChange={(date, dateString) => setRegdateEnd(dateString)}
-            />
+            <>
+              <DatePicker
+                onChange={(date, dateString) => setRegdateStart(dateString)}
+              />
+              <DatePicker
+                onChange={(date, dateString) => setRegdateEnd(dateString)}
+              />
+            </>
           </Form.Item>
         </Form>
       </Filter>
