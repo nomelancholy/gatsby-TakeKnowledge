@@ -1,24 +1,11 @@
-import {
-  Button,
-  Form,
-  Input,
-  Modal,
-  Card,
-  Col,
-  Select,
-  Table,
-  DatePicker,
-  TimePicker,
-} from "antd";
+import { Button, Form, Input, Modal, Card, Col, Select, Table } from "antd";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 import { useForm } from "antd/lib/form/Form";
 import CheckableTag from "@components/elements/CheckableTag";
 import TimeTable from "@components/elements/TimeTable";
-
-import moment, { locale } from "moment";
 
 const ProductSpot = (props) => {
   const { spotInfo, productId, handleSpotDeleted, optionSpotList, token } =
@@ -38,26 +25,10 @@ const ProductSpot = (props) => {
 
   const [form] = useForm();
 
-  // 서버 전송용 사용 가능 시간 state
-  const [monTime, setMonTime] = useState("");
-  const [tueTime, setTueTime] = useState("");
-  const [wedTime, setWedTime] = useState("");
-  const [thuTime, setThuTime] = useState("");
-  const [friTime, setFriTime] = useState("");
-  const [satTime, setSatTime] = useState("");
-  const [sunTime, setSunTime] = useState("");
-
-  // TimePicker 값 세팅용 사용 가능 시간 state
-  const [monSettingTime, setMonSettingTime] = useState([]);
-  const [tueSettingTime, setTueSettingTime] = useState([]);
-  const [wedSettingTime, setWedSettingTime] = useState([]);
-  const [thuSettingTime, setThuSettingTime] = useState([]);
-  const [friSettingTime, setFriSettingTime] = useState([]);
-  const [satSettingTime, setSatSettingTime] = useState([]);
-  const [sunSettingTime, setSunSettingTime] = useState([]);
-
   // timeTable에 props로 내려줄 이벤트 state
   const [events, setEvents] = useState([]);
+  // timeTable 잡을 캘린더
+  const calendarRef = useRef(null);
 
   // 사용 가능 스팟 등록 / 수정 구분
   const [isActive, setIsActive] = useState(true);
@@ -88,71 +59,127 @@ const ProductSpot = (props) => {
         spot: spotInfo.spot.spot_id,
       });
 
-      // const monTime = [
-      //   moment(spotInfo.timetable.mon_st, "HH"),
-      //   moment(spotInfo.timetable.mon_end, "HH"),
-      // ];
+      // 날짜 timetable에 바인딩
 
-      // setMonSettingTime(monTime);
+      // 이벤트 저장할 array
+      const eventArray = [];
+      // 캘린더에 세팅된 날짜 조회
+      const calendarDateArray = getCalendarDate();
+      // time_table 검색을 위한 요일 순서대로
+      const dayArray = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+      // timetable 객체 검색을 위해 배열로 분해
+      const timeTableArray = Object.entries(spotInfo.time_table);
 
-      // const tueTime = [
-      //   moment(spotInfo.timetable.tue_st, "HH"),
-      //   moment(spotInfo.timetable.tue_end, "HH"),
-      // ];
+      dayArray.map((day, i) => {
+        // timeTableArray에서 day에 해당하는 st, end 값 추출
+        const timePair = timeTableArray.filter((arr) => {
+          // arr[0] = Object.key
+          return arr[0].startsWith(day);
+        });
 
-      // setTueSettingTime(tueTime);
+        // st, end 모두 0인 경우가 아니면
+        if (!(timePair[0][1] === 0 && timePair[1][1] === 0)) {
+          // 서버에서 보내는 객체의 순서를 바꾸지 않는 한 st가
+          // timePair[0] 이 st / timePair[1]이 end
 
-      // const wedTime = [
-      //   moment(spotInfo.timetable.wed_st, "HH"),
-      //   moment(spotInfo.timetable.wed_end, "HH"),
-      // ];
+          // 캘린더에서 그 요일에 해당하는 날짜 추출
+          const year = calendarDateArray[i].getFullYear();
+          const month = calendarDateArray[i].getMonth();
+          const date = calendarDateArray[i].getDate();
 
-      // setWedSettingTime(wedTime);
+          const startTime = new Date(year, month, date, timePair[0][1], 0, 0);
+          const endTime = new Date(year, month, date, timePair[1][1], 0, 0);
 
-      // const thuTime = [
-      //   moment(spotInfo.timetable.thu_st, "HH"),
-      //   moment(spotInfo.timetable.thu_end, "HH"),
-      // ];
+          let startHourStr = timePair[0][1].toString();
+          let endHourStr = timePair[1][1].toString();
 
-      // setThuSettingTime(thuTime);
+          // 한 자리일 경우 앞에 0추가
+          if (startHourStr.length === 1) {
+            startHourStr = `0${startHourStr}`;
+          }
 
-      // const friTime = [
-      //   moment(spotInfo.timetable.fri_st, "HH"),
-      //   moment(spotInfo.timetable.fri_end, "HH"),
-      // ];
+          if (endHourStr.length === 1) {
+            endHourStr = `0${endHourStr}`;
+          }
 
-      // setFriSettingTime(friTime);
+          // event객체 생성 및 추가
+          const eventObj = {
+            start: startTime,
+            end: endTime,
+            display: "block",
+            eventId: `${dayArray[i]}/${startHourStr}-${endHourStr}`,
+          };
 
-      // const satTime = [
-      //   moment(spotInfo.timetable.sat_st, "HH"),
-      //   moment(spotInfo.timetable.sat_end, "HH"),
-      // ];
+          eventArray.push(eventObj);
+        }
+      });
 
-      // setSatSettingTime(satTime);
-
-      // const sunTime = [
-      //   moment(spotInfo.timetable.sun_st, "HH"),
-      //   moment(spotInfo.timetable.sun_end, "HH"),
-      // ];
-
-      // setSunSettingTime(sunTime);
+      setEvents([...events, ...eventArray]);
     } else {
       // 새로 등록하는 경우
       setIsNew(true);
     }
   }, []);
 
+  // timeTable에 세팅되어 있는 날짜 불러오는 함수
+  const getCalendarDate = () => {
+    // 캘린더 시작일
+    let calendarStartDate =
+      calendarRef.current._calendarApi.currentDataManager.data.dateProfile
+        .activeRange.start;
+
+    // calendarStartDate에 그대로 세팅하니 메모리에서 데이터 값이 꼬여서 복사하는 방식으로 진행
+    const fullYear = calendarStartDate.getFullYear();
+    const month = calendarStartDate.getMonth();
+    const date = calendarStartDate.getDate();
+
+    let firstDate = new Date(fullYear, month, date);
+
+    // calendarDateArray에 일주일치 값 추가
+    const calendarDateArray = [];
+
+    calendarDateArray.push(firstDate);
+
+    for (let i = 1; i < 7; i++) {
+      const nextDate = new Date(fullYear, month, date + i);
+      calendarDateArray.push(nextDate);
+    }
+
+    return calendarDateArray;
+  };
+
   // 수정 or 등록 버튼 클릭
   const handleSpotChangeSumbit = (values) => {
-    const schedule = {
-      mon: monTime,
-      tue: tueTime,
-      wed: wedTime,
-      thu: thuTime,
-      fri: friTime,
-      sat: satTime,
-      sun: sunTime,
-    };
+    // 날짜 전송
+    // 넘어온 값이 없는 요일 찾기 위한 기준 배열
+    let offDayArray = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+
+    // 전송용 데이터 저장 객체
+    let schedule = {};
+
+    events.map((event) => {
+      // event가 존재하는 요일
+      const eventDay = event.eventId.split("/")[0];
+      const eventTime = event.eventId.split("/")[1];
+
+      // 값이 들어간 요일은 배열에서 제외
+      offDayArray = offDayArray.filter((day) => {
+        return day != eventDay;
+      });
+
+      // 요일 : 시간을 key-value로 넣어 객체 생성
+      const time = { [eventDay]: eventTime };
+      // schedule 객체에 추가
+      schedule = { ...schedule, ...time };
+    });
+
+    // 값이 없는 날 0-0으로 추가
+    if (offDayArray.length !== 0) {
+      offDayArray.map((day) => {
+        const time = { [day]: "0-0" };
+        schedule = { ...schedule, ...time };
+      });
+    }
 
     const config = {
       method: "post",
@@ -208,37 +235,8 @@ const ProductSpot = (props) => {
     setDeleteModalVisible(false);
   };
 
-  const handleTime = (day, time) => {
-    switch (day) {
-      case "mon":
-        setMonTime(time);
-        break;
-      case "tue":
-        setTueTime(time);
-        break;
-      case "wed":
-        setWedTime(time);
-        break;
-      case "thu":
-        setThuTime(time);
-        break;
-      case "fri":
-        setFriTime(time);
-        break;
-      case "sat":
-        setSatTime(time);
-        break;
-      case "sun":
-        setSunTime(time);
-        break;
-      default:
-        break;
-    }
-  };
-
   // 옵션 스팟이 바뀔 때 사용 가능 공간 변경
   const handleOptionSpotChange = (value) => {
-    console.log(`value`, value);
     const spotConfig = {
       method: "get",
       url: `${process.env.BACKEND_API}/admin/spot/get/${value}`,
@@ -253,14 +251,14 @@ const ProductSpot = (props) => {
 
         if (
           spotInfo.length !== 0 &&
-          spotInfo.space &&
-          spotInfo.space.length !== 0
+          spotInfo.spaces &&
+          spotInfo.spaces.length !== 0
         ) {
           // 이미 상품에 사용 가능 공간 데이터가 있는 경우
           const optionSpotSpaces = [...spotData.spaces];
 
           // 체크된 space들 includes로 찾기 편한 방식으로 가공
-          const checkedSpaceIdArray = spotInfo.space.map(
+          const checkedSpaceIdArray = spotInfo.spaces.map(
             (space) => space.space_id
           );
 
@@ -377,164 +375,11 @@ const ProductSpot = (props) => {
 
           <Form.Item name="schedule" label="사용 가능 시간">
             <div>
-              {/* TO-DO : dragabble timetable */}
-              {/* <TimeTable /> */}
-              {/* <Table
-              columns={columns}
-              dataSource={tableData}
-              onRow={(record, rowIndex) => {
-                return {
-                  onClick: (event) => {
-                    console.log(`event`, event);
-                  }, // click row
-                  onDoubleClick: (event) => {}, // double click row
-                  onContextMenu: (event) => {}, // right button click row
-                  onMouseEnter: (event) => {}, // mouse enter row
-                  onMouseLeave: (event) => {}, // mouse leave row
-                };
-              }}
-            ></Table> */}
-              {/* 월{" "}
-              <TimePicker.RangePicker
-                showTime={{ format: "HH" }}
-                format="HH"
-                placeholder={["Start Time", "End Time"]}
-                value={monSettingTime}
-                onChange={(date, dateString) => {
-                  const day = "mon";
-                  let time = "";
-
-                  if (dateString[1] == "00") {
-                    time = `${dateString[0]}-24`;
-                  } else {
-                    time = dateString.join("-");
-                  }
-
-                  handleTime(day, time);
-                  setMonSettingTime(date);
-                }}
+              <TimeTable
+                calendarRef={calendarRef}
+                events={events}
+                setEvents={setEvents}
               />
-              화{" "}
-              <TimePicker.RangePicker
-                showTime={{ format: "HH" }}
-                format="HH"
-                placeholder={["Start Time", "End Time"]}
-                value={tueSettingTime}
-                onChange={(date, dateString) => {
-                  const day = "tue";
-                  let time = "";
-
-                  if (dateString[1] == "00") {
-                    time = `${dateString[0]}-24`;
-                  } else {
-                    time = dateString.join("-");
-                  }
-
-                  handleTime(day, time);
-                  setTueSettingTime(date);
-                }}
-              />
-              수{" "}
-              <TimePicker.RangePicker
-                showTime={{ format: "HH" }}
-                format="HH"
-                placeholder={["Start Time", "End Time"]}
-                value={wedSettingTime}
-                onChange={(date, dateString) => {
-                  const day = "wed";
-                  let time = "";
-
-                  if (dateString[1] == "00") {
-                    time = `${dateString[0]}-24`;
-                  } else {
-                    time = dateString.join("-");
-                  }
-
-                  handleTime(day, time);
-                  setWedSettingTime(date);
-                }}
-              />
-              목{" "}
-              <TimePicker.RangePicker
-                showTime={{ format: "HH" }}
-                format="HH"
-                placeholder={["Start Time", "End Time"]}
-                value={thuSettingTime}
-                onChange={(date, dateString) => {
-                  const day = "thu";
-                  let time = "";
-
-                  if (dateString[1] == "00") {
-                    time = `${dateString[0]}-24`;
-                  } else {
-                    time = dateString.join("-");
-                  }
-
-                  handleTime(day, time);
-                  setThuSettingTime(date);
-                }}
-              />
-              금{" "}
-              <TimePicker.RangePicker
-                showTime={{ format: "HH" }}
-                format="HH"
-                value={friSettingTime}
-                placeholder={["Start Time", "End Time"]}
-                onChange={(date, dateString) => {
-                  const day = "fri";
-                  let time = "";
-
-                  if (dateString[1] == "00") {
-                    time = `${dateString[0]}-24`;
-                  } else {
-                    time = dateString.join("-");
-                  }
-
-                  handleTime(day, time);
-                  setFriSettingTime(date);
-                }}
-              />
-              토{" "}
-              <TimePicker.RangePicker
-                showTime={{ format: "HH" }}
-                format="HH"
-                value={satSettingTime}
-                placeholder={["Start Time", "End Time"]}
-                onChange={(date, dateString) => {
-                  const day = "sat";
-                  let time = "";
-
-                  if (dateString[1] == "00") {
-                    time = `${dateString[0]}-24`;
-                  } else {
-                    time = dateString.join("-");
-                  }
-
-                  handleTime(day, time);
-                  setSatSettingTime(date);
-                }}
-              />
-              일{" "}
-              <TimePicker.RangePicker
-                showTime={{ format: "HH" }}
-                format="HH"
-                value={sunSettingTime}
-                placeholder={["Start Time", "End Time"]}
-                onChange={(date, dateString) => {
-                  const day = "sun";
-                  let time = "";
-
-                  if (dateString[1] == "00") {
-                    time = `${dateString[0]}-24`;
-                  } else {
-                    time = dateString.join("-");
-                  }
-
-                  handleTime(day, time);
-                  setSunSettingTime(date);
-                }}
-              /> */}
-              <TimeTable events={events} setEvents={setEvents} />
             </div>
           </Form.Item>
           {isActive && (

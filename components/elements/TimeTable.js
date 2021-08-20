@@ -3,43 +3,11 @@ import React, { useState, useEffect, useRef } from "react";
 import FullCalendar from "@fullcalendar/react";
 import interactionPlugin from "@fullcalendar/interaction";
 import timegridPlugin from "@fullcalendar/timegrid";
-// import timegridPlugin from "@fullcalendar/resource-timegrid";
-import timelinePlugin from "@fullcalendar/resource-timeline";
 import moment, { locale } from "moment";
 import { format, addMinutes } from "date-fns";
 import { FullCalendarLicense } from "@utils/config";
 
-const TimeTable = ({ events, setEvents }) => {
-  const calendarRef = useRef(null);
-
-  const [calendarDateArray, setCalendarDateArray] = useState(undefined);
-
-  useEffect(() => {
-    // // 캘린더 시작일
-    let calendarStartDate =
-      calendarRef.current._calendarApi.currentDataManager.data.dateProfile
-        .activeRange.start;
-
-    // calendarStartDate에 그대로 세팅하니 메모리에서 데이터 값이 꼬여서 복사하는 방식으로 진행
-    const fullYear = calendarStartDate.getFullYear();
-    const month = calendarStartDate.getMonth();
-    const date = calendarStartDate.getDate();
-
-    let firstDate = new Date(fullYear, month, date);
-
-    // calendarDateArray에 일주일치 값 추가
-    const calendarDateArray = [];
-
-    calendarDateArray.push(firstDate);
-
-    for (let i = 1; i < 7; i++) {
-      const nextDate = new Date(fullYear, month, date + i);
-      calendarDateArray.push(nextDate);
-    }
-
-    setCalendarDateArray(calendarDateArray);
-  }, []);
-
+const TimeTable = ({ events, setEvents, calendarRef }) => {
   return (
     <FullCalendar
       ref={calendarRef}
@@ -93,7 +61,8 @@ const TimeTable = ({ events, setEvents }) => {
 
         // 하루치 / 첫 날 요일
         const day = moment(info.start).day();
-
+        // 요일 영문 변환을 위한 array
+        const dayArray = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
         // 배열 filtering과 데이터 전송을 위해 eventId 사용
         // eventId format : 요일/시작-끝
         // 요일 : 0,1,2,3,4,5,6 -> 일, 월, 화, 수, 목, 금, 토
@@ -114,10 +83,10 @@ const TimeTable = ({ events, setEvents }) => {
             start: info.start,
             end: info.end,
             display: "block",
-            eventId: `${day}/${moment(info.start).format("HH")}-${endTime}`,
+            eventId: `${dayArray[day]}/${moment(info.start).format(
+              "HH"
+            )}-${endTime}`,
           };
-
-          // console.log(`하루치 eventObj`, eventObj);
 
           newEvents = [...events, eventObj];
         } else {
@@ -134,10 +103,10 @@ const TimeTable = ({ events, setEvents }) => {
                 start: info.start,
                 end: new Date(startYear, startMonth, startDate + 1),
                 display: "block",
-                eventId: `${day}/${moment(info.start).format("HH")}-24`,
+                eventId: `${dayArray[day]}/${moment(info.start).format(
+                  "HH"
+                )}-24`,
               };
-
-              // console.log(`첫 날 eventObj`, eventObj);
             } else if (i === diff) {
               // 마지막 날
               const date = new Date(startYear, startMonth, startDate + i);
@@ -146,26 +115,21 @@ const TimeTable = ({ events, setEvents }) => {
                 start: date,
                 end: info.end,
                 display: "block",
-                eventId: `${date.getDay()}/00-${moment(info.end).format("HH")}`,
+                eventId: `${dayArray[date.getDay()]}/00-${moment(
+                  info.end
+                ).format("HH")}`,
               };
-
-              // console.log(`마지막 날 eventObj`, eventObj);
             } else {
               // 중간 날
               const fromDate = new Date(startYear, startMonth, startDate + i);
               const toDate = new Date(startYear, startMonth, startDate + i + 1);
 
-              console.log(`startDate`, fromDate);
-              console.log(`endDate`, toDate);
-
               eventObj = {
                 start: fromDate,
                 end: toDate,
                 display: "block",
-                eventId: `${fromDate.getDay()}/00-24`,
+                eventId: `${dayArray[fromDate.getDay()]}/00-24`,
               };
-
-              console.log(`중간 날 eventObj`, eventObj);
             }
             eventArray.push(eventObj);
           }
@@ -181,7 +145,6 @@ const TimeTable = ({ events, setEvents }) => {
       unselectAuto={false}
       events={events}
       eventClick={(info) => {
-        console.log(`info`, info);
         // 클릭한 이벤트 삭제
         const id = info.event._def.extendedProps.eventId;
 
