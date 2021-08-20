@@ -85,10 +85,7 @@ const ProductDetail = (props) => {
   const [intro, setIntro] = useState("");
   const [content, setContent] = useState("");
 
-  // 상품에 붙어있는 사용 가능 스팟 id list
-  const [spotIdList, setSpotIdList] = useState(undefined);
-
-  // id로 조회한 스팟 리스트
+  // 상품에 붙어있는 사용 가능 스팟 리스트
   const [spotList, setSpotList] = useState(undefined);
 
   // 사용 가능 스팟 - select box에 option으로 내려줄 스팟 list
@@ -188,8 +185,10 @@ const ProductDetail = (props) => {
       setType(productInfo.type);
 
       // 사용 가능 스팟 ID 세팅
-      if (productInfo.spaces) {
-        setSpotIdList(productInfo.spaces);
+      if (productInfo.maps) {
+        setSpotList(productInfo.maps);
+
+        getOptionsSpotList();
       }
 
       // 운영 요일 binding
@@ -209,43 +208,43 @@ const ProductDetail = (props) => {
     }
   }, [productInfo]);
 
-  useEffect(() => {
-    if (spotIdList) {
-      console.log(`spotIdList`, spotIdList);
-      const spotList = [];
+  // useEffect(() => {
+  //   if (spotIdList) {
+  //     console.log(`spotIdList`, spotIdList);
+  //     const spotList = [];
 
-      spotIdList.map((spotId) => {
-        const config = {
-          headers: {
-            "Content-Type": "application/json;charset=UTF-8",
-            "Access-Control-Allow-Origin": "*",
-            Authorization: decodeURIComponent(token),
-          },
-        };
+  //     spotIdList.map((spotId) => {
+  //       const config = {
+  //         headers: {
+  //           "Content-Type": "application/json;charset=UTF-8",
+  //           "Access-Control-Allow-Origin": "*",
+  //           Authorization: decodeURIComponent(token),
+  //         },
+  //       };
 
-        axios
-          .get(
-            `${process.env.BACKEND_API}/admin/product/space/get/${productId}/${spotId}`,
-            config
-          )
-          .then((response) => {
-            const spotData = response.data.item;
-            spotList.push(spotData);
-          })
-          .catch((error) => {
-            console.log(`error`, error);
-          });
-      });
+  //       axios
+  //         .get(
+  //           `${process.env.BACKEND_API}/admin/product/space/get/${productId}/${spotId}`,
+  //           config
+  //         )
+  //         .then((response) => {
+  //           const spotData = response.data.item;
+  //           spotList.push(spotData);
+  //         })
+  //         .catch((error) => {
+  //           console.log(`error`, error);
+  //         });
+  //     });
 
-      setSpotList(spotList);
-      getOptionsSpotList();
-    }
-  }, [spotIdList]);
+  //     setSpotList(spotList);
+  //     getOptionsSpotList();
+  //   }
+  // }, [spotIdList]);
 
   // 상품 생성 되거나 spotList가 생기면 바로 공간 추가할 수 있게 option spot list 조회
   useEffect(() => {
     // productId가 생성됐는데 optionSpotList가 비어있다면
-    if (generatedProductId && optionSpotList !== undefined) {
+    if (generatedProductId) {
       getOptionsSpotList();
     }
   }, [generatedProductId]);

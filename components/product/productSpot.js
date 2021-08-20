@@ -56,13 +56,16 @@ const ProductSpot = (props) => {
   const [satSettingTime, setSatSettingTime] = useState([]);
   const [sunSettingTime, setSunSettingTime] = useState([]);
 
+  // timeTable에 props로 내려줄 이벤트 state
+  const [events, setEvents] = useState([]);
+
   // 사용 가능 스팟 등록 / 수정 구분
   const [isActive, setIsActive] = useState(true);
 
   useEffect(() => {
     console.log(`spotInfo`, spotInfo);
     // 내려오는 데이터가 있고 +로 추가한 경우가 아닌지 확인
-    if (spotInfo.length !== 0 && spotInfo.sm_id) {
+    if (spotInfo.length !== 0 && spotInfo.spot) {
       // Option Spot list 중 inactive || trash 인 것들 세팅
       const unavailableSpotList = optionSpotList.filter(
         (spot) => spot.status !== "active"
@@ -70,7 +73,7 @@ const ProductSpot = (props) => {
 
       // spotInfo로 내려온 spot이  unavailableSpotList 에 있는지 확인
       const checkList = unavailableSpotList.filter(
-        (spot) => spot.spot_id === spotInfo.sm_id
+        (spot) => spot.spot_id === spotInfo.spot.spot_id
       );
 
       // isActive 상태값 조절
@@ -78,13 +81,11 @@ const ProductSpot = (props) => {
         setIsActive(false);
       } else {
         // active spot 일 경우 해당 spot의 모든 공간 조회
-        handleOptionSpotChange(spotInfo.sm_id);
+        handleOptionSpotChange(spotInfo.spot.spot_id);
       }
 
-      console.log(`spotInfo.sm_id`, spotInfo.sm_id);
-
       form.setFieldsValue({
-        spot: spotInfo.sm_id,
+        spot: spotInfo.spot.spot_id,
       });
 
       // const monTime = [
@@ -533,7 +534,7 @@ const ProductSpot = (props) => {
                   setSunSettingTime(date);
                 }}
               /> */}
-              <TimeTable />
+              <TimeTable events={events} setEvents={setEvents} />
             </div>
           </Form.Item>
           {isActive && (
