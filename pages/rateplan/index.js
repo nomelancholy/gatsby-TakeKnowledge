@@ -1,20 +1,7 @@
-import {
-  Button,
-  Table,
-  Form,
-  Input,
-  Row,
-  Select,
-  Modal,
-  DatePicker,
-} from "antd";
-import {
-  SlidersOutlined,
-  SearchOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
+import { Button, Table, Form, Input, Row, Select, DatePicker } from "antd";
+import { SlidersOutlined, PlusOutlined } from "@ant-design/icons";
 
-import React, { Component, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 import Router from "next/router";
@@ -24,8 +11,16 @@ import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
 import { rateplanListColumns } from "@utils/columns/rateplan";
 
+// 요금제 관리
 const Rateplan = (props) => {
   const { user, isLoggedIn, token } = props.auth;
+
+  // 로그인/로그아웃 체크
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+  }, [isLoggedIn]);
 
   const [rateplanList, setRateplanList] = useState([]);
 
@@ -99,10 +94,6 @@ const Rateplan = (props) => {
   };
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      Router.push("/");
-    }
-
     getRateplanList(params);
   }, []);
 

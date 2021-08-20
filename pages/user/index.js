@@ -1,7 +1,7 @@
-import { Button, Table, Form, Input, Row, Select, Modal } from "antd";
-import { SlidersOutlined, SearchOutlined } from "@ant-design/icons";
+import { Button, Table, Form, Input, Row, Select } from "antd";
+import { SlidersOutlined } from "@ant-design/icons";
 
-import React, { Component, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 import Router from "next/router";
@@ -11,8 +11,16 @@ import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
 import { userListColumns } from "@utils/columns/user";
 
+// 회원 관리
 const User = (props) => {
   const { user, isLoggedIn, token } = props.auth;
+
+  // 로그인/로그아웃 체크
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+  }, [isLoggedIn]);
 
   const [userList, setUserList] = useState([]);
 
@@ -118,13 +126,6 @@ const User = (props) => {
 
     getUserList({ ...params, ...searchParams });
   };
-
-  // 로그인 체크
-  useEffect(() => {
-    if (!isLoggedIn) {
-      Router.push("/");
-    }
-  }, [isLoggedIn]);
 
   useEffect(() => {
     getUserList(params);

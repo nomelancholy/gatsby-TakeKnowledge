@@ -11,8 +11,16 @@ import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
 import { serviceListColumns } from "@utils/columns/service";
 
+// 부가서비스 계약 관리
 const Service = (props) => {
   const { user, isLoggedIn, token } = props.auth;
+
+  // 로그인/로그아웃 체크
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+  }, [isLoggedIn]);
 
   const [serviceList, setServiceList] = useState([]);
 
@@ -96,10 +104,6 @@ const Service = (props) => {
   };
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      Router.push("/");
-    }
-
     getServiceList(params);
   }, []);
 

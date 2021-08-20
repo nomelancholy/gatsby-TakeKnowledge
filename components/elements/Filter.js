@@ -12,6 +12,7 @@ const Filter = (props) => {
         <>
           <Button
             type="primary"
+            key="search"
             style={{
               marginRight: 10,
             }}
@@ -19,7 +20,9 @@ const Filter = (props) => {
           >
             검색
           </Button>
-          <Button onClick={onReset}>초기화</Button>
+          <Button key="reset" onClick={onReset}>
+            초기화
+          </Button>
         </>
       }
       onClose={onClose}

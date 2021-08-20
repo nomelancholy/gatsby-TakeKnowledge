@@ -1,16 +1,7 @@
-import {
-  Button,
-  Table,
-  Form,
-  Input,
-  Row,
-  Select,
-  Modal,
-  DatePicker,
-} from "antd";
-import { SlidersOutlined, SearchOutlined } from "@ant-design/icons";
+import { Button, Table, Form, Input, Row, Select, DatePicker } from "antd";
+import { SlidersOutlined } from "@ant-design/icons";
 
-import React, { Component, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 import Router from "next/router";
@@ -20,6 +11,7 @@ import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
 import { qnaListColumns } from "@utils/columns/qna";
 
+// 문의 관리
 const Qna = (props) => {
   // 1차 유형, 2차 유형 하이라키 구조
   const qnaSelectOptions = [
@@ -189,12 +181,6 @@ const Qna = (props) => {
   };
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      // 로그인 되어 있지 않으면 홈으로
-      Router.push("/");
-    }
-
-    // 파라미터 없이 호출
     getQnaList(params);
   }, []);
 

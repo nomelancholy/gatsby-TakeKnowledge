@@ -11,8 +11,16 @@ import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
 import { productListColumns } from "@utils/columns/product";
 
+// 상품 관리
 const Product = (props) => {
   const { user, isLoggedIn, token } = props.auth;
+
+  // 로그인/로그아웃 체크
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+  }, [isLoggedIn]);
 
   const [productList, setProductList] = useState([]);
 
@@ -80,10 +88,6 @@ const Product = (props) => {
   };
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      Router.push("/");
-    }
-
     getProductList(params);
   }, []);
 
@@ -155,9 +159,6 @@ const Product = (props) => {
       <h3>상품 관리</h3>
 
       <Row type="flex" align="middle" className="py-3">
-        {/* <Button type="primary">
-          <SearchOutlined></SearchOutlined>검색
-        </Button> */}
         <Button
           type="primary"
           onClick={() => {

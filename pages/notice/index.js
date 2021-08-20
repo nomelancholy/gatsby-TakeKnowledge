@@ -1,11 +1,7 @@
-import { Button, Table, Form, Input, Row, Select, Modal } from "antd";
-import {
-  SlidersOutlined,
-  SearchOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
+import { Button, Table, Form, Input, Row, Select } from "antd";
+import { SlidersOutlined, PlusOutlined } from "@ant-design/icons";
 
-import React, { Component, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 import Router from "next/router";
@@ -15,9 +11,8 @@ import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
 import { noticeListcolumns } from "@utils/columns/notice";
 
+// 알림(공지)
 const Notice = (props) => {
-  // 공지 컬럼 정의
-
   const { user, isLoggedIn, token } = props.auth;
 
   useEffect(() => {
@@ -90,10 +85,6 @@ const Notice = (props) => {
   };
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      Router.push("/");
-    }
-
     getNoticeList(params);
   }, []);
 

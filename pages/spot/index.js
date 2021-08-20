@@ -1,4 +1,4 @@
-import { Button, Table, Form, Input, Row, Modal, Select } from "antd";
+import { Button, Table, Form, Input, Row, Select } from "antd";
 import { SlidersOutlined, PlusOutlined } from "@ant-design/icons";
 
 import React, { useState, useEffect } from "react";
@@ -11,8 +11,16 @@ import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
 import { spotListcolumns } from "@utils/columns/spot";
 
+// 스팟 관리
 const Spot = (props) => {
   const { user, isLoggedIn, token } = props.auth;
+
+  // 로그인/로그아웃 체크
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+  }, [isLoggedIn]);
 
   // 조회해온 spot list
   const [spotList, setSpotList] = useState([]);
@@ -144,12 +152,6 @@ const Spot = (props) => {
 
     getSpotList({ ...params, ...searchParams });
   };
-
-  useEffect(() => {
-    if (!isLoggedIn) {
-      Router.push("/");
-    }
-  }, [isLoggedIn]);
 
   useEffect(() => {
     getSpotList(params);
