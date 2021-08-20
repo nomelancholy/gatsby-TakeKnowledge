@@ -152,16 +152,20 @@ const TimeTable = ({ events, setEvents }) => {
               // console.log(`마지막 날 eventObj`, eventObj);
             } else {
               // 중간 날
-              const date = new Date(startYear, startMonth, startDate + i);
+              const fromDate = new Date(startYear, startMonth, startDate + i);
+              const toDate = new Date(startYear, startMonth, startDate + i + 1);
+
+              console.log(`startDate`, fromDate);
+              console.log(`endDate`, toDate);
 
               eventObj = {
-                start: date,
-                end: moment(date).day(i + 1)._d,
+                start: fromDate,
+                end: toDate,
                 display: "block",
-                eventId: `${date.getDay()}/00-24`,
+                eventId: `${fromDate.getDay()}/00-24`,
               };
 
-              // console.log(`중간 날 eventObj`, eventObj);
+              console.log(`중간 날 eventObj`, eventObj);
             }
             eventArray.push(eventObj);
           }
