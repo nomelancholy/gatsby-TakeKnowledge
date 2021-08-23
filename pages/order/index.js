@@ -24,7 +24,11 @@ const Order = (props) => {
 
   const [orderList, setOrderList] = useState([]);
 
-  const [pagination, setPagination] = useState({});
+  const [pagination, setPagination] = useState({
+    page: 1,
+    size: 20,
+    pageSize: 20,
+  });
   const [loading, setLoading] = useState(false);
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
@@ -33,9 +37,6 @@ const Order = (props) => {
   const [orderDateEnd, setOrderDateEnd] = useState(undefined);
 
   const [searchForm] = useForm();
-
-  // 페이지 사이즈
-  const PAGE_SIZE = 20;
 
   const [params, setParams] = useState({
     order_id: undefined,
@@ -48,8 +49,6 @@ const Order = (props) => {
     pay_demand: undefined,
     order_date_start: undefined,
     order_date_end: undefined,
-    page: 1,
-    size: PAGE_SIZE,
   });
 
   const getOrderList = (params) => {
@@ -69,7 +68,7 @@ const Order = (props) => {
       )
       .then((response) => {
         const data = response.data;
-        console.log(`data`, data);
+        console.log(`orderList data`, data);
         setOrderList(data.items);
 
         // 페이지 네이션 정보 세팅
@@ -77,9 +76,9 @@ const Order = (props) => {
           current: data.page,
           total: data.total,
           pageSize: data.size,
+          size: data.size,
         };
 
-        // pageInfo 세팅
         setPagination(pageInfo);
 
         // 로딩바 세팅
@@ -93,18 +92,33 @@ const Order = (props) => {
   };
 
   useEffect(() => {
-    getOrderList(params);
+    getOrderList(pagination);
   }, []);
+
   // 테이블 페이지 변경시
   const handleTableChange = (pagination) => {
-    setPagination(pagination);
+    // paginiation에서 제공하는 것이 아닌 api 통신을 위해 사용하는 size 속성만 추가해서 세팅
+    setPagination({
+      ...pagination,
+      size: pagination.pageSize,
+    });
 
     // 호출
-    getOrderList({ ...params, page: pagination.current });
+    getOrderList({
+      ...params,
+      page: pagination.current,
+      size: pagination.pageSize,
+    });
   };
 
   const handleSearch = () => {
     const searchFormValues = searchForm.getFieldsValue();
+
+    setPagination({
+      page: 1,
+      size: 20,
+      pageSize: 20,
+    });
 
     const searchParams = {
       order_id: searchFormValues.order_id,
@@ -118,6 +132,7 @@ const Order = (props) => {
       order_date_start: orderDateStart,
       order_date_end: orderDateEnd,
       page: 1,
+      size: 20,
     };
 
     getOrderList({ ...params, ...searchParams });
@@ -129,6 +144,12 @@ const Order = (props) => {
 
     setOrderDateStart(undefined);
     setOrderDateEnd(undefined);
+
+    setPagination({
+      page: 1,
+      size: 20,
+      pageSize: 20,
+    });
 
     // params state reset
     const searchParams = {
@@ -143,6 +164,7 @@ const Order = (props) => {
       order_date_start: undefined,
       order_date_end: undefined,
       page: 1,
+      size: 20,
     };
 
     getOrderList({ ...params, ...searchParams });

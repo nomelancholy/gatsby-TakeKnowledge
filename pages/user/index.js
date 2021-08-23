@@ -24,7 +24,11 @@ const User = (props) => {
 
   const [userList, setUserList] = useState([]);
 
-  const [pagination, setPagination] = useState({});
+  const [pagination, setPagination] = useState({
+    page: 1,
+    size: 20,
+    pageSize: 20,
+  });
   const [loading, setLoading] = useState(false);
 
   // 검색 필터 Modal
@@ -32,17 +36,12 @@ const User = (props) => {
   // 검색 Form
   const [searchForm] = useForm();
 
-  // 페이지 사이즈
-  const PAGE_SIZE = 20;
-
   const [params, setParams] = useState({
     user_name: undefined,
     has_contract: undefined,
     user_role_ext: undefined,
     status: undefined,
     registed_card: undefined,
-    page: 1,
-    size: PAGE_SIZE,
   });
 
   const getUserList = (params) => {
@@ -69,9 +68,9 @@ const User = (props) => {
           current: data.page,
           total: data.total,
           pageSize: data.size,
+          size: data.size,
         };
 
-        // pageInfo 세팅
         setPagination(pageInfo);
 
         // 로딩바 세팅
@@ -86,16 +85,30 @@ const User = (props) => {
 
   // 테이블 페이지 변경시
   const handleTableChange = (pagination) => {
-    setPagination(pagination);
+    setPagination({
+      ...pagination,
+      size: pagination.pageSize,
+      pageSize: 20,
+    });
 
     // 호출
-    getUserList({ ...params, page: pagination.current });
+    getUserList({
+      ...params,
+      page: pagination.current,
+      size: pagination.pageSize,
+    });
   };
 
   // 검색 버튼 클릭
   const handleSearch = () => {
     const { user_name, has_contract, user_role_ext, status, registed_card } =
       searchForm.getFieldsValue();
+
+    setPagination({
+      page: 1,
+      size: 20,
+      pageSize: 20,
+    });
 
     const searchParams = {
       user_name: user_name,
@@ -104,6 +117,7 @@ const User = (props) => {
       status: status,
       registed_card: registed_card,
       page: 1,
+      size: 20,
     };
 
     getUserList({ ...params, ...searchParams });
@@ -114,6 +128,12 @@ const User = (props) => {
     // form Item reset
     searchForm.resetFields();
 
+    setPagination({
+      page: 1,
+      size: 20,
+      pageSize: 20,
+    });
+
     // params state reset
     const searchParams = {
       user_name: undefined,
@@ -122,13 +142,14 @@ const User = (props) => {
       status: undefined,
       registed_card: undefined,
       page: 1,
+      size: 20,
     };
 
     getUserList({ ...params, ...searchParams });
   };
 
   useEffect(() => {
-    getUserList(params);
+    getUserList(pagination);
   }, []);
 
   return (

@@ -24,7 +24,11 @@ const Contract = (props) => {
 
   const [contractList, setContractList] = useState([]);
 
-  const [pagination, setPagination] = useState({});
+  const [pagination, setPagination] = useState({
+    page: 1,
+    size: 20,
+    pageSize: 20,
+  });
   const [loading, setLoading] = useState(false);
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
@@ -44,9 +48,6 @@ const Contract = (props) => {
 
   const [searchForm] = useForm();
 
-  // 페이지 사이즈
-  const PAGE_SIZE = 20;
-
   const [params, setParams] = useState({
     contract_id: undefined,
     uid: undefined,
@@ -61,8 +62,6 @@ const Contract = (props) => {
     cancel_date_end: undefined,
     terminate_date_start: undefined,
     terminate_date_end: undefined,
-    page: 1,
-    size: PAGE_SIZE,
   });
 
   const getContractList = (params) => {
@@ -89,9 +88,9 @@ const Contract = (props) => {
           current: data.page,
           total: data.total,
           pageSize: data.size,
+          size: data.size,
         };
 
-        // pageInfo 세팅
         setPagination(pageInfo);
 
         // 로딩바 세팅
@@ -104,23 +103,29 @@ const Contract = (props) => {
       });
   };
   useEffect(() => {
-    if (!isLoggedIn) {
-      Router.push("/");
-    }
-
-    getContractList(params);
+    getContractList(pagination);
   }, []);
 
   // 테이블 페이지 변경시
   const handleTableChange = (pagination) => {
-    setPagination(pagination);
+    setPagination({ ...pagination, size: pagination.pageSize });
 
     // 호출
-    getContractList({ ...params, page: pagination.current });
+    getContractList({
+      ...params,
+      page: pagination.current,
+      size: pagination.pageSize,
+    });
   };
 
   const handleSearch = () => {
     const searchFormValues = searchForm.getFieldsValue();
+
+    setPagination({
+      page: 1,
+      size: 20,
+      pageSize: 20,
+    });
 
     const searchParams = {
       contract_id: searchFormValues.contract_id,
@@ -137,6 +142,7 @@ const Contract = (props) => {
       terminate_date_start: contractTerminateDateStart,
       terminate_date_end: contractTerminateDateEnd,
       page: 1,
+      size: 20,
     };
 
     getContractList({ ...params, ...searchParams });
@@ -155,6 +161,12 @@ const Contract = (props) => {
     setContractTerminateDateStart(undefined);
     setContractTerminateDateEnd(undefined);
 
+    setPagination({
+      page: 1,
+      size: 20,
+      pageSize: 20,
+    });
+
     // params state reset
     const searchParams = {
       contract_id: undefined,
@@ -171,6 +183,7 @@ const Contract = (props) => {
       terminate_date_start: undefined,
       terminate_date_end: undefined,
       page: 1,
+      size: 20,
     };
 
     getContractList({ ...params, ...searchParams });

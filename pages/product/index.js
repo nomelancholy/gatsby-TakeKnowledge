@@ -27,15 +27,16 @@ const Product = (props) => {
   // 필터 옵션에 사용하는 상품 리스트
   const [optionProductList, setOptionProductList] = useState([]);
 
-  const [pagination, setPagination] = useState({});
+  const [pagination, setPagination] = useState({
+    page: 1,
+    size: 20,
+    pageSize: 20,
+  });
   const [loading, setLoading] = useState(false);
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
   const [searchForm] = useForm();
-
-  // 페이지 사이즈
-  const PAGE_SIZE = 20;
 
   const [params, setParams] = useState({
     product_id: undefined,
@@ -43,8 +44,7 @@ const Product = (props) => {
     name: undefined,
     status: undefined,
     pay_demand: undefined,
-    page: 1,
-    size: PAGE_SIZE,
+    pay_method: undefined,
   });
 
   const getProductList = (params) => {
@@ -72,9 +72,9 @@ const Product = (props) => {
           current: data.page,
           total: data.total,
           pageSize: data.size,
+          size: data.size,
         };
 
-        // pageInfo 세팅
         setPagination(pageInfo);
 
         // 로딩바 세팅
@@ -93,14 +93,27 @@ const Product = (props) => {
 
   // 테이블 페이지 변경시
   const handleTableChange = (pagination) => {
-    setPagination(pagination);
+    setPagination({
+      ...pagination,
+      size: pagination.pageSize,
+    });
 
     // 호출
-    getProductList({ ...params, page: pagination.current });
+    getProductList({
+      ...params,
+      page: pagination.current,
+      size: pagination.pageSize,
+    });
   };
 
   const handleSearch = () => {
     const searchFormValues = searchForm.getFieldsValue();
+
+    setPagination({
+      page: 1,
+      size: 20,
+      pageSize: 20,
+    });
 
     const searchParams = {
       product_id: searchFormValues.product_id,
@@ -108,7 +121,9 @@ const Product = (props) => {
       name: searchFormValues.name,
       status: searchFormValues.status,
       pay_demand: searchFormValues.pay_demand,
+      pay_method: searchFormValues.pay_method,
       page: 1,
+      size: 20,
     };
 
     getProductList({ ...params, ...searchParams });
@@ -118,6 +133,12 @@ const Product = (props) => {
     // form Item reset
     searchForm.resetFields();
 
+    setPagination({
+      page: 1,
+      size: 20,
+      pageSize: 20,
+    });
+
     // params state reset
     const searchParams = {
       product_id: undefined,
@@ -125,7 +146,9 @@ const Product = (props) => {
       name: undefined,
       status: undefined,
       pay_demand: undefined,
+      pay_method: undefined,
       page: 1,
+      size: 20,
     };
 
     getProductList({ ...params, ...searchParams });
@@ -133,10 +156,11 @@ const Product = (props) => {
 
   // 상품 그룹 변경시 상품명 리스트 변경
   const handleProductTypeChange = (value) => {
+    console.log(`value`, value);
     axios
       .post(
         `${process.env.BACKEND_API}/admin/product/list`,
-        { page: 1, size: 20, status: "active", type: value },
+        { page: 1, size: 100, status: "active", type: value },
         {
           headers: {
             "Content-Type": "application/json;charset=UTF-8",
@@ -147,6 +171,7 @@ const Product = (props) => {
       )
       .then((response) => {
         const productList = response.data.items;
+        console.log(`productList`, productList);
         setOptionProductList(productList);
       })
       .catch((error) => {
@@ -207,16 +232,22 @@ const Product = (props) => {
           </Form.Item>
           <Form.Item name="type" label="상품 그룹">
             <Select style={{ width: 160 }} onChange={handleProductTypeChange}>
-              <Select.Option value="membership">멤버십</Select.Option>
-              <Select.Option value="service">부가서비스</Select.Option>
-              <Select.Option value="voucher">이용권</Select.Option>
+              <Select.Option key="membership" value="membership">
+                멤버십
+              </Select.Option>
+              <Select.Option key="service" value="service">
+                부가서비스
+              </Select.Option>
+              <Select.Option key="voucher" value="voucher">
+                이용권
+              </Select.Option>
             </Select>
           </Form.Item>
           <Form.Item name="name" label="상품명">
             {/* 그룹에서 선택한 상품명 찾아서 세팅 */}
             <Select style={{ width: 160 }}>
               {optionProductList.map((product) => (
-                <Select.Option value={product.name}>
+                <Select.Option key={product.product_id} value={product.name}>
                   {product.name}
                 </Select.Option>
               ))}

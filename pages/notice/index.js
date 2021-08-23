@@ -23,15 +23,16 @@ const Notice = (props) => {
 
   const [noticeList, setNoticeList] = useState([]);
 
-  const [pagination, setPagination] = useState({});
+  const [pagination, setPagination] = useState({
+    page: 1,
+    size: 20,
+    pageSize: 20,
+  });
   const [loading, setLoading] = useState(false);
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
   const [searchForm] = useForm();
-
-  // 페이지 사이즈
-  const PAGE_SIZE = 20;
 
   const [params, setParams] = useState({
     notice_id: undefined,
@@ -39,8 +40,6 @@ const Notice = (props) => {
     type: undefined,
     sticky: undefined,
     title: undefined,
-    page: 1,
-    size: PAGE_SIZE,
   });
 
   const getNoticeList = (params) => {
@@ -69,9 +68,9 @@ const Notice = (props) => {
           current: data.page,
           total: data.total,
           pageSize: data.size,
+          size: data.size,
         };
 
-        // pageInfo 세팅
         setPagination(pageInfo);
 
         // 로딩바 세팅
@@ -85,19 +84,32 @@ const Notice = (props) => {
   };
 
   useEffect(() => {
-    getNoticeList(params);
+    getNoticeList(pagination);
   }, []);
 
   // 테이블 페이지 변경시
   const handleTableChange = (pagination) => {
-    setPagination(pagination);
+    setPagination({
+      ...pagination,
+      size: pagination.pageSize,
+    });
 
     // 호출
-    getNoticeList({ ...params, page: pagination.current });
+    getNoticeList({
+      ...params,
+      page: pagination.current,
+      size: pagination.pageSize,
+    });
   };
 
   const handleSearch = () => {
     const searchFormValues = searchForm.getFieldsValue();
+
+    setPagination({
+      page: 1,
+      size: 20,
+      pageSize: 20,
+    });
 
     const searchParams = {
       notice_id: searchFormValues.notice_id,
@@ -106,6 +118,7 @@ const Notice = (props) => {
       sticky: searchFormValues.sticky,
       title: searchFormValues.title,
       page: 1,
+      size: 20,
     };
 
     getNoticeList({ ...params, ...searchParams });
@@ -115,6 +128,12 @@ const Notice = (props) => {
     // form Item reset
     searchForm.resetFields();
 
+    setPagination({
+      page: 1,
+      size: 20,
+      pageSize: 20,
+    });
+
     // params state reset
     const searchParams = {
       notice_id: undefined,
@@ -123,6 +142,7 @@ const Notice = (props) => {
       sticky: undefined,
       title: undefined,
       page: 1,
+      size: 20,
     };
 
     getNoticeList({ ...params, ...searchParams });

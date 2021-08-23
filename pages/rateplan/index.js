@@ -26,15 +26,16 @@ const Rateplan = (props) => {
 
   const [optionProductList, setOptionProductList] = useState([]);
 
-  const [pagination, setPagination] = useState({});
+  const [pagination, setPagination] = useState({
+    page: 1,
+    size: 20,
+    pageSize: 20,
+  });
   const [loading, setLoading] = useState(false);
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
   const [searchForm] = useForm();
-
-  // 페이지 사이즈
-  const PAGE_SIZE = 20;
 
   const [params, setParams] = useState({
     rateplan_id: undefined,
@@ -45,8 +46,6 @@ const Rateplan = (props) => {
     start_date_end: undefined,
     end_date_start: undefined,
     end_date_end: undefined,
-    page: 1,
-    size: PAGE_SIZE,
   });
 
   const [startDateStart, setStartDateStart] = useState(undefined);
@@ -78,9 +77,9 @@ const Rateplan = (props) => {
           current: data.page,
           total: data.total,
           pageSize: data.size,
+          size: data.size,
         };
 
-        // pageInfo 세팅
         setPagination(pageInfo);
 
         // 로딩바 세팅
@@ -94,19 +93,32 @@ const Rateplan = (props) => {
   };
 
   useEffect(() => {
-    getRateplanList(params);
+    getRateplanList(pagination);
   }, []);
 
   // 테이블 페이지 변경시
   const handleTableChange = (pagination) => {
-    setPagination(pagination);
+    setPagination({
+      ...pagination,
+      size: pagination.pageSize,
+    });
 
     // 호출
-    getRateplanList({ ...params, page: pagination.current });
+    getRateplanList({
+      ...params,
+      page: pagination.current,
+      size: pagination.pageSize,
+    });
   };
 
   const handleSearch = () => {
     const searchFormValues = searchForm.getFieldsValue();
+
+    setPagination({
+      page: 1,
+      size: 20,
+      pageSize: 20,
+    });
 
     const searchParams = {
       rateplan_id: searchFormValues.rateplan_id,
@@ -118,6 +130,7 @@ const Rateplan = (props) => {
       end_date_start: endDateStart,
       end_date_end: endDateEnd,
       page: 1,
+      size: 20,
     };
 
     getRateplanList({ ...params, ...searchParams });
@@ -132,6 +145,12 @@ const Rateplan = (props) => {
     setEndDateStart(undefined);
     setEndDateEnd(undefined);
 
+    setPagination({
+      page: 1,
+      size: 20,
+      pageSize: 20,
+    });
+
     // params state reset
     const searchParams = {
       rateplan_id: undefined,
@@ -143,6 +162,7 @@ const Rateplan = (props) => {
       end_date_start: undefined,
       end_date_end: undefined,
       page: 1,
+      size: 20,
     };
 
     getRateplanList({ ...params, ...searchParams });
@@ -153,7 +173,7 @@ const Rateplan = (props) => {
     axios
       .post(
         `${process.env.BACKEND_API}/admin/product/list`,
-        { page: 1, size: 20, status: "active", type: value },
+        { page: 1, size: 100, status: "active", type: value },
         {
           headers: {
             "Content-Type": "application/json;charset=UTF-8",

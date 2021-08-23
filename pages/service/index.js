@@ -24,7 +24,11 @@ const Service = (props) => {
 
   const [serviceList, setServiceList] = useState([]);
 
-  const [pagination, setPagination] = useState({});
+  const [pagination, setPagination] = useState({
+    page: 1,
+    size: 20,
+    pageSize: 20,
+  });
   const [loading, setLoading] = useState(false);
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
@@ -43,9 +47,6 @@ const Service = (props) => {
 
   const [searchForm] = useForm();
 
-  // 페이지 사이즈
-  const PAGE_SIZE = 20;
-
   const [params, setParams] = useState({
     contract_id: undefined,
     uid: undefined,
@@ -59,8 +60,6 @@ const Service = (props) => {
     reservation_end_date_end: undefined,
     reservation_cancel_date_start: undefined,
     reservation_cancel_date_end: undefined,
-    page: 1,
-    size: PAGE_SIZE,
   });
 
   const getServiceList = (params) => {
@@ -88,9 +87,9 @@ const Service = (props) => {
           current: data.page,
           total: data.total,
           pageSize: data.size,
+          size: data.size,
         };
 
-        // pageInfo 세팅
         setPagination(pageInfo);
 
         // 로딩바 세팅
@@ -104,19 +103,32 @@ const Service = (props) => {
   };
 
   useEffect(() => {
-    getServiceList(params);
+    getServiceList(pagination);
   }, []);
 
   // 테이블 페이지 변경시
   const handleTableChange = (pagination) => {
-    setPagination(pagination);
+    setPagination({
+      ...pagination,
+      size: pagination.pageSize,
+    });
 
     // 호출
-    getServiceList({ ...params, page: pagination.current });
+    getServiceList({
+      ...params,
+      page: pagination.current,
+      size: pagination.pageSize,
+    });
   };
 
   const handleSearch = () => {
     const searchFormValues = searchForm.getFieldsValue();
+
+    setPagination({
+      page: 1,
+      size: 20,
+      pageSize: 20,
+    });
 
     const searchParams = {
       contract_id: searchFormValues.contract_id,
@@ -132,6 +144,7 @@ const Service = (props) => {
       reservation_cancel_date_start: reservationCancelDateStart,
       reservation_cancel_date_end: reservationCancelDateEnd,
       page: 1,
+      size: 20,
     };
 
     getServiceList({ ...params, ...searchParams });
@@ -148,6 +161,12 @@ const Service = (props) => {
     setReservationCancelDateStart(undefined);
     setReservationCancelDateEnd(undefined);
 
+    setPagination({
+      page: 1,
+      size: 20,
+      pageSize: 20,
+    });
+
     // params state reset
     const searchParams = {
       contract_id: undefined,
@@ -163,6 +182,7 @@ const Service = (props) => {
       reservation_cancel_date_start: undefined,
       reservation_cancel_date_end: undefined,
       page: 1,
+      size: 20,
     };
 
     getServiceList({ ...params, ...searchParams });

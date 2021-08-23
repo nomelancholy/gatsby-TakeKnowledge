@@ -111,7 +111,11 @@ const Qna = (props) => {
   const [qnaList, setQnaList] = useState([]);
 
   const [loading, setLoading] = useState(false);
-  const [pagination, setPagination] = useState({});
+  const [pagination, setPagination] = useState({
+    page: 1,
+    size: 20,
+    pageSize: 20,
+  });
 
   const [categoryOptions, setCategoryOptions] = useState([]);
 
@@ -123,9 +127,6 @@ const Qna = (props) => {
   const [regdateStart, setRegdateStart] = useState(undefined);
   const [regdateEnd, setRegdateEnd] = useState(undefined);
 
-  // 페이지 사이즈
-  const PAGE_SIZE = 20;
-
   // 파라미터 state - 초기엔 초기값, 이후엔 바로 직전의 params 저장
   const [params, setParams] = useState({
     status: undefined,
@@ -133,8 +134,6 @@ const Qna = (props) => {
     category: undefined,
     start_date: undefined,
     end_date: undefined,
-    page: 1,
-    size: PAGE_SIZE,
   });
 
   const getQnaList = (params) => {
@@ -164,9 +163,9 @@ const Qna = (props) => {
           current: data.page,
           total: data.total,
           pageSize: data.size,
+          size: data.size,
         };
 
-        // pageInfo 세팅
         setPagination(pageInfo);
 
         // 로딩바 세팅
@@ -181,15 +180,22 @@ const Qna = (props) => {
   };
 
   useEffect(() => {
-    getQnaList(params);
+    getQnaList(pagination);
   }, []);
 
   // 테이블 페이지 변경시
   const handleTableChange = (pagination) => {
-    setPagination(pagination);
+    setPagination({
+      ...pagination,
+      size: pagination.pageSize,
+    });
 
     // 호출
-    getQnaList({ ...params, page: pagination.current });
+    getQnaList({
+      ...params,
+      page: pagination.current,
+      size: pagination.pageSize,
+    });
   };
 
   // 검색 - 유형 1 변경시 유형 2(카테고리 세팅)
@@ -204,6 +210,12 @@ const Qna = (props) => {
   const handleSearch = () => {
     const searchFormValues = searchForm.getFieldsValue();
 
+    setPagination({
+      page: 1,
+      size: 20,
+      pageSize: 20,
+    });
+
     const searchParams = {
       qid: searchFormValues.qid,
       classification: searchFormValues.classification,
@@ -212,6 +224,7 @@ const Qna = (props) => {
       start_date: regdateStart,
       end_date: regdateEnd,
       page: 1,
+      size: 20,
     };
 
     getQnaList({ ...params, ...searchParams });
@@ -220,6 +233,12 @@ const Qna = (props) => {
   const handleReset = () => {
     // form Item reset
     searchForm.resetFields();
+
+    setPagination({
+      page: 1,
+      size: 20,
+      pageSize: 20,
+    });
 
     setRegdateStart(undefined);
     setRegdateEnd(undefined);
@@ -233,6 +252,7 @@ const Qna = (props) => {
       start_date: undefined,
       end_date: undefined,
       page: 1,
+      size: 20,
     };
 
     getQnaList({ ...params, ...searchParams });

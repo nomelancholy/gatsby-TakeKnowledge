@@ -27,21 +27,20 @@ const Spot = (props) => {
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
-  const [pagination, setPagination] = useState({});
+  const [pagination, setPagination] = useState({
+    page: 1,
+    size: 20,
+    pageSize: 20,
+  });
   const [loading, setLoading] = useState(false);
 
   const [searchForm] = useForm();
-
-  // 페이지 사이즈
-  const PAGE_SIZE = 20;
 
   // 파라미터 state - 초기엔 초기값, 이후엔 바로 직전의 params 저장
   const [params, setParams] = useState({
     spot_id: undefined,
     name: undefined,
     status: undefined,
-    page: 1,
-    size: PAGE_SIZE,
   });
 
   // spot list 조회
@@ -69,9 +68,9 @@ const Spot = (props) => {
           current: data.page,
           total: data.total,
           pageSize: data.size,
+          size: data.size,
         };
 
-        // pageInfo 세팅
         setPagination(pageInfo);
 
         setLoading(false);
@@ -116,10 +115,17 @@ const Spot = (props) => {
 
   // 테이블 페이지 변경시
   const handleTableChange = (pagination) => {
-    setPagination(pagination);
+    setPagination({
+      ...pagination,
+      size: pagination.pageSize,
+    });
 
     // 호출
-    getSpotList({ ...params, page: pagination.current });
+    getSpotList({
+      ...params,
+      page: pagination.current,
+      size: pagination.pageSize,
+    });
   };
 
   // 검색
@@ -127,11 +133,18 @@ const Spot = (props) => {
   const handleSearch = () => {
     const searchFormValues = searchForm.getFieldsValue();
 
+    setPagination({
+      page: 1,
+      size: 20,
+      pageSize: 20,
+    });
+
     const searchParams = {
       spot_id: searchFormValues.spot_id,
       name: searchFormValues.name,
       status: searchFormValues.status,
       page: 1,
+      size: 20,
     };
 
     getSpotList({ ...params, ...searchParams });
@@ -142,19 +155,26 @@ const Spot = (props) => {
     // form Item reset
     searchForm.resetFields();
 
+    setPagination({
+      page: 1,
+      size: 20,
+      pageSize: 20,
+    });
+
     // params state reset
     const searchParams = {
       spot_id: undefined,
       name: undefined,
       status: undefined,
       page: 1,
+      size: 20,
     };
 
     getSpotList({ ...params, ...searchParams });
   };
 
   useEffect(() => {
-    getSpotList(params);
+    getSpotList(pagination);
   }, []);
 
   return (
