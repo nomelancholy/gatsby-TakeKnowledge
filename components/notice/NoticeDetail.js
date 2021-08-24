@@ -30,12 +30,8 @@ const NoticeDetail = (props) => {
 
   const [okModalVisible, setOkModalVisible] = useState(false);
 
-  // 공지 상태
-  const [statusForm] = Form.useForm();
-  // 공지 제목 / 내용
-  const [contentsForm] = Form.useForm();
-
-  const [form] = Form.useForm();
+  // 공지 Form
+  const [noticeForm] = Form.useForm();
 
   useEffect(() => {
     if (noticeId) {
@@ -69,24 +65,20 @@ const NoticeDetail = (props) => {
   useEffect(() => {
     if (noticeInfo) {
       // 공지 상태
-      statusForm.setFieldsValue({
+      noticeForm.setFieldsValue({
         status: noticeInfo.status,
         type: noticeInfo.type,
         sticky: noticeInfo.sticky,
-      });
-
-      // 공지 제목 / 내용
-      contentsForm.setFieldsValue({
         title: noticeInfo.title,
       });
+
       setContent(noticeInfo.content);
     }
   }, [noticeInfo]);
 
   // 저장 버튼 클릭
   const handleNoticeRegisterSubmit = () => {
-    const { type, sticky, status } = statusForm.getFieldValue();
-    const { title } = contentsForm.getFieldValue();
+    const { type, sticky, status, title } = noticeForm.getFieldValue();
 
     let data = {
       type: type,
@@ -137,9 +129,15 @@ const NoticeDetail = (props) => {
         bodyStyle={{ padding: "1rem" }}
         className="mb-4"
       >
-        <Card bodyStyle={{ padding: "1rem" }} className="mb-4">
-          <Form form={statusForm}>
-            <Form.Item name="status" label="공지 노출 여부">
+        <Form form={noticeForm} onFinish={handleNoticeRegisterSubmit}>
+          <Card bodyStyle={{ padding: "1rem" }} className="mb-2">
+            <Form.Item
+              name="status"
+              label="공지 노출 여부"
+              rules={[
+                { required: true, message: "공지 노출 여부를 선택해주세요" },
+              ]}
+            >
               <Radio.Group>
                 <Radio style={radioStyle} value={"publish"}>
                   노출
@@ -149,7 +147,11 @@ const NoticeDetail = (props) => {
                 </Radio>
               </Radio.Group>
             </Form.Item>
-            <Form.Item name="type" label="공지 유형">
+            <Form.Item
+              name="type"
+              label="공지 유형"
+              rules={[{ required: true, message: "공지 유형을 선택해주세요" }]}
+            >
               <Radio.Group>
                 <Radio style={radioStyle} value={"normal"}>
                   일반 공지
@@ -162,7 +164,13 @@ const NoticeDetail = (props) => {
                 </Radio>
               </Radio.Group>
             </Form.Item>
-            <Form.Item name="sticky" label="상단 노출">
+            <Form.Item
+              name="sticky"
+              label="상단 노출"
+              rules={[
+                { required: true, message: "상단 노출 여부를 선택해주세요" },
+              ]}
+            >
               <Radio.Group>
                 <Radio style={radioStyle} value={1}>
                   노출
@@ -172,32 +180,33 @@ const NoticeDetail = (props) => {
                 </Radio>
               </Radio.Group>
             </Form.Item>
-          </Form>
-        </Card>
-        <Card bodyStyle={{ padding: "1rem" }} className="mb-4">
-          <Form form={contentsForm}>
-            <Form.Item name="title" label="제목">
+          </Card>
+          <Card bodyStyle={{ padding: "1rem" }} className="mb-2">
+            <Form.Item
+              name="title"
+              label="제목"
+              rules={[{ required: true, message: "제목을 입력해주세요" }]}
+            >
               <Input />
             </Form.Item>
             <Form.Item name="content" label="내용">
               <PostEditor onChange={handleEditorChange} setContents={content} />
             </Form.Item>
-          </Form>
-        </Card>
-
-        <Button type="primary" onClick={handleNoticeRegisterSubmit}>
-          저장
-        </Button>
-        <Modal
-          visible={okModalVisible}
-          okText="확인"
-          onOk={() => {
-            router.push("/notice");
-          }}
-          cancelButtonProps={{ style: { display: "none" } }}
-        >
-          {registerMode ? "공지 등록 완료" : "공지 수정 완료"}
-        </Modal>
+            <Button type="primary" htmlType="submit">
+              저장
+            </Button>
+            <Modal
+              visible={okModalVisible}
+              okText="확인"
+              onOk={() => {
+                router.push("/notice");
+              }}
+              cancelButtonProps={{ style: { display: "none" } }}
+            >
+              {registerMode ? "공지 등록 완료" : "공지 수정 완료"}
+            </Modal>
+          </Card>
+        </Form>
       </Card>
 
       <Row type="flex" align="middle" className="py-4">
