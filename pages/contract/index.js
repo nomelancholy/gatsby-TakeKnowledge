@@ -127,9 +127,23 @@ const Contract = (props) => {
       pageSize: 20,
     });
 
+    let contractIds = undefined;
+    let uIds = undefined;
+    let groupIds = undefined;
+
+    if (searchFormValues.contract_id) {
+      contractIds = searchFormValues.contract_id.split("\n");
+    }
+
+    if (searchFormValues.uid) {
+      uIds = searchFormValues.uid.split("\n");
+    }
+
+    console.log(`contractIds`, contractIds);
+
     const searchParams = {
-      contract_id: searchFormValues.contract_id,
-      uid: searchFormValues.uid,
+      contract_id: contractIds,
+      uid: uIds,
       user_name: searchFormValues.user_name,
       status: searchFormValues.status,
       contract_type: searchFormValues.contract_type,
@@ -226,22 +240,25 @@ const Contract = (props) => {
           layout="vertical"
           name="form_in_modal"
           initialValues={{ modifier: "public" }}
-          onKeyUp={(e) => {
-            if (e.key === "Enter") {
-              handleSearch();
-            }
-          }}
         >
           <Form.Item name="contract_id" label="계약 ID">
-            <Input />
+            <Input.TextArea autoSize={true} />
           </Form.Item>
           <Form.Item name="uid" label="멤버 ID">
-            <Input />
+            <Input.TextArea autoSize={true} />
           </Form.Item>
-          {/* <Form.Item name="group_id" label="그룹 ID">
-            <Input />
-          </Form.Item> */}
-          <Form.Item name="user_name" label="계약자명">
+          <Form.Item name="group_id" label="그룹 ID">
+            <Input.TextArea autoSize={true} />
+          </Form.Item>
+          <Form.Item
+            name="user_name"
+            label="계약자명"
+            onKeyUp={(e) => {
+              if (e.key === "Enter") {
+                handleSearch();
+              }
+            }}
+          >
             <Input />
           </Form.Item>
           {/* <Form.Item name="group_name" label="그룹명">
