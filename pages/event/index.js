@@ -9,10 +9,10 @@ import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
-import { couponListcolumns } from "@utils/columns/coupon";
+import { eventListcolumns } from "@utils/columns/event";
 
-// 쿠폰 관리
-const Coupon = (props) => {
+// 이벤트 관리
+const Event = (props) => {
   const { user, isLoggedIn, token } = props.auth;
 
   useEffect(() => {
@@ -21,7 +21,7 @@ const Coupon = (props) => {
     }
   }, [isLoggedIn]);
 
-  const [couponList, setCouponList] = useState([]);
+  const [eventList, setEventList] = useState([]);
 
   const [pagination, setPagination] = useState({
     page: 1,
@@ -42,7 +42,7 @@ const Coupon = (props) => {
     title: undefined,
   });
 
-  const getCouponList = (params) => {
+  const getEventList = (params) => {
     setLoading(true);
 
     axios
@@ -61,7 +61,7 @@ const Coupon = (props) => {
         const data = response.data;
         console.log(`notice data`, data);
 
-        setCouponList(data.items);
+        setEventList(data.items);
 
         // 페이지 네이션 정보 세팅
         const pageInfo = {
@@ -84,7 +84,7 @@ const Coupon = (props) => {
   };
 
   useEffect(() => {
-    getCouponList(pagination);
+    getEventList(pagination);
   }, []);
 
   // 테이블 페이지 변경시
@@ -95,7 +95,7 @@ const Coupon = (props) => {
     });
 
     // 호출
-    getCouponList({
+    getEventList({
       ...params,
       page: pagination.current,
       size: pagination.pageSize,
@@ -121,7 +121,7 @@ const Coupon = (props) => {
       size: 20,
     };
 
-    getCouponList({ ...params, ...searchParams });
+    getEventList({ ...params, ...searchParams });
   };
 
   const handleReset = () => {
@@ -145,12 +145,12 @@ const Coupon = (props) => {
       size: 20,
     };
 
-    getCouponList({ ...params, ...searchParams });
+    getEventList({ ...params, ...searchParams });
   };
 
   return (
     <>
-      <h3>쿠폰 관리</h3>
+      <h3>이벤트 관리</h3>
 
       <Row type="flex" align="middle" className="py-3">
         <Button
@@ -176,9 +176,9 @@ const Coupon = (props) => {
 
       <Table
         size="middle"
-        columns={couponListcolumns}
+        columns={eventListcolumns}
         rowKey={(record) => record.notice_id}
-        dataSource={couponList}
+        dataSource={eventList}
         pagination={pagination}
         loading={loading}
         onChange={handleTableChange}
@@ -236,4 +236,4 @@ export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
   return { props: initialize(ctx) };
 });
 
-export default connect((state) => state)(Coupon);
+export default connect((state) => state)(Event);

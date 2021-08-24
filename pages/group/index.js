@@ -1,18 +1,17 @@
-import { Button, Table, Form, Input, Row, Select, Modal } from "antd";
-import {
-  SlidersOutlined,
-  SearchOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
+import { Button, Table, Form, Input, Row, Select } from "antd";
+import { SlidersOutlined, PlusOutlined } from "@ant-design/icons";
 
-import React, { Component, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 import Router from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import { Filter } from "@components/elements";
+import { useForm } from "antd/lib/form/Form";
+import { groupListcolumns } from "@utils/columns/group";
 
+// 그룹 관리
 const Group = (props) => {
   const { user, isLoggedIn, token } = props.auth;
 
@@ -20,107 +19,133 @@ const Group = (props) => {
     if (!isLoggedIn) {
       Router.push("/");
     }
-  }, []);
+  }, [isLoggedIn]);
 
-  const columns = [
-    {
-      title: "그룹 ID",
-      dataIndex: "name",
-    },
-    {
-      title: "그룹명",
-      dataIndex: "gender",
-    },
-    {
-      title: "그룹 회원 상태",
-      dataIndex: "email",
-    },
-    {
-      title: "멤버 수",
-      dataIndex: "email",
-    },
-    {
-      title: "상품 유형",
-      dataIndex: "email",
-    },
-    {
-      title: "결제 방식",
-      dataIndex: "email",
-    },
-    {
-      title: "활성/휴면 여부",
-      dataIndex: "email",
-    },
-    {
-      title: "생성 일시",
-      dataIndex: "email",
-    },
-  ];
+  const [groupList, setGroupList] = useState([]);
 
-  const [data, setData] = useState([]);
-  const [pagination, setPagination] = useState({});
+  const [pagination, setPagination] = useState({
+    page: 1,
+    size: 20,
+    pageSize: 20,
+  });
   const [loading, setLoading] = useState(false);
 
-  const [registrationModalOpen, setRegistrationModalOpen] = useState(false);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
-  const [form] = Form.useForm();
+  const [searchForm] = useForm();
 
-  const handleTableChange = (pagination, filters, sorter) => {
-    setPagination(2);
+  const [params, setParams] = useState({
+    notice_id: undefined,
+    status: undefined,
+    type: undefined,
+    sticky: undefined,
+    title: undefined,
+  });
 
-    fetch({
-      results: pagination.pageSize,
-      page: pagination.current,
-      sortField: sorter.field,
-      sortOrder: sorter.order,
-      ...filters,
-    });
-  };
-
-  const fetch = (params = {}) => {
+  const getGroupList = (params) => {
     setLoading(true);
+
     axios
-      .get(
-        "https://randomuser.me/api",
-        {
-          results: 10,
-          ...params,
-        },
+      .post(
+        `${process.env.BACKEND_API}/services/notice/list`,
+        { ...params },
         {
           headers: {
             "Content-Type": "application/json;charset=UTF-8",
             "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
           },
         }
       )
       .then((response) => {
-        console.log(`response`, response);
         const data = response.data;
-        console.log(`data`, data);
-        // Read total count from server
-        // pagination.total = data.totalCount;
-        setPagination({ ...pagination, total: 200 });
+        console.log(`notice data`, data);
+
+        setGroupList(data.items);
+
+        // 페이지 네이션 정보 세팅
+        const pageInfo = {
+          current: data.page,
+          total: data.total,
+          pageSize: data.size,
+          size: data.size,
+        };
+
+        setPagination(pageInfo);
+
+        // 로딩바 세팅
         setLoading(false);
-        setData(data.results);
+
+        setParams(params);
       })
       .catch((error) => {
         console.log(`error`, error);
       });
   };
 
-  const handleGroupTypeChange = (value) => {
-    console.log(value);
-    form.setFieldsValue({
-      note: `Hi, ${value === "male" ? "man" : "lady"}!`,
+  useEffect(() => {
+    getGroupList(pagination);
+  }, []);
+
+  // 테이블 페이지 변경시
+  const handleTableChange = (pagination) => {
+    setPagination({
+      ...pagination,
+      size: pagination.pageSize,
+    });
+
+    // 호출
+    getGroupList({
+      ...params,
+      page: pagination.current,
+      size: pagination.pageSize,
     });
   };
 
-  const handlePaymentTypeChange = (value) => {
-    console.log(value);
-    form.setFieldsValue({
-      note: `Hi, ${value === "male" ? "man" : "lady"}!`,
+  const handleSearch = () => {
+    const searchFormValues = searchForm.getFieldsValue();
+
+    setPagination({
+      page: 1,
+      size: 20,
+      pageSize: 20,
     });
+
+    const searchParams = {
+      notice_id: searchFormValues.notice_id,
+      status: searchFormValues.status,
+      type: searchFormValues.type,
+      sticky: searchFormValues.sticky,
+      title: searchFormValues.title,
+      page: 1,
+      size: 20,
+    };
+
+    getGroupList({ ...params, ...searchParams });
+  };
+
+  const handleReset = () => {
+    // form Item reset
+    searchForm.resetFields();
+
+    setPagination({
+      page: 1,
+      size: 20,
+      pageSize: 20,
+    });
+
+    // params state reset
+    const searchParams = {
+      notice_id: undefined,
+      status: undefined,
+      type: undefined,
+      sticky: undefined,
+      title: undefined,
+      page: 1,
+      size: 20,
+    };
+
+    getGroupList({ ...params, ...searchParams });
   };
 
   return (
@@ -128,9 +153,6 @@ const Group = (props) => {
       <h3>그룹 관리</h3>
 
       <Row type="flex" align="middle" className="py-3">
-        {/* <Button type="primary">
-          <SearchOutlined></SearchOutlined>검색
-        </Button> */}
         <Button
           type="primary"
           onClick={() => {
@@ -144,7 +166,7 @@ const Group = (props) => {
         <Button
           type="primary"
           onClick={() => {
-            setRegistrationModalOpen(true);
+            Router.push("/notice/new");
           }}
         >
           <PlusOutlined />
@@ -154,9 +176,9 @@ const Group = (props) => {
 
       <Table
         size="middle"
-        columns={columns}
-        rowKey={(record) => record.login.uuid}
-        dataSource={data}
+        columns={groupListcolumns}
+        rowKey={(record) => record.notice_id}
+        dataSource={groupList}
         pagination={pagination}
         loading={loading}
         onChange={handleTableChange}
@@ -165,120 +187,47 @@ const Group = (props) => {
       <Filter
         visible={filterModalOpen}
         onClose={() => setFilterModalOpen(false)}
-        onSearch={() => {
-          console.log(`onOk`);
-          //     () => {
-          //   form
-          //     .validateFields()
-          //     .then((values) => {
-          //       form.resetFields();
-          //       onCreate(values);
-          //     })
-          //     .catch((info) => {
-          //       console.log("Validate Failed:", info);
-          //     });
-          // }
-        }}
+        onReset={handleReset}
+        onSearch={handleSearch}
       >
         <Form
-          // form={form}
+          form={searchForm}
           layout="vertical"
           name="form_in_modal"
           initialValues={{ modifier: "public" }}
+          onKeyUp={(e) => {
+            if (e.key === "Enter") {
+              handleSearch();
+            }
+          }}
         >
-          <Form.Item name="그룹 ID" label="그룹 ID">
+          <Form.Item name="notice_id" label="공지 ID">
             <Input />
           </Form.Item>
-          <Form.Item name="그룹명" label="그룹명">
-            <Input />
+          <Form.Item name="type" label="공지 유형">
+            <Select style={{ width: 160 }}>
+              <Select.Option value="normal">일반 공지</Select.Option>
+              <Select.Option value="group">그룹 공지</Select.Option>
+              <Select.Option value="spot">지점 공지</Select.Option>
+            </Select>
           </Form.Item>
-          <Form.Item name="회원 상태" label="회원 상태">
-            <Input />
+          <Form.Item name="status" label="사용 여부">
+            <Select style={{ width: 120 }}>
+              <Select.Option value="publish">발행</Select.Option>
+              <Select.Option value="private">미발행</Select.Option>
+            </Select>
           </Form.Item>
-          <Form.Item name="활성/휴면 여부" label="활성/휴면 여부">
+          <Form.Item name="sticky" label="상단 노출">
+            <Select style={{ width: 120 }}>
+              <Select.Option value={0}>미노출</Select.Option>
+              <Select.Option value={1}>노출</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="title" label="공지 제목">
             <Input />
           </Form.Item>
         </Form>
       </Filter>
-      {/* 등록 모달 */}
-      <Modal
-        visible={registrationModalOpen}
-        title="그룹 등록"
-        okText="등록"
-        cancelText="취소"
-        onCancel={() => {
-          setRegistrationModalOpen(false);
-        }}
-        onOk={
-          () => {
-            console.log(`onOk`);
-          }
-          //     () => {
-          //   form
-          //     .validateFields()
-          //     .then((values) => {
-          //       form.resetFields();
-          //       onCreate(values);
-          //     })
-          //     .catch((info) => {
-          //       console.log("Validate Failed:", info);
-          //     });
-          // }
-        }
-      >
-        <Form
-          // form={form}
-          layout="vertical"
-          name="form_in_modal"
-          initialValues={{ modifier: "public" }}
-        >
-          <Form.Item
-            name="그룹 유형"
-            label="그룹 유형"
-            rules={[
-              { required: true, message: "그룹 유형은 필수 선택 사항입니다." },
-            ]}
-          >
-            <Select
-              placeholder="그룹 유형을 선택해주세요"
-              onChange={handleGroupTypeChange}
-            >
-              <Select.Option value="male">개인 사업자</Select.Option>
-              <Select.Option value="female">법인</Select.Option>
-            </Select>
-          </Form.Item>
-          <Form.Item
-            name="그룹명"
-            label="그룹명"
-            rules={[
-              {
-                required: true,
-                message: "그룹명은 필수 입력 사항입니다.",
-              },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="결제수단 선택"
-            label="결제수단 선택"
-            rules={[
-              {
-                required: true,
-                message: "결제 수단은은 필수 선택 사항입니다.",
-              },
-            ]}
-          >
-            <Select
-              placeholder="결제수단 선택"
-              onChange={handlePaymentTypeChange}
-            >
-              <Select.Option value="male">카드</Select.Option>
-              <Select.Option value="female">계좌이체</Select.Option>
-            </Select>
-          </Form.Item>
-        </Form>
-      </Modal>
     </>
   );
 };
