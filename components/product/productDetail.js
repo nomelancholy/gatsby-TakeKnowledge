@@ -700,6 +700,7 @@ const ProductDetail = (props) => {
               visible={okModalVisible}
               okText="확인"
               onOk={() => setOkModalVisible(false)}
+              cancelButtonProps={{ style: { display: "none" } }}
             >
               스팟 등록 완료
             </Modal>

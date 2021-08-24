@@ -327,6 +327,7 @@ const RateplanDetail = (props) => {
               onOk={() => {
                 router.push("/payment");
               }}
+              cancelButtonProps={{ style: { display: "none" } }}
             >
               {registerMode ? "스팟 등록 완료" : "스팟 수정 완료"}
             </Modal>

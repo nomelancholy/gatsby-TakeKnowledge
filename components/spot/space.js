@@ -213,6 +213,7 @@ const Space = (props) => {
             visible={okModalVisible}
             okText="확인"
             onOk={() => setOkModalVisible(false)}
+            onCancel={() => setOkModalVisible(false)}
             cancelButtonProps={{ style: { display: "none" } }}
           >
             {title} 정보 등록 완료

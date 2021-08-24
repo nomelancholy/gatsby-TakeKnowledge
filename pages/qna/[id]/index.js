@@ -1,4 +1,4 @@
-import { Button, Form, Input, Row, Modal, Card, Radio } from "antd";
+import { Button, Form, Input, Row, Modal, Card, Radio, Popconfirm } from "antd";
 
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
@@ -30,7 +30,6 @@ const QnaDetail = (props) => {
 
   // Modal 관련 state
   const [okModalVisible, setOkModalVisible] = useState(false);
-  const [removeModalVisible, setRemoveModalVisible] = useState(false);
 
   // 답장을 단 적이 있는 경우 (작성/수정 flag)
   const [replyQid, setReplyQid] = useState(undefined);
@@ -253,13 +252,14 @@ const QnaDetail = (props) => {
         <Button type="primary" onClick={handleReplyRegisterSubmit}>
           저장
         </Button>
-        <Button
-          onClick={() => {
-            setRemoveModalVisible(true);
-          }}
+        <Popconfirm
+          title={"삭제하시겠습니까?"}
+          onConfirm={handleRemove}
+          okText={"삭제"}
+          cancelText={"취소"}
         >
-          삭제
-        </Button>
+          <Button>삭제</Button>
+        </Popconfirm>
         <Modal
           visible={okModalVisible}
           okText="확인"
@@ -272,17 +272,6 @@ const QnaDetail = (props) => {
           cancelButtonProps={{ style: { display: "none" } }}
         >
           {replyQid ? "답변 수정 완료" : "답변 등록 완료"}
-        </Modal>
-        <Modal
-          visible={removeModalVisible}
-          okText="확인"
-          cancelText="취소"
-          onOk={handleRemove}
-          onCancel={() => {
-            setRemoveModalVisible(false);
-          }}
-        >
-          {"삭제하시겠습니까?"}
         </Modal>
       </Card>
 

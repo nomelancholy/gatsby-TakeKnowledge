@@ -1,4 +1,14 @@
-import { Button, Form, Input, Modal, Card, Col, Select, Table } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  Modal,
+  Card,
+  Col,
+  Select,
+  Table,
+  Popconfirm,
+} from "antd";
 
 import React, { useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
@@ -21,7 +31,6 @@ const ProductSpot = (props) => {
 
   // 모달 관련 state
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
   const [form] = useForm();
 
@@ -208,13 +217,14 @@ const ProductSpot = (props) => {
 
   // 삭제
   const handleSpotRemove = () => {
+    console.log(`spotInfo`, spotInfo);
     const config = {
       method: "post",
       url: `${process.env.BACKEND_API}/admin/product/space/delete`,
       headers: {
         Authorization: decodeURIComponent(token),
       },
-      data: { spot_id: spotInfo.sm_id, product_id: productId },
+      data: { spot_id: spotInfo.spot.spot_id, product_id: productId },
     };
 
     axios(config)
@@ -231,8 +241,6 @@ const ProductSpot = (props) => {
       .catch(function (error) {
         console.log(error);
       });
-
-    setDeleteModalVisible(false);
   };
 
   // 옵션 스팟이 바뀔 때 사용 가능 공간 변경
@@ -324,18 +332,14 @@ const ProductSpot = (props) => {
     <Col sm={24} md={8} className="mb-4">
       <Card>
         <>
-          <Button onClick={() => setDeleteModalVisible(true)}>삭제</Button>
-          <Modal
-            visible={deleteModalVisible}
-            okText="확인"
-            cancelText="취소"
-            onOk={handleSpotRemove}
-            onCancel={() => {
-              setDeleteModalVisible(false);
-            }}
+          <Popconfirm
+            title={"삭제하시겠습니까?"}
+            onConfirm={handleSpotRemove}
+            okText={"삭제"}
+            cancelText={"취소"}
           >
-            <p>정말 삭제하시겠습니까?</p>
-          </Modal>
+            <Button>삭제</Button>
+          </Popconfirm>
         </>
         <Form form={form} onFinish={handleSpotChangeSumbit}>
           <Form.Item name="spot" label="스팟 선택">
@@ -391,6 +395,7 @@ const ProductSpot = (props) => {
                 visible={updateModalVisible}
                 okText="확인"
                 onOk={() => setUpdateModalVisible(false)}
+                cancelButtonProps={{ style: { display: "none" } }}
               >
                 <p>{isNew ? "등록" : "수정"} 완료 되었습니다.</p>
               </Modal>

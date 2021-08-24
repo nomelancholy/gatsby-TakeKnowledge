@@ -9,6 +9,7 @@ import {
   Radio,
   Upload,
   Checkbox,
+  Popconfirm,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 
@@ -37,7 +38,6 @@ const SpaceCard = (props) => {
   const [removedFileList, setRemovedFileList] = useState([]);
 
   // 모달 관련 state
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [okModalVisible, setOkModalVisible] = useState(false);
 
   // 라디오 state
@@ -264,18 +264,14 @@ const SpaceCard = (props) => {
       <Card>
         {!isNew && (
           <>
-            <Button onClick={() => setDeleteModalVisible(true)}>삭제</Button>
-            <Modal
-              visible={deleteModalVisible}
-              okText="확인"
-              cancelText="취소"
-              onOk={handleSpaceRemove}
-              onCancel={() => {
-                setDeleteModalVisible(false);
-              }}
+            <Popconfirm
+              title="정말 삭제하시겠습니까?"
+              onConfirm={handleSpaceRemove}
+              okText={"삭제"}
+              cancelText={"취소"}
             >
-              <p>정말 삭제하시겠습니까?</p>
-            </Modal>
+              <Button>삭제</Button>
+            </Popconfirm>
           </>
         )}
 
@@ -346,9 +342,7 @@ const SpaceCard = (props) => {
           onOk={() => {
             setOkModalVisible(false);
           }}
-          onCancel={() => {
-            setOkModalVisible(false);
-          }}
+          onCancel={() => setOkModalVisible(false)}
           cancelButtonProps={{ style: { display: "none" } }}
         >
           {isNew ? `${title} 등록 완료` : `${title} 수정 완료`}
