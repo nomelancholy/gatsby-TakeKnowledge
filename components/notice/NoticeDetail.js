@@ -189,7 +189,11 @@ const NoticeDetail = (props) => {
             >
               <Input />
             </Form.Item>
-            <Form.Item name="content" label="내용">
+            <Form.Item
+              name="content"
+              label="내용"
+              rules={[{ required: true, message: "내용을 입력해주세요" }]}
+            >
               <PostEditor onChange={handleEditorChange} setContents={content} />
             </Form.Item>
             <Button type="primary" htmlType="submit">
