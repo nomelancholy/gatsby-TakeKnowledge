@@ -232,8 +232,12 @@ const QnaDetail = (props) => {
           </Form>
         </Card>
         <Card title={`답장`} bodyStyle={{ padding: "1rem" }} className="mb-4">
-          <Form form={replyForm}>
-            <Form.Item name="reply" label="내용">
+          <Form form={replyForm} onFinish={handleReplyRegisterSubmit}>
+            <Form.Item
+              name="reply"
+              label="내용"
+              rules={[{ required: true, message: "답변 내용을 입력해주세요" }]}
+            >
               <Input.TextArea />
             </Form.Item>
             {replyQid && (
@@ -246,33 +250,32 @@ const QnaDetail = (props) => {
                 </Form.Item>
               </>
             )}
+            <Button type="primary" htmlType="submit">
+              저장
+            </Button>
+            <Popconfirm
+              title={"삭제하시겠습니까?"}
+              onConfirm={handleRemove}
+              okText={"삭제"}
+              cancelText={"취소"}
+            >
+              <Button>삭제</Button>
+            </Popconfirm>
+            <Modal
+              visible={okModalVisible}
+              okText="확인"
+              onOk={() => {
+                router.push("/qna");
+              }}
+              onCancel={() => {
+                setOkModalVisible(false);
+              }}
+              cancelButtonProps={{ style: { display: "none" } }}
+            >
+              {replyQid ? "답변 수정 완료" : "답변 등록 완료"}
+            </Modal>
           </Form>
         </Card>
-
-        <Button type="primary" onClick={handleReplyRegisterSubmit}>
-          저장
-        </Button>
-        <Popconfirm
-          title={"삭제하시겠습니까?"}
-          onConfirm={handleRemove}
-          okText={"삭제"}
-          cancelText={"취소"}
-        >
-          <Button>삭제</Button>
-        </Popconfirm>
-        <Modal
-          visible={okModalVisible}
-          okText="확인"
-          onOk={() => {
-            router.push("/qna");
-          }}
-          onCancel={() => {
-            setOkModalVisible(false);
-          }}
-          cancelButtonProps={{ style: { display: "none" } }}
-        >
-          {replyQid ? "답변 수정 완료" : "답변 등록 완료"}
-        </Modal>
       </Card>
 
       <Row type="flex" align="middle" className="py-4">
