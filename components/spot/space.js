@@ -70,7 +70,7 @@ const Space = (props) => {
     // 받아온 설명 세팅
     if (desc) {
       form.setFieldsValue({
-        desc: desc,
+        [`${type}_desc`]: desc,
       });
     }
 
@@ -78,10 +78,11 @@ const Space = (props) => {
       const optionImages = [];
 
       images.map((image) => {
+        // images 중에서 그 type에 해당하는 이미지만 가져온다
         if (image.image_key.startsWith(type)) {
           const newObj = {
             thumbUrl: image.image_path,
-            image_key: image.image_key,
+            uid: image.image_key,
           };
 
           optionImages.push(newObj);
@@ -92,12 +93,14 @@ const Space = (props) => {
     }
   }, []);
 
-  const handleSpotSpaceInfoUpdate = (values) => {
+  const handleSpotSpaceInfoUpdate = () => {
     const formData = new FormData();
 
+    const values = form.getFieldValue();
+
     formData.append("spot_id", spotId);
-    if (values.desc !== undefined) {
-      formData.append(`${type}_desc`, values.desc);
+    if (values[`${type}_desc`] !== undefined) {
+      formData.append(`${type}_desc`, values[`${type}_desc`]);
     }
 
     if (removedFileList.length > 0) {
@@ -106,8 +109,8 @@ const Space = (props) => {
 
     if (values.images) {
       values.images.map((image, index) => {
-        // image_key가 있는 파일은 이미 서버에 등록되어 있기 때문에 제외
-        if (!image.image_key) {
+        // image.uid가 rc로 시작하면 새로 올린 이미지
+        if (image.uid.startsWith("rc")) {
           formData.append(`${type}${index + 1}`, image.originFileObj);
         }
       });
@@ -142,14 +145,16 @@ const Space = (props) => {
       // 파일 삭제
 
       // 삭제된 파일 list 에서 삭제
-      const newFileList = fileList.filter((fileObj) => fileObj !== file);
+      const newFileList = fileList.filter(
+        (fileObj) => fileObj.uid !== file.uid
+      );
       setFileList(newFileList);
       form.setFieldsValue({ images: newFileList });
 
-      if (file.image_key) {
+      if (!file.uid.startsWith("rc")) {
         // 서버에서 받아온 파일인 경우
         // 서버에서 삭제하기 위한 배열 세팅
-        const newRemovedFileList = [...removedFileList, file.image_key];
+        const newRemovedFileList = [...removedFileList, file.uid];
         setRemovedFileList(newRemovedFileList);
       }
     }
@@ -164,39 +169,52 @@ const Space = (props) => {
     <>
       <Card title={title} bodyStyle={{ padding: "1rem" }} className="mb-4">
         <Form form={form} onFinish={handleSpotSpaceInfoUpdate}>
-          <Form.Item name="images" label="대표 이미지 (최대 5장까지 첨부 가능)">
-            <Upload
-              name="image"
-              listType="picture-card"
-              fileList={fileList}
-              onChange={handleFileChange}
-              onPreview={handlePreview}
-            >
-              {fileList.length < 5 ? (
-                <Button icon={<UploadOutlined />}>업로드</Button>
-              ) : null}
-            </Upload>
-            <Modal
-              visible={previewVisible}
-              footer={null}
-              onCancel={() => {
-                setPreviewVisible(false);
-              }}
-            >
-              <img alt="example" style={{ width: "100%" }} src={previewImage} />
-            </Modal>
+          <Form.Item
+            name={`${type}_images`}
+            label="대표 이미지 (최대 5장까지 첨부 가능)"
+          >
+            <>
+              <Upload
+                name="image"
+                listType="picture-card"
+                fileList={fileList}
+                onChange={handleFileChange}
+                onPreview={handlePreview}
+              >
+                {fileList.length < 5 ? (
+                  <Button icon={<UploadOutlined />}>업로드</Button>
+                ) : null}
+              </Upload>
+              <Modal
+                visible={previewVisible}
+                footer={null}
+                onCancel={() => {
+                  setPreviewVisible(false);
+                }}
+              >
+                <img
+                  alt="example"
+                  style={{ width: "100%" }}
+                  src={previewImage}
+                />
+              </Modal>
+            </>
           </Form.Item>
-          <Form.Item name="desc" label="설명">
+          <Form.Item name={`${type}_desc`} label="설명">
             <Input.TextArea rows={3}></Input.TextArea>
           </Form.Item>
-          <Form.Item name="list" label={`${title} 리스트`}>
-            {spaceList && spaceList.length !== 0 ? (
-              spaceList.map((spaceObj) => {
-                return <Tag key={spaceObj.space_id}>{spaceObj.space.name}</Tag>;
-              })
-            ) : (
-              <>-</>
-            )}
+          <Form.Item name={`${type}_list`} label={`${title} 리스트`}>
+            <>
+              {spaceList && spaceList.length !== 0 ? (
+                spaceList.map((spaceObj) => {
+                  return (
+                    <Tag key={spaceObj.space_id}>{spaceObj.space.name}</Tag>
+                  );
+                })
+              ) : (
+                <>-</>
+              )}
+            </>
           </Form.Item>
           <Button
             type="primary"

@@ -6,7 +6,7 @@ import axios from "axios";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 
-const Coworking = (props) => {
+const Locker = (props) => {
   const { user, isLoggedIn, token } = props.auth;
 
   useEffect(() => {
@@ -22,6 +22,7 @@ const Coworking = (props) => {
 
   // props로 보낼 spotName 세팅
   useEffect(() => {
+    // uri에서 타입 추출해서 세팅
     const resourcese = router.pathname.split("/");
     const type = resourcese[resourcese.length - 1];
     setType(type);
@@ -56,4 +57,4 @@ export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
   return { props: initialize(ctx) };
 });
 
-export default connect((state) => state)(Coworking);
+export default connect((state) => state)(Locker);

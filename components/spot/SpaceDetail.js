@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 import SpaceCard from "./SpaceCard";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
+import { PlusOutlined } from "@ant-design/icons";
 
 const SpaceDetail = (props) => {
   const { spotId, type, spotName } = props;
@@ -17,57 +18,66 @@ const SpaceDetail = (props) => {
   const [spaceList, setSpaceList] = useState([]);
 
   useEffect(() => {
-    if (type && spotId) {
-      switch (type) {
-        case "lounge":
-          setTitle("라운지");
-          break;
-        case "meeting":
-          setTitle("미팅룸");
-          break;
-        case "coworking":
-          setTitle("코워킹룸");
-          break;
+    switch (type) {
+      case "lounge":
+        setTitle("라운지");
+        break;
+      case "meeting":
+        setTitle("미팅룸");
+        break;
+      case "coworking":
+        setTitle("코워킹룸");
+        break;
 
-        case "locker":
-          setTitle("락커");
-          break;
-        default:
-          break;
-      }
-
-      const config = {
-        method: "post",
-        url: `${process.env.BACKEND_API}/spot/space/list`,
-        headers: {
-          Authorization: decodeURIComponent(token),
-        },
-        data: {
-          spot_id: spotId,
-          type: type,
-        },
-      };
-
-      axios(config)
-        .then(function (response) {
-          setSpaceList(response.data.items);
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
+      case "locker":
+        setTitle("락커");
+        break;
+      default:
+        break;
     }
-  }, [spotId, type]);
+
+    const config = {
+      method: "post",
+      url: `${process.env.BACKEND_API}/spot/space/list`,
+      headers: {
+        Authorization: decodeURIComponent(token),
+      },
+      data: {
+        spot_id: spotId,
+        type: type,
+      },
+    };
+
+    axios(config)
+      .then(function (response) {
+        setSpaceList(response.data.items);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }, []);
 
   const handleAddSpace = () => {
-    const newList = spaceList.concat({});
+    // 신규 공간 생성시 현재 있는 가장 뒤쪽 space_id + 1 부터 부여
+    let newId = 0;
+
+    spaceList.map((space) => {
+      if (space.space_id > newId) {
+        newId = space.space_id;
+      }
+    });
+
+    newId = newId + 1;
+
+    const newList = spaceList.concat({ space_id: newId });
     setSpaceList(newList);
   };
 
   const handleSpaceDeleted = (spaceId) => {
-    const newSpaceLIst = spaceList.filter(
+    const newSpaceList = spaceList.filter(
       (space) => space.space_id !== spaceId
     );
-    setSpaceList(newSpaceLIst);
+    setSpaceList(newSpaceList);
   };
 
   return (
@@ -77,30 +87,33 @@ const SpaceDetail = (props) => {
         extra={<a onClick={() => router.back()}>뒤로 가기</a>}
         bodyStyle={{ padding: "1rem" }}
         className="mb-4"
+        key="manage"
       >
         <Card
           title={`스팟 명 : ${spotName}`}
           bodyStyle={{ padding: "1rem" }}
           className="mb-4"
+          key="spot"
         >
-          <Button onClick={handleAddSpace}>+</Button>
           <Card
             title={`${title} 리스트`}
             bodyStyle={{ padding: "1rem" }}
             className="mb-4"
+            extra={<Button onClick={handleAddSpace} icon={<PlusOutlined />} />}
+            key="list"
           >
-            {spaceList.map((spaceObj) => (
-              <>
+            <>
+              {spaceList.map((spaceObj) => (
                 <SpaceCard
                   key={spaceObj.space_id}
-                  spotId={spotId}
                   spaceInfo={spaceObj}
+                  spotId={spotId}
                   type={type}
                   title={title}
                   handleSpaceDeleted={handleSpaceDeleted}
                 />
-              </>
-            ))}
+              ))}
+            </>
           </Card>
         </Card>
       </Card>

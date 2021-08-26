@@ -10,6 +10,7 @@ import {
   Radio,
   Upload,
   Checkbox,
+  message,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 
@@ -21,7 +22,6 @@ import NextHead from "next/head";
 import Space from "./Space";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
-import { isOrdered } from "immutable";
 
 const radioStyle = {
   display: "inline",
@@ -82,6 +82,8 @@ const SpotDetail = (props) => {
   // spotData 세팅되면 알맞는 엘리먼트에 binding
   useEffect(() => {
     if (spotInfo) {
+      console.log(`spotInfo`, spotInfo);
+
       form.setFieldsValue({
         status: spotInfo.status,
         name: spotInfo.name,
@@ -111,15 +113,16 @@ const SpotDetail = (props) => {
         });
       }
 
-      // 이미지 파일 세팅
+      // 대표 이미지 파일 세팅
       if (spotInfo.images) {
         const spotImages = [];
 
         spotInfo.images.map((image) => {
+          // 대표 이미지인 것들만
           if (image.image_key.startsWith("image")) {
             const newObj = {
               thumbUrl: image.image_path,
-              image_key: image.image_key,
+              uid: image.image_key,
             };
 
             spotImages.push(newObj);
@@ -179,15 +182,6 @@ const SpotDetail = (props) => {
     formData.append("seat_capacity", values.seat_capacity);
     formData.append("excerpt", JSON.stringify(excerpt));
 
-    // formData 확인
-    // for (let key of formData.keys()) {
-    //   console.log(key);
-    // }
-
-    // for (let value of formData.values()) {
-    //   console.log(value);
-    // }
-
     if (removedFileList.length > 0) {
       formData.append("del_images", JSON.stringify(removedFileList));
     }
@@ -195,8 +189,8 @@ const SpotDetail = (props) => {
     // 파일 처리
     if (values.images) {
       values.images.map((image, index) => {
-        // image_key가 있는 파일은 이미 서버에 등록되어 있기 때문에 제외
-        if (!image.image_key) {
+        // image.uid가 rc로 시작하면 새로 올린 이미지
+        if (image.uid.startsWith("rc")) {
           formData.append(`image${index + 1}`, image.originFileObj);
         }
       });
@@ -233,14 +227,16 @@ const SpotDetail = (props) => {
       // 파일 삭제
 
       // 삭제된 파일 list 에서 삭제
-      const newFileList = fileList.filter((fileObj) => fileObj !== file);
+      const newFileList = fileList.filter(
+        (fileObj) => fileObj.uid !== file.uid
+      );
       setFileList(newFileList);
       form.setFieldsValue({ images: newFileList });
 
-      if (file.image_key) {
+      if (!file.uid.startsWith("rc")) {
         // 서버에서 받아온 파일인 경우
         // 서버에서 삭제하기 위한 배열 세팅
-        const newRemovedFileList = [...removedFileList, file.image_key];
+        const newRemovedFileList = [...removedFileList, file.uid];
         setRemovedFileList(newRemovedFileList);
       }
     }
@@ -332,16 +328,7 @@ const SpotDetail = (props) => {
               >
                 <Input onClick={showAddressPopup} />
               </Form.Item>
-              <Form.Item
-                name="address_etc"
-                label="상세 주소"
-                rules={[
-                  {
-                    required: true,
-                    message: "상세 주소는 필수 입력 사항입니다",
-                  },
-                ]}
-              >
+              <Form.Item name="address_etc" label="상세 주소">
                 <Input ref={userAddressEtcRef} />
               </Form.Item>
               <Form.Item
@@ -356,7 +343,16 @@ const SpotDetail = (props) => {
               >
                 <Input />
               </Form.Item>
-              <Form.Item name="seat_capacity" label="인원">
+              <Form.Item
+                name="seat_capacity"
+                label="인원"
+                rules={[
+                  {
+                    type: "number",
+                    message: "인원은 숫자로 입력해야 합니다.",
+                  },
+                ]}
+              >
                 <InputNumber
                   min={0}
                   initialValues={0}
@@ -370,33 +366,35 @@ const SpotDetail = (props) => {
                 name="images"
                 label="대표 이미지 (최대 5장까지 첨부 가능)"
               >
-                <Upload
-                  name="image"
-                  listType="picture-card"
-                  fileList={fileList}
-                  onChange={handleFileChange}
-                  onPreview={handlePreview}
-                >
-                  {fileList.length < 5 ? (
-                    <Button icon={<UploadOutlined />}>업로드</Button>
-                  ) : null}
-                </Upload>
-                <Modal
-                  visible={previewVisible}
-                  footer={null}
-                  onCancel={() => {
-                    setPreviewVisible(false);
-                  }}
-                >
-                  <img
-                    alt="example"
-                    style={{ width: "100%" }}
-                    src={previewImage}
-                  />
-                </Modal>
+                <>
+                  <Upload
+                    name="image"
+                    listType="picture-card"
+                    fileList={fileList}
+                    onChange={handleFileChange}
+                    onPreview={handlePreview}
+                  >
+                    {fileList.length < 5 ? (
+                      <Button icon={<UploadOutlined />}>업로드</Button>
+                    ) : null}
+                  </Upload>
+                  <Modal
+                    visible={previewVisible}
+                    footer={null}
+                    onCancel={() => {
+                      setPreviewVisible(false);
+                    }}
+                  >
+                    <img
+                      alt="example"
+                      style={{ width: "100%" }}
+                      src={previewImage}
+                    />
+                  </Modal>
+                </>
               </Form.Item>
               <Form.Item name="content" label="설명">
-                <Input.TextArea rows={4}></Input.TextArea>
+                <Input.TextArea autoSize={true}></Input.TextArea>
               </Form.Item>
               <Form.Item name="facilityInfos" label="시설 정보">
                 <Checkbox.Group options={facilityInfoOptions} />
@@ -449,13 +447,13 @@ const SpotDetail = (props) => {
                 desc={spotInfo.coworking_desc}
                 images={spotInfo.images}
               />
-              {/* <Space
+              <Space
                 key="locker"
                 type="locker"
                 spotId={spotId}
                 desc={spotInfo.locker_desc}
                 images={spotInfo.images}
-              /> */}
+              />
             </>
           )}
 
