@@ -257,7 +257,10 @@ const Rateplan = (props) => {
           <Form.Item name="product_id" label="상품명">
             <Select style={{ width: 160 }}>
               {optionProductList.map((product) => (
-                <Select.Option value={product.product_id}>
+                <Select.Option
+                  value={product.product_id}
+                  key={product.product_id}
+                >
                   {product.name}
                 </Select.Option>
               ))}
@@ -273,9 +276,11 @@ const Rateplan = (props) => {
           <Form.Item name="start_date" label="시작 일자">
             <>
               <DatePicker
+                placeholder="시작"
                 onChange={(date, dateString) => setStartDateStart(dateString)}
               />
               <DatePicker
+                placeholder="종료"
                 onChange={(date, dateString) => setStartDateEnd(dateString)}
               />
             </>
@@ -283,9 +288,11 @@ const Rateplan = (props) => {
           <Form.Item name="end_date" label="종료 일자">
             <>
               <DatePicker
+                placeholder="시작"
                 onChange={(date, dateString) => setEndDateStart(dateString)}
               />
               <DatePicker
+                placeholder="종료"
                 onChange={(date, dateString) => setEndDateEnd(dateString)}
               />
             </>

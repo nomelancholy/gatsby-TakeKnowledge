@@ -1,5 +1,5 @@
 import { Button, Table, Form, Input, Row, Select, DatePicker } from "antd";
-import { SlidersOutlined } from "@ant-design/icons";
+import { SlidersOutlined, PlusOutlined } from "@ant-design/icons";
 
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
@@ -33,6 +33,9 @@ const Service = (props) => {
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
+  // 사용 지점 옵션 state
+  const [optionSpotList, setOptionSpotList] = useState(undefined);
+
   const [reservationStartDateStart, setReservationStartDateStart] =
     useState(undefined);
   const [reservationStartDateEnd, setReservationStartDateEnd] =
@@ -48,18 +51,18 @@ const Service = (props) => {
   const [searchForm] = useForm();
 
   const [params, setParams] = useState({
-    contract_id: undefined,
+    schedule_id: undefined,
     uid: undefined,
     user_name: undefined,
-    product_type: undefined,
+    space_type: undefined,
     status: undefined,
     spot_id: undefined,
-    reservation_start_date_start: undefined,
-    reservation_start_date_end: undefined,
-    reservation_end_date_start: undefined,
-    reservation_end_date_end: undefined,
-    reservation_cancel_date_start: undefined,
-    reservation_cancel_date_end: undefined,
+    start_date_start: undefined,
+    start_date_end: undefined,
+    end_date_start: undefined,
+    end_date_end: undefined,
+    cancel_date_start: undefined,
+    cancel_date_end: undefined,
   });
 
   const getServiceList = (params) => {
@@ -104,7 +107,34 @@ const Service = (props) => {
 
   useEffect(() => {
     getServiceList(pagination);
+
+    getOptionsSpotList();
   }, []);
+
+  const getOptionsSpotList = () => {
+    console.log("call getOptionsSpotList");
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/spot/list`,
+        { page: 1, size: 100 },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        const data = response.data.items;
+        // 활성화된 스팟들만 사용 가능 스팟으로 세팅 -> 다 불러서 disabled 시키는 쪽으로 변경
+        // const activeSpotList = data.filter((spot) => spot.status === "active");
+        setOptionSpotList(data);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
 
   // 테이블 페이지 변경시
   const handleTableChange = (pagination) => {
@@ -131,18 +161,18 @@ const Service = (props) => {
     });
 
     const searchParams = {
-      contract_id: searchFormValues.contract_id,
+      schedule_id: searchFormValues.schedule_id,
       uid: searchFormValues.uid,
       user_name: searchFormValues.user_name,
-      product_type: searchFormValues.product_type,
+      space_type: searchFormValues.space_type,
       status: searchFormValues.status,
       spot_id: searchFormValues.spot_id,
-      reservation_start_date_start: reservationStartDateStart,
-      reservation_start_date_end: reservationStartDateEnd,
-      reservation_end_date_start: reservationEndDateStart,
-      reservation_end_date_end: reservationEndDateEnd,
-      reservation_cancel_date_start: reservationCancelDateStart,
-      reservation_cancel_date_end: reservationCancelDateEnd,
+      start_date_start: reservationStartDateStart,
+      start_date_end: reservationStartDateEnd,
+      end_date_start: reservationEndDateStart,
+      end_date_end: reservationEndDateEnd,
+      cancel_date_start: reservationCancelDateStart,
+      cancel_date_end: reservationCancelDateEnd,
       page: 1,
       size: 20,
     };
@@ -169,18 +199,18 @@ const Service = (props) => {
 
     // params state reset
     const searchParams = {
-      contract_id: undefined,
+      schedule_id: undefined,
       uid: undefined,
       user_name: undefined,
-      product_type: undefined,
+      space_type: undefined,
       status: undefined,
       spot_id: undefined,
-      reservation_start_date_start: undefined,
-      reservation_start_date_end: undefined,
-      reservation_end_date_start: undefined,
-      reservation_end_date_end: undefined,
-      reservation_cancel_date_start: undefined,
-      reservation_cancel_date_end: undefined,
+      start_date_start: undefined,
+      start_date_end: undefined,
+      end_date_start: undefined,
+      end_date_end: undefined,
+      cancel_date_start: undefined,
+      cancel_date_end: undefined,
       page: 1,
       size: 20,
     };
@@ -204,15 +234,15 @@ const Service = (props) => {
         </Button>
         <span className="px-2 w-10"></span>
         {/* 2차 분량 */}
-        {/* <Button
+        <Button
+          icon={<PlusOutlined />}
           type="primary"
           onClick={() => {
             setRegistrationModalOpen(true);
           }}
         >
-          <PlusOutlined />
-          <span>등록</span>
-        </Button> */}
+          등록
+        </Button>
       </Row>
 
       <Table
@@ -236,8 +266,13 @@ const Service = (props) => {
           layout="vertical"
           name="form_in_modal"
           initialValues={{ modifier: "public" }}
+          onKeyUp={(e) => {
+            if (e.key === "Enter") {
+              handleSearch();
+            }
+          }}
         >
-          <Form.Item name="contract_id" label="예약 ID">
+          <Form.Item name="schedule_id" label="예약 ID">
             <Input />
           </Form.Item>
           <Form.Item name="uid" label="멤버 ID">
@@ -246,7 +281,7 @@ const Service = (props) => {
           <Form.Item name="user_name" label="계약자명">
             <Input />
           </Form.Item>
-          <Form.Item name="product_type" label="부가서비스">
+          <Form.Item name="space_type" label="부가서비스">
             <Select style={{ width: 160 }}>
               <Select.Option value="meeting">미팅룸</Select.Option>
               <Select.Option value="coworking">코워킹룸</Select.Option>
@@ -256,31 +291,45 @@ const Service = (props) => {
           </Form.Item>
           <Form.Item name="status" label="예약 상태">
             <Select style={{ width: 160 }}>
-              <Select.Option value="wait">계좌이체 대기</Select.Option>
-              <Select.Option value="buy">구매</Select.Option>
-              <Select.Option value="pay">이용중</Select.Option>
-              <Select.Option value="refund">환불</Select.Option>
-              <Select.Option value="expired">종료</Select.Option>
-              <Select.Option value="terminate">해지</Select.Option>
-              <Select.Option value="canceld">취소</Select.Option>
+              <Select.Option value="buy">예약</Select.Option>
+              <Select.Option value="canceled">예약 취소</Select.Option>
+              <Select.Option value="pay">계약 완료(이용중)</Select.Option>
+              <Select.Option value="expired">계약 해지 (만료)</Select.Option>
+              <Select.Option value="terminate">계약 해지 (중도)</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item name="spot" label="사용 지점">
+          <Form.Item name="spot_id" label="사용 지점">
             <Select style={{ width: 160 }}>
               {/* 활성화 된 spot 리스트 가져와서  map */}
-              {/* <Select.Option value="true">해당</Select.Option>
-              <Select.Option value="false">미해당</Select.Option> */}
+              {optionSpotList &&
+                optionSpotList.map((optionSpot) => (
+                  <Select.Option
+                    key={optionSpot.spot_id}
+                    value={optionSpot.spot_id}
+                    disabled={optionSpot.status === "active" ? false : true}
+                  >
+                    {optionSpot.status === "active"
+                      ? optionSpot.name
+                      : `${optionSpot.name} ${
+                          optionSpot.status === "inactive"
+                            ? "(비활성)"
+                            : "(삭제)"
+                        }`}
+                  </Select.Option>
+                ))}
             </Select>
           </Form.Item>
 
           <Form.Item name="start_date" label="예약 시작 일자">
             <>
               <DatePicker
+                placeholder="시작"
                 onChange={(date, dateString) =>
                   setReservationStartDateStart(dateString)
                 }
               />
               <DatePicker
+                placeholder="종료"
                 onChange={(date, dateString) =>
                   setReservationStartDateEnd(dateString)
                 }
@@ -290,11 +339,13 @@ const Service = (props) => {
           <Form.Item name="end_date" label="예약 종료 일자">
             <>
               <DatePicker
+                placeholder="시작"
                 onChange={(date, dateString) =>
                   setReservationEndDateStart(dateString)
                 }
               />
               <DatePicker
+                placeholder="종료"
                 onChange={(date, dateString) =>
                   setReservationEndDateEnd(dateString)
                 }
@@ -304,11 +355,13 @@ const Service = (props) => {
           <Form.Item name="cancel_date" label="예약 취소 일자">
             <>
               <DatePicker
+                placeholder="시작"
                 onChange={(date, dateString) =>
                   setReservationCancelDateStart(dateString)
                 }
               />
               <DatePicker
+                placeholder="종료"
                 onChange={(date, dateString) =>
                   setReservationCancelDateEnd(dateString)
                 }

@@ -257,9 +257,11 @@ const Order = (props) => {
           <Form.Item name="next_paydate" label="정기 결제 일자">
             <>
               <DatePicker
+                placeholder="시작"
                 onChange={(date, dateString) => setOrderDateStart(dateString)}
               />
               <DatePicker
+                placeholder="종료"
                 onChange={(date, dateString) => setOrderDateEnd(dateString)}
               />
             </>

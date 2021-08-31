@@ -287,11 +287,13 @@ const Contract = (props) => {
           <Form.Item name="start_date" label="계약 시작 일자">
             <>
               <DatePicker
+                placeholder="시작"
                 onChange={(date, dateString) =>
                   setContractStartDateStart(dateString)
                 }
               />
               <DatePicker
+                placeholder="종료"
                 onChange={(date, dateString) =>
                   setContractStartDateEnd(dateString)
                 }
@@ -301,11 +303,13 @@ const Contract = (props) => {
           <Form.Item name="end_date" label="계약 종료 일자">
             <>
               <DatePicker
+                placeholder="시작"
                 onChange={(date, dateString) =>
                   setContractEndDateStart(dateString)
                 }
               />
               <DatePicker
+                placeholder="종료"
                 onChange={(date, dateString) =>
                   setContractEndDateEnd(dateString)
                 }
@@ -315,11 +319,13 @@ const Contract = (props) => {
           <Form.Item name="cancel_date" label="계약 취소 일자">
             <>
               <DatePicker
+                placeholder="시작"
                 onChange={(date, dateString) =>
                   setContractCancelDateStart(dateString)
                 }
               />
               <DatePicker
+                placeholder="종료"
                 onChange={(date, dateString) =>
                   setContractCancelDateEnd(dateString)
                 }
@@ -329,11 +335,13 @@ const Contract = (props) => {
           <Form.Item name="terminate_date" label="계약 해지 일자">
             <>
               <DatePicker
+                placeholder="시작"
                 onChange={(date, dateString) =>
                   setContractTerminateDateStart(dateString)
                 }
               />
               <DatePicker
+                placeholder="종료"
                 onChange={(date, dateString) =>
                   setContractTerminateDateEnd(dateString)
                 }

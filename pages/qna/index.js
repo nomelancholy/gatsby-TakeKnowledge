@@ -336,9 +336,11 @@ const Qna = (props) => {
           <Form.Item name="regdate" label="생성 일시">
             <>
               <DatePicker
+                placeholder="시작"
                 onChange={(date, dateString) => setRegdateStart(dateString)}
               />
               <DatePicker
+                placeholder="종료"
                 onChange={(date, dateString) => setRegdateEnd(dateString)}
               />
             </>

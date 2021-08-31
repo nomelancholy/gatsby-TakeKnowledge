@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { useRouter } from "next/router";
 import { wrapper } from "@state/stores";
@@ -9,6 +9,12 @@ const RateplanWithId = (props) => {
   const router = useRouter();
   const { id } = router.query;
   const { user, isLoggedIn, token } = props.auth;
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+  }, [isLoggedIn]);
 
   return <RateplanDetail rateplanId={id} token={token} />;
 };

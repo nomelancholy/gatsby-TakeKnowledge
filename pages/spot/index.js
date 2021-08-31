@@ -236,6 +236,7 @@ const Spot = (props) => {
             <Select style={{ width: 200 }}>
               <Select.Option value="active">활성</Select.Option>
               <Select.Option value="inactive">비활성</Select.Option>
+              <Select.Option value="trash">삭제</Select.Option>
             </Select>
           </Form.Item>
         </Form>

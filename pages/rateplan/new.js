@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
@@ -6,6 +6,12 @@ import RateplanDetail from "@components/rateplan/RateplanDetail";
 
 const RateplanNew = (props) => {
   const { user, isLoggedIn, token } = props.auth;
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+  }, [isLoggedIn]);
 
   return <RateplanDetail rateplanId={null} token={token} />;
 };
