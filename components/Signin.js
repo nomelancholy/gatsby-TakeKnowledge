@@ -94,12 +94,14 @@ const Signin = (props) => {
           </FormItem>
 
           <FormItem name="remember" valuePropName="checked" initialValue={true}>
-            <Checkbox>Remember me</Checkbox>
+            <>
+              <Checkbox>Remember me</Checkbox>
 
-            <Button type="primary" htmlType="submit" block className="mt-3">
-              Log in
-            </Button>
-            {msg && <p>{msg}</p>}
+              <Button type="primary" htmlType="submit" block className="mt-3">
+                Log in
+              </Button>
+              {msg && <p>{msg}</p>}
+            </>
           </FormItem>
         </Form>
       </Content>
