@@ -7,26 +7,17 @@ import {
   Tabs,
   Card,
   Radio,
-  Upload,
-  Checkbox,
   Select,
   InputNumber,
   DatePicker,
 } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
 
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 import { useRouter } from "next/router";
-import dynamic from "next/dynamic";
 import moment from "moment";
-import Router from "next/dist/next-server/server/router";
 // import ProductSpot from "./productSpot";
-
-const PostEditor = dynamic(() => import("@utils/Editor"), {
-  ssr: false,
-});
 
 const RateplanDetail = (props) => {
   const { rateplanId, token } = props;
@@ -89,11 +80,13 @@ const RateplanDetail = (props) => {
   useEffect(() => {
     // 요금제 정보 세팅되면
     if (rateplanInfo) {
+      console.log(`rateplanInfo`, rateplanInfo);
+
+      // 상품 구분, 상품명
       // 요금제에 붙어있는 상품 조회
       axios
-        .post(
-          `${process.env.BACKEND_API}/product/get`,
-          { product_id: rateplanInfo.product_id },
+        .get(
+          `${process.env.BACKEND_API}/admin/product/get/${rateplanInfo.product_id}`,
           {
             headers: {
               "Content-Type": "application/json;charset=UTF-8",
@@ -130,18 +123,16 @@ const RateplanDetail = (props) => {
       // 전송용 state에도 세팅
       setStartDate(rateplanInfo.start_date.replace(/\./gi, "-"));
       setEndDate(rateplanInfo.end_date.replace(/\./gi, "-"));
-      // 상품 구분
-
-      // 상품명
     }
   }, [rateplanInfo]);
 
   useEffect(() => {
     // 요금제에 붙어있는 상품 정보 세팅되면
     if (productInfo) {
+      console.log(`productInfo`, productInfo);
       // 요금제 - 상품의 값 상품 구분에 세팅하고
       form.setFieldsValue({
-        product_type: productInfo.type,
+        product_type: productInfo.item.type,
       });
       // 그에 해당하는 옵션 리스트 조회
       getOptionProductList(productInfo.type);
@@ -175,7 +166,7 @@ const RateplanDetail = (props) => {
     // 옵션 상품 리스트가 조회되었고, detail로 들어와서 상품 정보도 있는 경우면
     if (optionProductList && productInfo) {
       form.setFieldsValue({
-        product_id: productInfo.product_id,
+        product_id: productInfo.item.product_id,
       });
     }
   }, [optionProductList]);
@@ -288,7 +279,7 @@ const RateplanDetail = (props) => {
                 </Select>
               </Form.Item>
               <Form.Item name="product_id" label="상품 명">
-                <Select initialValue="-" style={{ width: 120 }}>
+                <Select style={{ width: 120 }}>
                   {optionProductList.map((product) => (
                     <Select.Option
                       key={product.product_id}
@@ -302,10 +293,18 @@ const RateplanDetail = (props) => {
                 </Select>
               </Form.Item>
               <Form.Item name="price" label="이용 요금">
-                <InputNumber />
+                <InputNumber
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                />
               </Form.Item>
               <Form.Item name="dc_price" label="할인 요금">
-                <InputNumber />
+                <InputNumber
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                />
               </Form.Item>
               <Form.Item name="start_date" label="시작일">
                 <DatePicker onChange={handleStartDateChange} />
@@ -314,23 +313,28 @@ const RateplanDetail = (props) => {
                 <DatePicker onChange={handleEndDateChange} />
               </Form.Item>
               <Form.Item name="guest_price" label="게스트 요금">
-                <InputNumber />
+                <InputNumber
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                />
               </Form.Item>
-
-              <Button type="primary" htmlType="submit">
-                저장
-              </Button>
+              <>
+                <Button type="primary" htmlType="submit">
+                  저장
+                </Button>
+                <Modal
+                  visible={okModalVisible}
+                  okText="확인"
+                  onOk={() => {
+                    router.push("/payment");
+                  }}
+                  cancelButtonProps={{ style: { display: "none" } }}
+                >
+                  {registerMode ? "스팟 등록 완료" : "스팟 수정 완료"}
+                </Modal>
+              </>
             </Form>
-            <Modal
-              visible={okModalVisible}
-              okText="확인"
-              onOk={() => {
-                router.push("/payment");
-              }}
-              cancelButtonProps={{ style: { display: "none" } }}
-            >
-              {registerMode ? "스팟 등록 완료" : "스팟 수정 완료"}
-            </Modal>
           </Card>
 
           <Row type="flex" align="middle" className="py-4">
