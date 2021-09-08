@@ -61,8 +61,16 @@ const SidebarContent = ({
     appRoutes.forEach((route, index) => {
       const isCurrentPath =
         pathname.indexOf(lowercase(route.name)) > -1 ? true : false;
+
       const key = getKey(route.name, index);
+
       rootSubMenuKeys.push(key);
+
+      // children이 있는 route의 경우 메뉴를 기본적으로 오픈
+      if (route.children) {
+        setOpenKeys([...openKeys, key]);
+      }
+
       if (isCurrentPath) setOpenKeys([...openKeys, key]);
     });
   }, []);
