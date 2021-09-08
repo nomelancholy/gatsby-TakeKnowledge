@@ -2,47 +2,21 @@
 // api 주소
 export const eventListcolumns = [
   {
-    title: "공지 ID",
-    dataIndex: "notice_id",
+    title: "이벤트 ID",
+    dataIndex: "event_id",
   },
   {
-    title: "공지 제목",
+    title: "이벤트 제목",
     dataIndex: "title",
     render: (text, record) => {
-      return <a href={`/notice/${record.notice_id}`}>{text}</a>;
+      return <a href={`/event/${record.event_id}`}>{text}</a>;
     },
   },
   {
-    title: "공지 유형",
-    dataIndex: "type",
-    render: (text, record) => {
-      let renderText = "";
+    title: "경로",
+    dataIndex: "path",
+  },
 
-      if (text === "normal") {
-        renderText = "일반 공지";
-      } else if (text === "group") {
-        renderText = "그룹 공지";
-      } else if (text === "spot") {
-        renderText = "지점 공지";
-      }
-
-      return renderText;
-    },
-  },
-  {
-    title: "상단 노출",
-    dataIndex: "sticky",
-    render: (text, record) => {
-      return text === 0 ? "X" : "O";
-    },
-  },
-  {
-    title: "등록자",
-    dataIndex: "user",
-    render: (text, record) => {
-      return text.user_name;
-    },
-  },
   {
     title: "사용 여부",
     dataIndex: "status",
@@ -50,13 +24,21 @@ export const eventListcolumns = [
       let renderText = "";
 
       if (text === "publish") {
-        renderText = "발행";
-      } else if (text === "private") {
-        renderText = "미발행";
+        renderText = "활성";
+      } else if (text === "trash") {
+        renderText = "비활성";
       }
 
       return renderText;
     },
+  },
+  {
+    title: "시작 일시",
+    dataIndex: "start_date",
+  },
+  {
+    title: "종료 일시",
+    dataIndex: "end_date",
   },
   {
     title: "생성 일시",

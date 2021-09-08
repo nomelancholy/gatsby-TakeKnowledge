@@ -1,4 +1,4 @@
-import { Button, Table, Form, Input, Row, Select } from "antd";
+import { Button, Table, Form, Input, Row, Select, DatePicker } from "antd";
 import { SlidersOutlined, PlusOutlined } from "@ant-design/icons";
 
 import React, { useState, useEffect } from "react";
@@ -32,14 +32,21 @@ const Event = (props) => {
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
+  const [eventStartDateStart, setEventStartDateStart] = useState(undefined);
+  const [eventStartDateEnd, setEventStartDateEnd] = useState(undefined);
+  const [eventEndDateStart, setEventEndDateStart] = useState(undefined);
+  const [eventEndDateEnd, setEventEndDateEnd] = useState(undefined);
+
   const [searchForm] = useForm();
 
   const [params, setParams] = useState({
-    notice_id: undefined,
-    status: undefined,
-    type: undefined,
-    sticky: undefined,
+    event_id: undefined,
     title: undefined,
+    start_date_start: undefined,
+    start_date_end: undefined,
+    end_date_start: undefined,
+    end_date_end: undefined,
+    status: undefined,
   });
 
   const getEventList = (params) => {
@@ -47,7 +54,7 @@ const Event = (props) => {
 
     axios
       .post(
-        `${process.env.BACKEND_API}/services/notice/list`,
+        `${process.env.BACKEND_API}/services/events/list`,
         { ...params },
         {
           headers: {
@@ -59,7 +66,7 @@ const Event = (props) => {
       )
       .then((response) => {
         const data = response.data;
-        console.log(`notice data`, data);
+        console.log(`event data`, data);
 
         setEventList(data.items);
 
@@ -112,11 +119,13 @@ const Event = (props) => {
     });
 
     const searchParams = {
-      notice_id: searchFormValues.notice_id,
-      status: searchFormValues.status,
-      type: searchFormValues.type,
-      sticky: searchFormValues.sticky,
+      event_id: searchFormValues.event_id,
       title: searchFormValues.title,
+      start_date_start: eventStartDateStart,
+      start_date_end: eventStartDateEnd,
+      end_date_start: eventEndDateStart,
+      end_date_end: eventEndDateEnd,
+      status: searchFormValues.status,
       page: 1,
       size: 20,
     };
@@ -128,6 +137,11 @@ const Event = (props) => {
     // form Item reset
     searchForm.resetFields();
 
+    setEventStartDateStart(undefined);
+    setEventStartDateEnd(undefined);
+    setEventEndDateStart(undefined);
+    setEventEndDateEnd(undefined);
+
     setPagination({
       page: 1,
       size: 20,
@@ -136,11 +150,13 @@ const Event = (props) => {
 
     // params state reset
     const searchParams = {
-      notice_id: undefined,
-      status: undefined,
-      type: undefined,
-      sticky: undefined,
+      event_id: undefined,
       title: undefined,
+      start_date_start: undefined,
+      start_date_end: undefined,
+      end_date_start: undefined,
+      end_date_end: undefined,
+      status: undefined,
       page: 1,
       size: 20,
     };
@@ -177,7 +193,7 @@ const Event = (props) => {
       <Table
         size="middle"
         columns={eventListcolumns}
-        rowKey={(record) => record.notice_id}
+        rowKey={(record) => record.event_id}
         dataSource={eventList}
         pagination={pagination}
         loading={loading}
@@ -201,30 +217,47 @@ const Event = (props) => {
             }
           }}
         >
-          <Form.Item name="notice_id" label="공지 ID">
+          <Form.Item name="event_id" label="이벤트 ID">
             <Input />
           </Form.Item>
-          <Form.Item name="type" label="공지 유형">
-            <Select style={{ width: 160 }}>
-              <Select.Option value="normal">일반 공지</Select.Option>
-              <Select.Option value="group">그룹 공지</Select.Option>
-              <Select.Option value="spot">지점 공지</Select.Option>
-            </Select>
+          <Form.Item name="title" label="이벤트 제목">
+            <Input />
           </Form.Item>
           <Form.Item name="status" label="사용 여부">
             <Select style={{ width: 120 }}>
-              <Select.Option value="publish">발행</Select.Option>
-              <Select.Option value="private">미발행</Select.Option>
+              <Select.Option value="publish">활성</Select.Option>
+              <Select.Option value="trash">비활성</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item name="sticky" label="상단 노출">
-            <Select style={{ width: 120 }}>
-              <Select.Option value={0}>미노출</Select.Option>
-              <Select.Option value={1}>노출</Select.Option>
-            </Select>
+          <Form.Item name="start_date" label="이벤트 시작 일자">
+            <>
+              <DatePicker
+                placeholder="시작"
+                onChange={(date, dateString) =>
+                  setEventStartDateStart(dateString)
+                }
+              />
+              <DatePicker
+                placeholder="종료"
+                onChange={(date, dateString) =>
+                  setEventStartDateEnd(dateString)
+                }
+              />
+            </>
           </Form.Item>
-          <Form.Item name="title" label="공지 제목">
-            <Input />
+          <Form.Item name="end_date" label="이벤트 종료 일자">
+            <>
+              <DatePicker
+                placeholder="시작"
+                onChange={(date, dateString) =>
+                  setEventEndDateStart(dateString)
+                }
+              />
+              <DatePicker
+                placeholder="종료"
+                onChange={(date, dateString) => setEventEndDateEnd(dateString)}
+              />
+            </>
           </Form.Item>
         </Form>
       </Filter>
