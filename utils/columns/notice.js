@@ -20,8 +20,6 @@ export const noticeListcolumns = [
 
       if (text === "normal") {
         renderText = "일반 공지";
-      } else if (text === "group") {
-        renderText = "그룹 공지";
       } else if (text === "spot") {
         renderText = "지점 공지";
       }

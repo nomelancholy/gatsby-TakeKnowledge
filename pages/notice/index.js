@@ -207,7 +207,6 @@ const Notice = (props) => {
           <Form.Item name="type" label="공지 유형">
             <Select style={{ width: 160 }}>
               <Select.Option value="normal">일반 공지</Select.Option>
-              <Select.Option value="group">그룹 공지</Select.Option>
               <Select.Option value="spot">지점 공지</Select.Option>
             </Select>
           </Form.Item>

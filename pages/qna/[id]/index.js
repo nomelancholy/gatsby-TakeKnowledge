@@ -7,12 +7,6 @@ import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import axios from "axios";
 
-import dynamic from "next/dynamic";
-
-const PostEditor = dynamic(() => import("@utils/Editor"), {
-  ssr: false,
-});
-
 const radioStyle = {
   display: "inline",
   height: "30px",
@@ -48,9 +42,6 @@ const QnaDetail = (props) => {
   const [questionForm] = Form.useForm();
   // 답장
   const [replyForm] = Form.useForm();
-
-  // 에디터 컨텐츠 state
-  const [content, setContent] = useState("");
 
   // 문의 상세 조회
   useEffect(() => {
@@ -179,10 +170,6 @@ const QnaDetail = (props) => {
       });
   };
 
-  const handleEditorChange = (content) => {
-    setContent(content);
-  };
-
   return (
     <>
       <Card
@@ -252,7 +239,6 @@ const QnaDetail = (props) => {
               rules={[{ required: true, message: "답변 내용을 입력해주세요" }]}
             >
               <Input.TextArea />
-              <PostEditor onChange={handleEditorChange} setContents={content} />
             </Form.Item>
             {replyQid && (
               <>

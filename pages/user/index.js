@@ -220,15 +220,6 @@ const User = (props) => {
         case "member":
           userRoleExt = "일반";
           break;
-        case "group_member":
-          userRoleExt = "그룹 멤버";
-          break;
-        case "group_master":
-          userRoleExt = "그룹 관리자 멤버";
-          break;
-        case "group_admin":
-          userRoleExt = "그룹 관리자";
-          break;
         default:
           break;
       }
@@ -332,20 +323,9 @@ const User = (props) => {
             <Select style={{ width: 160 }}>
               <Select.Option value="ffadmin">파이브스팟 어드민</Select.Option>
               <Select.Option value="member">일반</Select.Option>
-              <Select.Option value="group_admin">그룹 관리자</Select.Option>
-              <Select.Option value="group_member">그룹 멤버</Select.Option>
-              <Select.Option value="group_master">
-                그룹 관리자멤버
-              </Select.Option>
             </Select>
           </Form.Item>
-          {/* <Form.Item name="group_id" label="그룹 ID">
-            <Input />
-          </Form.Item>
-          <Form.Item name="group_name" label="그룹명">
-            <Select style={{ width: 160 }}>
-            </Select>
-          </Form.Item> */}
+
           <Form.Item name="status" label="회원 상태">
             <Select style={{ width: 160 }}>
               <Select.Option value="active">활성</Select.Option>

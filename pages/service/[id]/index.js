@@ -137,9 +137,7 @@ const ServiceDetail = (props) => {
         case "ffadmin":
           userRole = "관리자";
           break;
-        case "group":
-          userRole = "그룹";
-          break;
+
         case "user":
           userRole = "회원";
           break;
@@ -248,35 +246,6 @@ const ServiceDetail = (props) => {
                   만료
                 </Radio>
               </Radio.Group>
-            </Form.Item>
-          </Form>
-        </Card>
-        <Card
-          title={`그룹 정보`}
-          bodyStyle={{ padding: "1rem" }}
-          className="mb-4"
-        >
-          <Form form={groupForm} layout="vertical">
-            <Form.Item name="classification" label="소속 그룹">
-              <Input disabled />
-            </Form.Item>
-            <Form.Item name="group_name" label="그룹 명 (법인명)">
-              <Input disabled />
-            </Form.Item>
-            <Form.Item name="group_id" label="그룹 ID">
-              <Input disabled />
-            </Form.Item>
-            <Form.Item name="address" label="사업자 주소">
-              <Input disabled />
-            </Form.Item>
-            <Form.Item name="number" label="사업자 등록 번호">
-              <Input disabled />
-            </Form.Item>
-            <Form.Item name="pay_demand" label="결제 방식">
-              <Input disabled />
-            </Form.Item>
-            <Form.Item name="card" label="대표 결제 카드">
-              <Input disabled />
             </Form.Item>
           </Form>
         </Card>

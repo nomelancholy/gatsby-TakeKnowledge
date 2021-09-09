@@ -154,8 +154,6 @@ const OrderDetail = (props) => {
 
   // 청구 상태
   const [orderStatusForm] = Form.useForm();
-  // 그룹 정보
-  const [groupForm] = Form.useForm();
   // 회원 정보
   const [userForm] = Form.useForm();
   // 계약 정보
@@ -224,9 +222,6 @@ const OrderDetail = (props) => {
       orderStatusForm.setFieldsValue({
         status: "active",
       });
-
-      // 그룹 정보
-      groupForm.setFieldsValue({});
 
       // 회원 정보
       userForm.setFieldsValue({
@@ -342,31 +337,7 @@ const OrderDetail = (props) => {
             </Form.Item>
           </Form>
         </Card>
-        <Card title="그룹 정보">
-          <Form form={groupForm} layout="vertical">
-            <Form.Item name="classification" label="소속 그룹">
-              <Input disabled />
-            </Form.Item>
-            <Form.Item name="group_id" label="그룹 ID">
-              <Input disabled />
-            </Form.Item>
-            <Form.Item name="group_name" label="그룹 명 (법인명)">
-              <Input disabled />
-            </Form.Item>
-            <Form.Item name="number" label="사업자 등록 번호">
-              <Input disabled />
-            </Form.Item>
-            <Form.Item name="address" label="사업자 주소">
-              <Input disabled />
-            </Form.Item>
-            <Form.Item name="pay_demand" label="결제 방식">
-              <Input disabled />
-            </Form.Item>
-            <Form.Item name="card" label="대표 결제 카드">
-              <Input disabled />
-            </Form.Item>
-          </Form>
-        </Card>
+
         <Card title="회원 정보">
           <Form form={userForm} layout="vertical">
             <Form.Item name="uid" label="회원 ID">

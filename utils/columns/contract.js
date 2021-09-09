@@ -49,10 +49,6 @@ export const contractListColumns = [
       return renderText;
     },
   },
-  // {
-  //   title: "그룹",
-  //   dataIndex: "group_id",
-  // },
   {
     title: "상품",
     dataIndex: "rateplan",

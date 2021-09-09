@@ -5,7 +5,7 @@ import axios from "axios";
 import Router, { useRouter } from "next/router";
 import dynamic from "next/dynamic";
 
-const PostEditor = dynamic(() => import("../../utils/Editor"), {
+const PostEditor = dynamic(() => import("@utils/Editor"), {
   ssr: false,
 });
 
@@ -155,9 +155,6 @@ const NoticeDetail = (props) => {
               <Radio.Group>
                 <Radio style={radioStyle} value={"normal"}>
                   일반 공지
-                </Radio>
-                <Radio style={radioStyle} value={"group"}>
-                  그룹 공지
                 </Radio>
                 <Radio style={radioStyle} value={"spot"}>
                   지점 공지

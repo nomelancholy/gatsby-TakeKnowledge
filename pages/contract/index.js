@@ -247,9 +247,6 @@ const Contract = (props) => {
           <Form.Item name="uid" label="멤버 ID">
             <Input.TextArea autoSize={true} />
           </Form.Item>
-          <Form.Item name="group_id" label="그룹 ID">
-            <Input.TextArea autoSize={true} />
-          </Form.Item>
           <Form.Item
             name="user_name"
             label="계약자명"
@@ -261,9 +258,6 @@ const Contract = (props) => {
           >
             <Input />
           </Form.Item>
-          {/* <Form.Item name="group_name" label="그룹명">
-            <Input />
-          </Form.Item> */}
           <Form.Item name="status" label="계약 상태">
             <Select style={{ width: 160 }}>
               <Select.Option value="buy">계약 신청</Select.Option>

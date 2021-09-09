@@ -64,8 +64,6 @@ const UserDetail = (props) => {
 
   // 회원 상태
   const [userStatusForm] = Form.useForm();
-  // 그룹 정보
-  const [groupForm] = Form.useForm();
   // 회원 정보
   const [userForm] = Form.useForm();
 
@@ -371,15 +369,6 @@ const UserDetail = (props) => {
         case "member":
           userRoelExt = "일반";
           break;
-        case "group_member":
-          userRoelExt = "그룹 멤버";
-          break;
-        case "group_master":
-          userRoelExt = "그룹 관리자 멤버";
-          break;
-        case "group_admin":
-          userRoelExt = "그룹 관리자";
-          break;
         default:
           break;
       }
@@ -410,16 +399,6 @@ const UserDetail = (props) => {
 
       // 선호 지점 옵션으로 사용할 활성화 된 스팟 조회
       getActiveSpotList({ page: 1, size: 100, status: "active" });
-
-      // 2차
-      // // 그룹 정보
-      // if (userDetail.user_role !== "group") {
-      //   groupForm.setFieldsValue({
-      //     group: "개인",
-      //   });
-      // } else {
-      //   // 그룹 정보 세팅
-      // }
 
       // 3차
       // 회원 메모
@@ -540,15 +519,6 @@ const UserDetail = (props) => {
             </Form.Item>
             <Form.Item name="user_role_ext" label="회원 역할">
               <Radio.Group disabled>
-                <Radio style={radioStyle} value={"group_member"}>
-                  그룹 멤버
-                </Radio>
-                <Radio style={radioStyle} value={"group_admin"}>
-                  그룹 관리자
-                </Radio>
-                <Radio style={radioStyle} value={"group_master"}>
-                  그룹 관리자멤버
-                </Radio>
                 <Radio style={radioStyle} value={"member"}>
                   일반
                 </Radio>
@@ -559,35 +529,6 @@ const UserDetail = (props) => {
             </Form.Item>
           </Form>
         </Card>
-        {/* 2차 */}
-        {/* <Card title="그룹 정보">
-          <Form form={groupForm} layout="vertical">
-            <Form.Item name="group" label="소속 그룹">
-              <Input disabled />
-            </Form.Item>
-            <Form.Item name="group_id" label="그룹 ID">
-              <Input disabled />
-            </Form.Item>
-            <Form.Item name="group_name" label="그룹 명 (법인명)">
-              <Input disabled />
-            </Form.Item>
-            <Form.Item name="number" label="사업자 등록 번호">
-              <Input disabled />
-            </Form.Item>
-            <Form.Item name="address" label="사업자 주소">
-              <Input disabled />
-            </Form.Item>
-            <Form.Item name="pay_demand" label="결제 방식">
-              <Input disabled />
-            </Form.Item>
-            <Form.Item name="card" label="대표 결제 카드">
-              <Input disabled />
-            </Form.Item>
-            <Form.Item name="certification" label="사업자 등록증">
-              <Input disabled />
-            </Form.Item>
-          </Form>
-        </Card> */}
         <Card title="회원 정보">
           <Form form={userForm} layout="vertical">
             <Form.Item name="uid" label="회원 ID">

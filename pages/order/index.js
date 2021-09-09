@@ -218,20 +218,10 @@ const Order = (props) => {
           <Form.Item name="uid" label="멤버 ID">
             <Input />
           </Form.Item>
-          {/* <Form.Item name="group_id" label="그룹 ID">
-            <Input />
-          </Form.Item> */}
           <Form.Item name="user_name" label="회원명">
             <Input />
           </Form.Item>
-          {/* <Form.Item name="group_type" label="그룹 유형">
-            <Select style={{ width: 160 }}>
-              <Select.Option value="meeting">미팅룸</Select.Option>
-              <Select.Option value="coworking">코워킹룸</Select.Option>
-              <Select.Option value="locker">락커</Select.Option>
-              <Select.Option value="lounge">라운지</Select.Option>
-            </Select>
-          </Form.Item> */}
+
           <Form.Item name="payment_status" label="결제 상태">
             <Select style={{ width: 160 }}>
               <Select.Option value="wait">대기</Select.Option>

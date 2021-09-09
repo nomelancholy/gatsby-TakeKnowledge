@@ -64,19 +64,6 @@ export const orderListColumns = [
     },
   },
   {
-    title: "그룹 유형",
-    dataIndex: "user",
-    render: (text, record) => {
-      let renderText = "개인";
-
-      if (text.user_role === "group") {
-        renderText = `그룹`;
-      }
-
-      return renderText;
-    },
-  },
-  {
     title: "상품 구분",
     dataIndex: "contract",
     render: (text, record) => {

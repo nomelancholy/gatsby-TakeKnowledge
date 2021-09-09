@@ -32,43 +32,8 @@ export const userListColumns = [
         case "member":
           renderText = "일반";
           break;
-        case "group_member":
-          renderText = "그룹 멤버";
-          break;
-        case "group_master":
-          renderText = "그룹 관리자 멤버";
-          break;
-        case "group_admin":
-          renderText = "그룹 관리자";
-          break;
         default:
           break;
-      }
-
-      return renderText;
-    },
-  },
-  {
-    title: "그룹/개인",
-    dataIndex: "user_role",
-    render: (text, record) => {
-      let renderText = "개인";
-
-      if (text === "group") {
-        renderText = `그룹`;
-      }
-
-      return renderText;
-    },
-  },
-  {
-    title: "그룹명(그룹id)",
-    dataIndex: "user_role",
-    render: (text, record) => {
-      let renderText = "-";
-
-      if (text === "group") {
-        renderText = `${record.group_name}(${record.group_id})`;
       }
 
       return renderText;
