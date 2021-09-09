@@ -57,6 +57,7 @@ const EventDetail = (props) => {
   // noticeInfo 세팅되면 알맞는 엘리먼트에 binding
   useEffect(() => {
     if (eventInfo) {
+      console.log(`eventInfo`, eventInfo);
       // 이벤트 상태
       eventForm.setFieldsValue({
         title: eventInfo.title,
@@ -146,8 +147,8 @@ const EventDetail = (props) => {
               label="상태"
               rules={[{ required: true, message: "상태를 선택해주세요" }]}
             >
-              <Radio.Group defaultValue="public">
-                <Radio style={radioStyle} value={"public"}>
+              <Radio.Group initialValues="publish">
+                <Radio style={radioStyle} value={"publish"}>
                   활성
                 </Radio>
                 <Radio style={radioStyle} value={"private"}>

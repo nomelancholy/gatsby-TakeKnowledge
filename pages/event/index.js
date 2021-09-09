@@ -1,4 +1,13 @@
-import { Button, Table, Form, Input, Row, Select, DatePicker } from "antd";
+import {
+  Button,
+  Table,
+  Form,
+  Input,
+  Row,
+  Select,
+  DatePicker,
+  InputNumber,
+} from "antd";
 import { SlidersOutlined, PlusOutlined } from "@ant-design/icons";
 
 import React, { useState, useEffect } from "react";
@@ -218,7 +227,7 @@ const Event = (props) => {
           }}
         >
           <Form.Item name="event_id" label="이벤트 ID">
-            <Input />
+            <InputNumber min="1" />
           </Form.Item>
           <Form.Item name="title" label="이벤트 제목">
             <Input />
@@ -226,7 +235,8 @@ const Event = (props) => {
           <Form.Item name="status" label="사용 여부">
             <Select style={{ width: 120 }}>
               <Select.Option value="publish">활성</Select.Option>
-              <Select.Option value="trash">비활성</Select.Option>
+              <Select.Option value="private">비활성</Select.Option>
+              <Select.Option value="trash">삭제</Select.Option>
             </Select>
           </Form.Item>
           <Form.Item name="start_date" label="이벤트 시작 일자">
