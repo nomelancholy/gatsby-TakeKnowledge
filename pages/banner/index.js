@@ -1,4 +1,13 @@
-import { Button, Table, Form, Input, Row, Select } from "antd";
+import {
+  Button,
+  Table,
+  Form,
+  Input,
+  Row,
+  Select,
+  InputNumber,
+  DatePicker,
+} from "antd";
 import { SlidersOutlined, PlusOutlined } from "@ant-design/icons";
 
 import React, { useState, useEffect } from "react";
@@ -32,14 +41,23 @@ const Banner = (props) => {
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
+  const [bannerStartDateStart, setBannerStartDateStart] = useState(undefined);
+  const [bannerStartDateEnd, setBannerStartDateEnd] = useState(undefined);
+  const [bannerEndDateStart, setBannerEndDateStart] = useState(undefined);
+  const [bannerEndDateEnd, setBannerEndDateEnd] = useState(undefined);
+
   const [searchForm] = useForm();
 
   const [params, setParams] = useState({
-    notice_id: undefined,
-    status: undefined,
-    type: undefined,
-    sticky: undefined,
+    banner_id: undefined,
     title: undefined,
+    path: undefined,
+    status: undefined,
+    permission: undefined,
+    start_date_start: undefined,
+    start_date_end: undefined,
+    end_date_start: undefined,
+    end_date_end: undefined,
   });
 
   const getBannerList = (params) => {
@@ -47,7 +65,7 @@ const Banner = (props) => {
 
     axios
       .post(
-        `${process.env.BACKEND_API}/services/notice/list`,
+        `${process.env.BACKEND_API}/services/banner/list`,
         { ...params },
         {
           headers: {
@@ -59,11 +77,11 @@ const Banner = (props) => {
       )
       .then((response) => {
         const data = response.data;
-        console.log(`notice data`, data);
+        console.log(`banner data`, data);
 
         setBannerList(data.items);
 
-        // 페이지 네이션 정보 세팅
+        // // 페이지 네이션 정보 세팅
         const pageInfo = {
           current: data.page,
           total: data.total,
@@ -73,7 +91,7 @@ const Banner = (props) => {
 
         setPagination(pageInfo);
 
-        // 로딩바 세팅
+        // // 로딩바 세팅
         setLoading(false);
 
         setParams(params);
@@ -103,7 +121,8 @@ const Banner = (props) => {
   };
 
   const handleSearch = () => {
-    const searchFormValues = searchForm.getFieldsValue();
+    const { banner_id, title, path, status, permission } =
+      searchForm.getFieldsValue();
 
     setPagination({
       page: 1,
@@ -112,11 +131,15 @@ const Banner = (props) => {
     });
 
     const searchParams = {
-      notice_id: searchFormValues.notice_id,
-      status: searchFormValues.status,
-      type: searchFormValues.type,
-      sticky: searchFormValues.sticky,
-      title: searchFormValues.title,
+      banner_id,
+      title,
+      path,
+      status,
+      permission,
+      start_date_start: bannerStartDateStart,
+      start_date_end: bannerStartDateEnd,
+      end_date_start: bannerEndDateStart,
+      end_date_end: bannerEndDateEnd,
       page: 1,
       size: 20,
     };
@@ -128,6 +151,11 @@ const Banner = (props) => {
     // form Item reset
     searchForm.resetFields();
 
+    setBannerStartDateStart(undefined);
+    setBannerStartDateEnd(undefined);
+    setBannerEndDateStart(undefined);
+    setBannerEndDateEnd(undefined);
+
     setPagination({
       page: 1,
       size: 20,
@@ -136,11 +164,15 @@ const Banner = (props) => {
 
     // params state reset
     const searchParams = {
-      notice_id: undefined,
-      status: undefined,
-      type: undefined,
-      sticky: undefined,
+      banner_id: undefined,
       title: undefined,
+      path: undefined,
+      status: undefined,
+      permission: undefined,
+      start_date_start: undefined,
+      start_date_end: undefined,
+      end_date_start: undefined,
+      end_date_end: undefined,
       page: 1,
       size: 20,
     };
@@ -177,7 +209,7 @@ const Banner = (props) => {
       <Table
         size="middle"
         columns={bannerListcolumns}
-        rowKey={(record) => record.notice_id}
+        rowKey={(record) => record.banner_id}
         dataSource={bannerList}
         pagination={pagination}
         loading={loading}
@@ -201,30 +233,63 @@ const Banner = (props) => {
             }
           }}
         >
-          <Form.Item name="notice_id" label="공지 ID">
+          <Form.Item name="banner_id" label="배너 ID">
+            <InputNumber min={1} />
+          </Form.Item>
+          <Form.Item name="title" label="제목">
             <Input />
           </Form.Item>
-          <Form.Item name="type" label="공지 유형">
+          <Form.Item name="path" label="배너 위치">
             <Select style={{ width: 160 }}>
-              <Select.Option value="normal">일반 공지</Select.Option>
-              <Select.Option value="group">그룹 공지</Select.Option>
-              <Select.Option value="spot">지점 공지</Select.Option>
+              <Select.Option value="home">홈</Select.Option>
+              <Select.Option value="spot">스팟</Select.Option>
+              <Select.Option value="service">서비스</Select.Option>
+              <Select.Option value="mypage">마이페이지</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item name="status" label="사용 여부">
+          <Form.Item name="status" label="노출">
             <Select style={{ width: 120 }}>
-              <Select.Option value="publish">발행</Select.Option>
-              <Select.Option value="private">미발행</Select.Option>
+              <Select.Option value="publish">활성</Select.Option>
+              <Select.Option value="private">비활성</Select.Option>
+              <Select.Option value="trash">삭제</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item name="sticky" label="상단 노출">
+          <Form.Item name="permission" label="배너 타깃">
             <Select style={{ width: 120 }}>
-              <Select.Option value={0}>미노출</Select.Option>
-              <Select.Option value={1}>노출</Select.Option>
+              <Select.Option value="guest">비회원</Select.Option>
+              <Select.Option value="user">개인 회원</Select.Option>
+              <Select.Option value="member">개인 멤버</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item name="title" label="공지 제목">
-            <Input />
+          <Form.Item name="start_date" label="배너 적용 시작 일자">
+            <>
+              <DatePicker
+                placeholder="시작"
+                onChange={(date, dateString) =>
+                  setBannerStartDateStart(dateString)
+                }
+              />
+              <DatePicker
+                placeholder="종료"
+                onChange={(date, dateString) =>
+                  setBannerStartDateEnd(dateString)
+                }
+              />
+            </>
+          </Form.Item>
+          <Form.Item name="end_date" label="배너 적용 종료 일자">
+            <>
+              <DatePicker
+                placeholder="시작"
+                onChange={(date, dateString) =>
+                  setBannerEndDateStart(dateString)
+                }
+              />
+              <DatePicker
+                placeholder="종료"
+                onChange={(date, dateString) => setBannerEndDateEnd(dateString)}
+              />
+            </>
           </Form.Item>
         </Form>
       </Filter>

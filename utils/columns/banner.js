@@ -2,61 +2,90 @@
 // api 주소
 export const bannerListcolumns = [
   {
-    title: "공지 ID",
-    dataIndex: "notice_id",
+    title: "배너 ID",
+    dataIndex: "banner_id",
   },
   {
-    title: "공지 제목",
-    dataIndex: "title",
+    title: "제목",
+    dataIndex: "items",
     render: (text, record) => {
-      return <a href={`/notice/${record.notice_id}`}>{text}</a>;
+      return <a href={`/banner/${record.banner_id}`}>{text[0].title}</a>;
     },
   },
   {
-    title: "공지 유형",
-    dataIndex: "type",
+    title: "위치",
+    dataIndex: "path",
     render: (text, record) => {
       let renderText = "";
 
-      if (text === "normal") {
-        renderText = "일반 공지";
-      } else if (text === "group") {
-        renderText = "그룹 공지";
+      if (text === "home") {
+        renderText = "홈";
       } else if (text === "spot") {
-        renderText = "지점 공지";
+        renderText = "스팟";
+      } else if (text === "service") {
+        renderText = "서비스";
+      } else if (text === "mypage") {
+        renderText = "마이페이지";
       }
 
       return renderText;
     },
   },
   {
-    title: "상단 노출",
-    dataIndex: "sticky",
-    render: (text, record) => {
-      return text === 0 ? "X" : "O";
-    },
-  },
-  {
-    title: "등록자",
-    dataIndex: "user",
-    render: (text, record) => {
-      return text.user_name;
-    },
-  },
-  {
-    title: "사용 여부",
+    title: "활성",
     dataIndex: "status",
     render: (text, record) => {
       let renderText = "";
 
       if (text === "publish") {
-        renderText = "발행";
+        renderText = "활성";
       } else if (text === "private") {
-        renderText = "미발행";
+        renderText = "비활성";
+      } else if (text === "trash") {
+        renderText = "삭제";
       }
 
       return renderText;
     },
+  },
+  {
+    title: "타깃",
+    dataIndex: "permission",
+    render: (text, record) => {
+      console.log(`text`, text);
+
+      const targets = text.split("|");
+
+      let targetArray = [];
+
+      targets.map((target) => {
+        switch (target) {
+          case "guest":
+            targetArray.push("비회원");
+            break;
+          case "user":
+            targetArray.push("개인 회원");
+            break;
+          case "member":
+            targetArray.push("개인 멤버");
+            break;
+          default:
+            break;
+        }
+      });
+
+      const renderText = targetArray.join(", ");
+
+      return renderText;
+    },
+  },
+  {
+    title: "시작일",
+    dataIndex: "start_date",
+  },
+  {
+    title: "종료일",
+    dataIndex: "end_date",
   },
   {
     title: "생성 일시",
