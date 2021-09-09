@@ -25,8 +25,10 @@ export const eventListcolumns = [
 
       if (text === "publish") {
         renderText = "활성";
-      } else if (text === "trash") {
+      } else if (text === "private") {
         renderText = "비활성";
+      } else if (text === "trash") {
+        renderText = "삭제";
       }
 
       return renderText;

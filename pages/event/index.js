@@ -182,7 +182,7 @@ const Event = (props) => {
         <Button
           type="primary"
           onClick={() => {
-            Router.push("/notice/new");
+            Router.push("/event/new");
           }}
         >
           <PlusOutlined />
