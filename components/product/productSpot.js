@@ -75,7 +75,7 @@ const ProductSpot = (props) => {
       // 캘린더에 세팅된 날짜 조회
       const calendarDateArray = getCalendarDate();
       // time_table 검색을 위한 요일 순서대로
-      const dayArray = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+      const dayArray = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
       // timetable 객체 검색을 위해 배열로 분해
       const timeTableArray = Object.entries(spotInfo.time_table);
 

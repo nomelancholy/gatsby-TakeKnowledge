@@ -26,6 +26,7 @@ const TimeTable = ({ events, setEvents, calendarRef }) => {
         return weekList[date.dow];
       }}
       allDaySlot={false}
+      firstDay={1}
       slotDuration={{ hours: 1 }}
       slotMinTime="00:00:00"
       slotMaxTime="24:00:00"
