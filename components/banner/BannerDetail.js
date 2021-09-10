@@ -9,7 +9,10 @@ import {
   DatePicker,
   Select,
   Checkbox,
+  Upload,
 } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
+
 import React, { useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
@@ -37,8 +40,16 @@ const BannerDetail = (props) => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  // 공지 Form
+  // 배너 Form
   const [bannerForm] = Form.useForm();
+  // 상단 띠배너 Form
+  const [topBannerForm] = Form.useForm();
+  // 하단 띠배너 Form
+  const [bottomBannerForm] = Form.useForm();
+  // 롤링 배너 Form
+  const [swiperBannerForm] = Form.useForm();
+  // 팝업 배너 Form
+  const [popupBannerForm] = Form.useForm();
 
   useEffect(() => {
     if (bannerId) {
@@ -89,7 +100,7 @@ const BannerDetail = (props) => {
 
   // 저장 버튼 클릭
   const handleBannerRegisterSubmit = () => {
-    console.log("클릭");
+    console.log("배너 저장 클릭");
     // const { title, path, status } = bannerForm.getFieldValue();
 
     // let data = {
@@ -127,6 +138,21 @@ const BannerDetail = (props) => {
     //   .catch(function (error) {
     //     console.log(error);
     //   });
+  };
+  const handleTopBannerRegisterSubmit = () => {
+    console.log("상단 배너 저장 클릭");
+  };
+
+  const handleBottomBannerRegisterSubmit = () => {
+    console.log("하단 배너 저장 클릭");
+  };
+
+  const handleSwiperBannerRegisterSubmit = () => {
+    console.log("롤링 배너 저장 클릭");
+  };
+
+  const handlePopupBannerRegisterSubmit = () => {
+    console.log("팝업 배너 저장 클릭");
   };
 
   const handleStartDateChange = (date, dateString) => {
@@ -228,11 +254,177 @@ const BannerDetail = (props) => {
             </Modal>
           </Card>
         </Form>
-      </Card>
 
-      <Row type="flex" align="middle" className="py-4">
-        <span className="px-2 w-10"></span>
-      </Row>
+        <Row type="flex" align="middle" className="py-4">
+          <span className="px-2 w-10"></span>
+        </Row>
+
+        <Form
+          form={topBannerForm}
+          onFinish={handleTopBannerRegisterSubmit}
+          initialValues={{ status: "publish" }}
+        >
+          <Card
+            title="상단 띠배너"
+            bodyStyle={{ padding: "1rem" }}
+            className="mb-2"
+          >
+            <Form.Item name="title" label="제목">
+              <Input></Input>
+            </Form.Item>
+            <Form.Item name="images" label="이미지">
+              <Upload name="image" listType="picture-card">
+                <Button icon={<UploadOutlined />}>업로드</Button>
+              </Upload>
+            </Form.Item>
+            <Form.Item name="link" label="URL 링크">
+              <Input />
+              <Checkbox>새 창으로 열기</Checkbox>
+            </Form.Item>
+
+            <Button type="primary" htmlType="submit">
+              저장
+            </Button>
+            <Modal
+              visible={okModalVisible}
+              okText="확인"
+              onOk={() => {
+                setOkModalVisible(false);
+              }}
+              cancelButtonProps={{ style: { display: "none" } }}
+            >
+              저장 완료
+            </Modal>
+          </Card>
+        </Form>
+
+        <Row type="flex" align="middle" className="py-4">
+          <span className="px-2 w-10"></span>
+        </Row>
+        <Form
+          form={bottomBannerForm}
+          onFinish={handleBottomBannerRegisterSubmit}
+          initialValues={{ status: "publish" }}
+        >
+          <Card
+            bodyStyle={{ padding: "1rem" }}
+            className="mb-2"
+            title="하단 띠배너"
+          >
+            <Form.Item name="title" label="제목">
+              <Input></Input>
+            </Form.Item>
+            <Form.Item name="images" label="이미지">
+              <Upload name="image" listType="picture-card">
+                <Button icon={<UploadOutlined />}>업로드</Button>
+              </Upload>
+            </Form.Item>
+            <Form.Item name="link" label="URL 링크">
+              <Input />
+              <Checkbox>새 창으로 열기</Checkbox>
+            </Form.Item>
+            <Button type="primary" htmlType="submit">
+              저장
+            </Button>
+            <Modal
+              visible={okModalVisible}
+              okText="확인"
+              onOk={() => {
+                setOkModalVisible(false);
+              }}
+              cancelButtonProps={{ style: { display: "none" } }}
+            >
+              저장 완료
+            </Modal>
+          </Card>
+        </Form>
+
+        <Row type="flex" align="middle" className="py-4">
+          <span className="px-2 w-10"></span>
+        </Row>
+        <Form
+          form={swiperBannerForm}
+          onFinish={handleSwiperBannerRegisterSubmit}
+          initialValues={{ status: "publish" }}
+        >
+          <Card
+            title="롤링 배너"
+            bodyStyle={{ padding: "1rem" }}
+            className="mb-2"
+          >
+            <Form.Item name="title" label="제목">
+              <Input></Input>
+            </Form.Item>
+            <Form.Item name="images" label="이미지">
+              <Upload name="image" listType="picture-card">
+                <Button icon={<UploadOutlined />}>업로드</Button>
+              </Upload>
+            </Form.Item>
+            <Form.Item name="link" label="URL 링크">
+              <Input />
+              <Checkbox>새 창으로 열기</Checkbox>
+            </Form.Item>
+            <Button type="primary" htmlType="submit">
+              저장
+            </Button>
+            <Modal
+              visible={okModalVisible}
+              okText="확인"
+              onOk={() => {
+                setOkModalVisible(false);
+              }}
+              cancelButtonProps={{ style: { display: "none" } }}
+            >
+              저장 완료
+            </Modal>
+          </Card>
+        </Form>
+
+        <Row type="flex" align="middle" className="py-4">
+          <span className="px-2 w-10"></span>
+        </Row>
+        <Form
+          form={popupBannerForm}
+          onFinish={handlePopupBannerRegisterSubmit}
+          initialValues={{ status: "publish" }}
+        >
+          <Card
+            title="팝업 배너"
+            bodyStyle={{ padding: "1rem" }}
+            className="mb-2"
+          >
+            <Form.Item name="title" label="제목">
+              <Input></Input>
+            </Form.Item>
+            <Form.Item name="images" label="이미지">
+              <Upload name="image" listType="picture-card">
+                <Button icon={<UploadOutlined />}>업로드</Button>
+              </Upload>
+            </Form.Item>
+            <Form.Item name="link" label="URL 링크">
+              <Input />
+              <Checkbox>새 창으로 열기</Checkbox>
+            </Form.Item>
+            <Button type="primary" htmlType="submit">
+              저장
+            </Button>
+            <Modal
+              visible={okModalVisible}
+              okText="확인"
+              onOk={() => {
+                setOkModalVisible(false);
+              }}
+              cancelButtonProps={{ style: { display: "none" } }}
+            >
+              저장 완료
+            </Modal>
+          </Card>
+        </Form>
+
+        <Row type="flex" align="middle" className="py-4">
+          <span className="px-2 w-10"></span>
+        </Row>
+      </Card>
     </>
   );
 };
