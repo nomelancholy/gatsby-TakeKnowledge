@@ -4,12 +4,15 @@ export const bannerListcolumns = [
   {
     title: "배너 ID",
     dataIndex: "banner_id",
+    render: (text, record) => {
+      return <a href={`/banner/${record.banner_id}`}>{text}</a>;
+    },
   },
   {
     title: "제목",
     dataIndex: "items",
     render: (text, record) => {
-      return <a href={`/banner/${record.banner_id}`}>{text[0].title}</a>;
+      return text.length === 0 ? "" : text[0].title;
     },
   },
   {
