@@ -198,7 +198,7 @@ const Banner = (props) => {
         <Button
           type="primary"
           onClick={() => {
-            Router.push("/notice/new");
+            Router.push("/banner/new");
           }}
         >
           <PlusOutlined />

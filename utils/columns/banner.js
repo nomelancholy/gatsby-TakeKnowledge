@@ -55,8 +55,6 @@ export const bannerListcolumns = [
     title: "타깃",
     dataIndex: "permission",
     render: (text, record) => {
-      console.log(`text`, text);
-
       const targets = text.split("|");
 
       let targetArray = [];
