@@ -1,4 +1,14 @@
-import { Button, Form, Input, Row, Modal, Card, Radio, DatePicker } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  Row,
+  Modal,
+  Card,
+  Radio,
+  DatePicker,
+  AutoComplete,
+} from "antd";
 import React, { useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
@@ -123,6 +133,33 @@ const EventDetail = (props) => {
     setEndDate(dateString);
   };
 
+  const [searchOptions, setSearchOptions] = useState([]);
+
+  const coupons = [
+    { label: "원데이 1만원 할인", id: "1" },
+    { label: "원스팟 1만원 할인", id: "2" },
+  ];
+
+  // 객체 배열에서 입력 텍스트를 label에 포함한 객체만 찾아서 return
+
+  const options = [{ label: "test", value: "test" }];
+
+  const handleSearch = (text) => {
+    const options = coupons.filter((coupon) => {
+      if (coupon.label.includes(text)) {
+        return { label: coupon.label, value: coupon.id };
+      }
+    });
+    setSearchOptions(options);
+  };
+
+  const [applyCoupon, setApplyCoupon] = useState(undefined);
+
+  const handleSelect = (data) => {
+    console.log(`data`, data);
+    setApplyCoupon(data);
+  };
+
   return (
     <>
       <Card
@@ -165,6 +202,13 @@ const EventDetail = (props) => {
               rules={[{ required: true, message: "파일 경로를 입력해주세요" }]}
             >
               <Input />
+            </Form.Item>
+            <Form.Item label="적용 쿠폰 검색">
+              <AutoComplete
+                options={searchOptions}
+                onSearch={handleSearch}
+                onSelect={handleSelect}
+              />
             </Form.Item>
             <Form.Item
               name="start_date"

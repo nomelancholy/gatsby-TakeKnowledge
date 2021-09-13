@@ -1,9 +1,10 @@
-import { Button, Form, Input, Row, Modal, Card, Radio } from "antd";
+import { Button, Form, Input, Row, Modal, Card, Radio, Transfer } from "antd";
 import React, { useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 import Router, { useRouter } from "next/router";
 import dynamic from "next/dynamic";
+import FormItem from "antd/lib/form/FormItem";
 
 const PostEditor = dynamic(() => import("@utils/Editor"), {
   ssr: false,
@@ -33,7 +34,51 @@ const NoticeDetail = (props) => {
   // 공지 Form
   const [noticeForm] = Form.useForm();
 
+  const [spotOptions, setSpotOptions] = useState([]);
+
+  const getSpotOptions = () => {
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/spot/list`,
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        const data = response.data.items;
+        console.log(`data`, data);
+
+        const options = [];
+
+        data.map((spot) => {
+          const spotOption = {
+            key: spot.spot_id,
+            title: spot.name,
+          };
+
+          options.push(spotOption);
+        });
+
+        setSpotOptions(options);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
+
   useEffect(() => {
+    console.log(`spotOptions`, spotOptions);
+  }, [spotOptions]);
+
+  useEffect(() => {
+    // 스팟 리스트 불러서 spotOptions에 세팅
+    getSpotOptions();
+
     if (noticeId) {
       // 수정일 경우
       setRegisterMode(false);
@@ -121,6 +166,12 @@ const NoticeDetail = (props) => {
     setContent(content);
   };
 
+  const handleSpotOptionsChange = (targetKeys) => {
+    setTargetSpots(targetKeys);
+  };
+
+  const [targetSpots, setTargetSpots] = useState([]);
+
   return (
     <>
       <Card
@@ -133,21 +184,24 @@ const NoticeDetail = (props) => {
           <Card bodyStyle={{ padding: "1rem" }} className="mb-2">
             <Form.Item
               name="status"
-              label="공지 노출 여부"
+              label="공지 활성/비활성"
               rules={[
-                { required: true, message: "공지 노출 여부를 선택해주세요" },
+                {
+                  required: true,
+                  message: "공지 활성/비활성 여부를 선택해주세요",
+                },
               ]}
             >
               <Radio.Group>
                 <Radio style={radioStyle} value={"publish"}>
-                  노출
+                  활성
                 </Radio>
                 <Radio style={radioStyle} value={"private"}>
-                  미노출
+                  비활성
                 </Radio>
               </Radio.Group>
             </Form.Item>
-            <Form.Item
+            {/* <Form.Item
               name="type"
               label="공지 유형"
               rules={[{ required: true, message: "공지 유형을 선택해주세요" }]}
@@ -160,23 +214,33 @@ const NoticeDetail = (props) => {
                   지점 공지
                 </Radio>
               </Radio.Group>
-            </Form.Item>
+            </Form.Item> */}
             <Form.Item
               name="sticky"
-              label="상단 노출"
+              label="상단 고정(pin)"
               rules={[
-                { required: true, message: "상단 노출 여부를 선택해주세요" },
+                { required: true, message: "상단 고정 여부를 선택해주세요" },
               ]}
             >
               <Radio.Group>
                 <Radio style={radioStyle} value={1}>
-                  노출
+                  고정
                 </Radio>
                 <Radio style={radioStyle} value={0}>
-                  미노출
+                  해제
                 </Radio>
               </Radio.Group>
             </Form.Item>
+            <Form.Item>
+              <Transfer
+                dataSource={spotOptions}
+                showSearch
+                targetKeys={targetSpots}
+                render={(item) => item.title}
+                onChange={handleSpotOptionsChange}
+              />
+            </Form.Item>
+            <FormItem></FormItem>
           </Card>
           <Card bodyStyle={{ padding: "1rem" }} className="mb-2">
             <Form.Item
