@@ -12,7 +12,7 @@ import { useForm } from "antd/lib/form/Form";
 import { couponListcolumns } from "@utils/columns/coupon";
 
 // 쿠폰 관리
-const Coupon = (props) => {
+const CouponAuto = (props) => {
   const { user, isLoggedIn, token } = props.auth;
 
   useEffect(() => {
@@ -235,4 +235,4 @@ export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
   return { props: initialize(ctx) };
 });
 
-export default connect((state) => state)(Coupon);
+export default connect((state) => state)(CouponAuto);

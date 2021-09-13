@@ -11,8 +11,8 @@ import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
 import { couponListcolumns } from "@utils/columns/coupon";
 
-// 쿠폰 관리
-const Coupon = (props) => {
+// 쿠폰 직접 발급
+const CouponDirect = (props) => {
   const { user, isLoggedIn, token } = props.auth;
 
   useEffect(() => {
@@ -235,4 +235,4 @@ export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
   return { props: initialize(ctx) };
 });
 
-export default connect((state) => state)(Coupon);
+export default connect((state) => state)(CouponDirect);
