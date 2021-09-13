@@ -114,7 +114,7 @@ const QnaDetail = (props) => {
 
     const { title } = questionForm.getFieldValue();
     const { classification, category } = categoryForm.getFieldValue();
-    const { reply } = replyForm.getFieldValue();
+    const { reply, file } = replyForm.getFieldValue();
 
     formData.append("title", title);
     formData.append("classification", classification);

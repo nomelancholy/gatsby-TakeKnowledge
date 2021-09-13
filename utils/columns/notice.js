@@ -12,21 +12,7 @@ export const noticeListcolumns = [
       return <a href={`/notice/${record.notice_id}`}>{text}</a>;
     },
   },
-  {
-    title: "공지 유형",
-    dataIndex: "type",
-    render: (text, record) => {
-      let renderText = "";
 
-      if (text === "normal") {
-        renderText = "일반 공지";
-      } else if (text === "spot") {
-        renderText = "지점 공지";
-      }
-
-      return renderText;
-    },
-  },
   {
     title: "상단 노출",
     dataIndex: "sticky",
@@ -42,15 +28,17 @@ export const noticeListcolumns = [
     },
   },
   {
-    title: "사용 여부",
+    title: "활성/비활성",
     dataIndex: "status",
     render: (text, record) => {
       let renderText = "";
 
       if (text === "publish") {
-        renderText = "발행";
+        renderText = "활성";
       } else if (text === "private") {
-        renderText = "미발행";
+        renderText = "비활성";
+      } else if (text === "trash") {
+        renderText = "삭제";
       }
 
       return renderText;
