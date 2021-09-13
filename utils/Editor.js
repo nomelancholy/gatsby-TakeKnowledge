@@ -34,7 +34,7 @@ const PostEditor = (props) => {
             "list",
             // "lineHeight",
             "link",
-            "image",
+            // "image",
             // "fullScreen",
             // "codeView",
             // "preview",
