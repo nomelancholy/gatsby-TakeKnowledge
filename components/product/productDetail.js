@@ -126,7 +126,7 @@ const ProductDetail = (props) => {
   // productData 세팅되면 알맞는 엘리먼트에 binding
   useEffect(() => {
     if (productInfo) {
-      console.log(`productInfo`, productInfo);
+      // console.log(`productInfo`, productInfo);
 
       form.setFieldsValue({
         // 상품 구분
@@ -186,6 +186,7 @@ const ProductDetail = (props) => {
 
       // 사용 가능 스팟 ID 세팅
       if (productInfo.maps) {
+        console.log(`productInfo.maps`, productInfo.maps);
         setSpotList(productInfo.maps);
 
         getOptionsSpotList();
@@ -278,7 +279,7 @@ const ProductDetail = (props) => {
   const handleSpotRegisterSubmit = (values) => {
     const formData = new FormData();
 
-    console.log(`values`, values);
+    // console.log(`values`, values);
 
     formData.append("type", values.type);
     formData.append("plan_spot", values.plan_spot);

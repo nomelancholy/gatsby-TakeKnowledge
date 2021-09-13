@@ -150,6 +150,35 @@ const BannerDetail = (props) => {
         // 롤링 배너 노출
         setHasSwiperBanner(true);
       }
+
+      if (bannerInfo.items && bannerInfo.items.length > 0) {
+        bannerInfo.items.map((bannerItem) => {
+          let form = "";
+
+          switch (bannerItem.banner_type) {
+            case "top":
+              form = topBannerForm;
+              break;
+            case "bottom":
+              form = bottomBannerForm;
+              break;
+            case "swiper":
+              form = swiperBannerForm;
+              break;
+            case "popup":
+              form = popupBannerForm;
+              break;
+            default:
+              break;
+          }
+
+          form.setFieldsValue({
+            title: bannerItem.title,
+            link: bannerItem.link,
+            target: bannerItem.target,
+          });
+        });
+      }
     }
   }, [bannerInfo]);
 
@@ -197,22 +226,6 @@ const BannerDetail = (props) => {
       .catch(function (error) {
         console.log(error);
       });
-  };
-
-  const handleTopBannerRegisterSubmit = () => {
-    console.log("상단 배너 저장 클릭");
-  };
-
-  const handleBottomBannerRegisterSubmit = () => {
-    console.log("하단 배너 저장 클릭");
-  };
-
-  const handleSwiperBannerRegisterSubmit = () => {
-    console.log("롤링 배너 저장 클릭");
-  };
-
-  const handlePopupBannerRegisterSubmit = () => {
-    console.log("팝업 배너 저장 클릭");
   };
 
   // 배너 아이템 (상단, 하단, 팝업, 롤링 배너)
