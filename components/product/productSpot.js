@@ -74,53 +74,50 @@ const ProductSpot = (props) => {
       const eventArray = [];
       // 캘린더에 세팅된 날짜 조회
       const calendarDateArray = getCalendarDate();
-      // time_table 검색을 위한 요일 순서대로
-      const dayArray = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
-      // timetable 객체 검색을 위해 배열로 분해
-      const timeTableArray = Object.entries(spotInfo.time_table);
 
-      dayArray.map((day, i) => {
-        // timeTableArray에서 day에 해당하는 st, end 값 추출
-        const timePair = timeTableArray.filter((arr) => {
-          // arr[0] = Object.key
-          return arr[0].startsWith(day);
-        });
+      spotInfo.time_table.map((time) => {
+        let startIndex = time[0].toString().charAt(0) - 1;
+        let endIndex = time[1].toString().charAt(0) - 1;
 
-        // st, end 모두 0인 경우가 아니면
-        if (!(timePair[0][1] === 0 && timePair[1][1] === 0)) {
-          // 서버에서 보내는 객체의 순서를 바꾸지 않는 한 st가
-          // timePair[0] 이 st / timePair[1]이 end
-
-          // 캘린더에서 그 요일에 해당하는 날짜 추출
-          const year = calendarDateArray[i].getFullYear();
-          const month = calendarDateArray[i].getMonth();
-          const date = calendarDateArray[i].getDate();
-
-          const startTime = new Date(year, month, date, timePair[0][1], 0, 0);
-          const endTime = new Date(year, month, date, timePair[1][1], 0, 0);
-
-          let startHourStr = timePair[0][1].toString();
-          let endHourStr = timePair[1][1].toString();
-
-          // 한 자리일 경우 앞에 0추가
-          if (startHourStr.length === 1) {
-            startHourStr = `0${startHourStr}`;
-          }
-
-          if (endHourStr.length === 1) {
-            endHourStr = `0${endHourStr}`;
-          }
-
-          // event객체 생성 및 추가
-          const eventObj = {
-            start: startTime,
-            end: endTime,
-            display: "block",
-            eventId: `${dayArray[i]}/${startHourStr}-${endHourStr}`,
-          };
-
-          eventArray.push(eventObj);
+        // 종료일이 일요일 24시까지인 단 한가지 경우엔
+        if (time[1] === 100) {
+          endIndex = 7;
         }
+
+        const startYear = calendarDateArray[startIndex].getFullYear();
+        const startMonth = calendarDateArray[startIndex].getMonth();
+        const startDate = calendarDateArray[startIndex].getDate();
+
+        const startTime = new Date(
+          startYear,
+          startMonth,
+          startDate,
+          time[0].toString().substring(1),
+          0,
+          0
+        );
+
+        const endYear = calendarDateArray[endIndex].getFullYear();
+        const endMonth = calendarDateArray[endIndex].getMonth();
+        const endDate = calendarDateArray[endIndex].getDate();
+
+        const endTime = new Date(
+          endYear,
+          endMonth,
+          endDate,
+          time[1].toString().substring(1),
+          0,
+          0
+        );
+
+        const eventObj = {
+          start: startTime,
+          end: endTime,
+          display: "block",
+          eventId: `${time[0]}-${time[1]}`,
+        };
+
+        eventArray.push(eventObj);
       });
 
       setEvents([...events, ...eventArray]);
@@ -144,12 +141,13 @@ const ProductSpot = (props) => {
 
     let firstDate = new Date(fullYear, month, date);
 
-    // calendarDateArray에 일주일치 값 추가
+    // calendarDateArray에 일주일치 + 다음 주 월요일 값까지 추가
+    // 다음주 월요일 추가하는 이유 : 일요일 24시가 끝나는 날인 경우 처리를 위해
     const calendarDateArray = [];
 
     calendarDateArray.push(firstDate);
 
-    for (let i = 1; i < 7; i++) {
+    for (let i = 1; i < 8; i++) {
       const nextDate = new Date(fullYear, month, date + i);
       calendarDateArray.push(nextDate);
     }
@@ -160,35 +158,20 @@ const ProductSpot = (props) => {
   // 수정 or 등록 버튼 클릭
   const handleSpotChangeSumbit = (values) => {
     // 날짜 전송
-    // 넘어온 값이 없는 요일 찾기 위한 기준 배열
-    let offDayArray = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
     // 전송용 데이터 저장 객체
-    let schedule = {};
+    let schedule = [];
 
     events.map((event) => {
       // event가 존재하는 요일
-      const eventDay = event.eventId.split("/")[0];
-      const eventTime = event.eventId.split("/")[1];
+      const startDate = event.eventId.split("-")[0];
+      const endDate = event.eventId.split("-")[1];
 
-      // 값이 들어간 요일은 배열에서 제외
-      offDayArray = offDayArray.filter((day) => {
-        return day != eventDay;
-      });
+      // 이차원 배열로 생성
+      const schedulePair = [startDate, endDate];
 
-      // 요일 : 시간을 key-value로 넣어 객체 생성
-      const time = { [eventDay]: eventTime };
-      // schedule 객체에 추가
-      schedule = { ...schedule, ...time };
+      schedule.push(schedulePair);
     });
-
-    // 값이 없는 날 0-0으로 추가
-    if (offDayArray.length !== 0) {
-      offDayArray.map((day) => {
-        const time = { [day]: "0-0" };
-        schedule = { ...schedule, ...time };
-      });
-    }
 
     const config = {
       method: "post",
@@ -363,19 +346,17 @@ const ProductSpot = (props) => {
               ))}
             </Select>
           </Form.Item>
-          {isActive && (
-            <Form.Item name="spaces" label="사용 가능 공간">
-              {availableSpaces.map((availableSpace) => (
-                <CheckableTag
-                  id={availableSpace.space.space_id}
-                  label={availableSpace.space.name}
-                  key={availableSpace.space_id}
-                  onChange={handleAvailableSpaceChange}
-                  checked={availableSpace.checked}
-                />
-              ))}
-            </Form.Item>
-          )}
+          <Form.Item name="spaces" label="사용 가능 공간">
+            {availableSpaces.map((availableSpace) => (
+              <CheckableTag
+                id={availableSpace.space.space_id}
+                label={availableSpace.space.name}
+                key={availableSpace.space_id}
+                onChange={handleAvailableSpaceChange}
+                checked={availableSpace.checked}
+              />
+            ))}
+          </Form.Item>
 
           <Form.Item name="schedule" label="사용 가능 시간">
             <div>
@@ -386,21 +367,19 @@ const ProductSpot = (props) => {
               />
             </div>
           </Form.Item>
-          {isActive && (
-            <>
-              <Button type="primary" htmlType="submit">
-                {isNew ? "등록" : "수정"}
-              </Button>
-              <Modal
-                visible={updateModalVisible}
-                okText="확인"
-                onOk={() => setUpdateModalVisible(false)}
-                cancelButtonProps={{ style: { display: "none" } }}
-              >
-                <p>{isNew ? "등록" : "수정"} 완료 되었습니다.</p>
-              </Modal>
-            </>
-          )}
+          <>
+            <Button type="primary" htmlType="submit">
+              {isNew ? "등록" : "수정"}
+            </Button>
+            <Modal
+              visible={updateModalVisible}
+              okText="확인"
+              onOk={() => setUpdateModalVisible(false)}
+              cancelButtonProps={{ style: { display: "none" } }}
+            >
+              <p>{isNew ? "등록" : "수정"} 완료 되었습니다.</p>
+            </Modal>
+          </>
         </Form>
       </Card>
     </Col>

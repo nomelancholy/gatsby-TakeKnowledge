@@ -37,106 +37,38 @@ const TimeTable = ({ events, setEvents, calendarRef }) => {
       }}
       selectable={true}
       select={(info) => {
-        // 하루 클릭 vs 여러날 클릭 처리를 위한 data
-        const startYear = info.start.getFullYear();
-        const startMonth = info.start.getMonth();
-        const startDate = info.start.getDate();
+        console.log(`info`, info);
 
-        const endYear = info.end.getFullYear();
-        const endMonth = info.end.getMonth();
-        const endDate = info.end.getDate();
-
-        // diff 비교를 위해 시간을 제거한 날짜
-        const start = moment(new Date(startYear, startMonth, startDate));
-        const end = moment(new Date(endYear, endMonth, endDate));
-
-        let diff = moment(end).diff(moment(start), "days");
-
-        // ~24시일 경우 데이터는 다음날 00시로 날아온다.
-        // 이 경우 diff를 1 줄여줘야 하기에 시간 확인
-        const endHours = info.end.getHours();
-
-        if (endHours === 0) {
-          diff = diff - 1;
-        }
-
-        // 하루치 / 첫 날 요일
-        const day = moment(info.start).day();
-        // 요일 영문 변환을 위한 array
-        const dayArray = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
-        // 배열 filtering과 데이터 전송을 위해 eventId 사용
-        // eventId format : 요일/시작-끝
-        // 요일 : 0,1,2,3,4,5,6 -> 일, 월, 화, 수, 목, 금, 토
-
+        // 업데이트되는 events 처리를 위한 배열
         let newEvents = [];
 
-        if (diff === 0) {
-          // 하루치만 클릭한 경우
+        // 월,화,수,목,금,토,일 -> 1,2,3,4,5,6,7
+        // 시작 요일 숫자로 저장
+        let startDay = moment(info.start).day();
+        // 종료 요일 숫자로 저장
+        let endDay = moment(info.end).day();
 
-          // ~24시일 경우 시간 데이터가 00으로 날아오기 때문에
-          // 이 경우 eventId에 사용하기 위해서 24로 변경
-          const endTime =
-            moment(info.end).format("HH") === "00"
-              ? "24"
-              : moment(info.end).format("HH");
-
-          const eventObj = {
-            start: info.start,
-            end: info.end,
-            display: "block",
-            eventId: `${dayArray[day]}/${moment(info.start).format(
-              "HH"
-            )}-${endTime}`,
-          };
-
-          newEvents = [...events, eventObj];
-        } else {
-          // 여러 날을 한꺼번에 클릭한 경우
-
-          const eventArray = [];
-
-          for (let i = 0; i <= diff; i++) {
-            let eventObj = {};
-
-            if (i === 0) {
-              // 첫 날
-              eventObj = {
-                start: info.start,
-                end: new Date(startYear, startMonth, startDate + 1),
-                display: "block",
-                eventId: `${dayArray[day]}/${moment(info.start).format(
-                  "HH"
-                )}-24`,
-              };
-            } else if (i === diff) {
-              // 마지막 날
-              const date = new Date(startYear, startMonth, startDate + i);
-
-              eventObj = {
-                start: date,
-                end: info.end,
-                display: "block",
-                eventId: `${dayArray[date.getDay()]}/00-${moment(
-                  info.end
-                ).format("HH")}`,
-              };
-            } else {
-              // 중간 날
-              const fromDate = new Date(startYear, startMonth, startDate + i);
-              const toDate = new Date(startYear, startMonth, startDate + i + 1);
-
-              eventObj = {
-                start: fromDate,
-                end: toDate,
-                display: "block",
-                eventId: `${dayArray[fromDate.getDay()]}/00-24`,
-              };
-            }
-            eventArray.push(eventObj);
-          }
-
-          newEvents = [...events, ...eventArray];
+        // 일요일인 경우 숫자 7로 변경 (full calendar에서 일요일은 0)
+        if (startDay === 0) {
+          startDay = 7;
         }
+
+        if (endDay === 0) {
+          endDay = 7;
+        }
+
+        // 시간 추출
+        const startTime = moment(info.start).format("HH");
+        const endTime = moment(info.end).format("HH");
+
+        const eventObj = {
+          start: info.start,
+          end: info.end,
+          display: "block",
+          eventId: `${startDay}${startTime}-${endDay}${endTime}`,
+        };
+
+        newEvents = [...events, eventObj];
 
         setEvents(newEvents);
       }}
