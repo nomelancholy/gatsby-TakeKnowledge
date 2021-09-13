@@ -175,7 +175,7 @@ const Coupon = (props) => {
         <Button
           type="primary"
           onClick={() => {
-            Router.push("/notice/new");
+            Router.push("/coupon/new");
           }}
         >
           <PlusOutlined />
@@ -226,12 +226,6 @@ const Coupon = (props) => {
             <Select style={{ width: 120 }}>
               <Select.Option value="publish">발행</Select.Option>
               <Select.Option value="private">미발행</Select.Option>
-            </Select>
-          </Form.Item>
-          <Form.Item name="sticky" label="상단 노출">
-            <Select style={{ width: 120 }}>
-              <Select.Option value={0}>미노출</Select.Option>
-              <Select.Option value={1}>노출</Select.Option>
             </Select>
           </Form.Item>
           <Form.Item name="start_date" label="쿠폰 시작 일자">
