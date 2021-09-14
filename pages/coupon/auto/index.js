@@ -11,7 +11,7 @@ import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
 import { couponListcolumns } from "@utils/columns/coupon";
 
-// 쿠폰 관리
+// 쿠폰 자동 발급
 const CouponAuto = (props) => {
   const { user, isLoggedIn, token } = props.auth;
 

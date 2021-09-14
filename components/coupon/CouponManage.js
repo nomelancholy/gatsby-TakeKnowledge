@@ -1,4 +1,16 @@
-import { Button, Form, Input, Row, Modal, Card, Radio, Transfer } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  InputNumber,
+  Row,
+  Modal,
+  Card,
+  Radio,
+  Transfer,
+  Select,
+  DatePicker,
+} from "antd";
 import React, { useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
@@ -115,20 +127,26 @@ const CouponManage = (props) => {
   return (
     <>
       <Card
-        title={couponId && couponId !== null ? `공지 ${couponId}` : "공지 등록"}
+        title={
+          couponId && couponId !== null ? `쿠폰 ID ${couponId}` : "쿠폰 등록"
+        }
         extra={<a onClick={() => router.back()}>뒤로 가기</a>}
         bodyStyle={{ padding: "1rem" }}
         className="mb-4"
       >
         <Form form={couponForm} onFinish={handleNoticeRegisterSubmit}>
-          <Card bodyStyle={{ padding: "1rem" }} className="mb-2">
+          <Card
+            bodyStyle={{ padding: "1rem" }}
+            className="mb-2"
+            title="활성/비활성"
+          >
             <Form.Item
               name="status"
-              label="공지 활성/비활성"
+              label="발급"
               rules={[
                 {
                   required: true,
-                  message: "공지 활성/비활성 여부를 선택해주세요",
+                  message: "쿠폰 발급 여부를 선택해주세요",
                 },
               ]}
             >
@@ -140,6 +158,158 @@ const CouponManage = (props) => {
                   비활성
                 </Radio>
               </Radio.Group>
+            </Form.Item>
+            <Form.Item
+              name="status"
+              label="이용"
+              rules={[
+                {
+                  required: true,
+                  message: "쿠폰 이용 여부를 선택해주세요",
+                },
+              ]}
+            >
+              <Radio.Group>
+                <Radio style={radioStyle} value={"publish"}>
+                  활성
+                </Radio>
+                <Radio style={radioStyle} value={"private"}>
+                  비활성
+                </Radio>
+              </Radio.Group>
+            </Form.Item>
+          </Card>
+          <Card bodyStyle={{ padding: "1rem" }} className="mb-2">
+            <FormItem
+              name="name"
+              label="쿠폰명"
+              rules={[
+                {
+                  required: true,
+                  max: 15,
+                  message: "쿠폰명을 15자 이내로 입력해주세요",
+                },
+              ]}
+            >
+              <Input maxLength="15" />
+            </FormItem>
+            <FormItem
+              name="name"
+              label="쿠폰 설명"
+              rules={[
+                {
+                  required: true,
+                  max: 50,
+                  message: "쿠폰 설명을 50자 이내로 입력해주세요",
+                },
+              ]}
+            >
+              <Input maxLength="50" />
+            </FormItem>
+            <Form.Item
+              name="type"
+              label="쿠폰 유형"
+              rules={[
+                {
+                  required: true,
+                  message: "쿠폰 유형을 선택해주세요",
+                },
+              ]}
+            >
+              <Select style={{ width: 120 }}>
+                <Select.Option value="membership">멤버십</Select.Option>
+                <Select.Option value="meeting">미팅룸</Select.Option>
+                <Select.Option value="coworking">코워킹룸</Select.Option>
+                <Select.Option value="locker">락커</Select.Option>
+                <Select.Option value="lounge">라운지</Select.Option>
+              </Select>
+            </Form.Item>
+            <FormItem
+              name="name"
+              label="공통 발급 코드"
+              rules={[
+                {
+                  required: true,
+                  max: 50,
+                  message: "쿠폰 설명을 50자 이내로 입력해주세요",
+                },
+              ]}
+            >
+              <Input maxLength="50" />
+            </FormItem>
+            <FormItem
+              name="name"
+              label="발행량"
+              rules={[
+                {
+                  required: true,
+                  max: 50,
+                  message: "쿠폰 설명을 50자 이내로 입력해주세요",
+                },
+              ]}
+            >
+              <InputNumber />
+              {"장"}
+            </FormItem>
+            <FormItem
+              name="name"
+              label="중복 허용수"
+              rules={[
+                {
+                  required: true,
+                  max: 50,
+                  message: "쿠폰 설명을 50자 이내로 입력해주세요",
+                },
+              ]}
+            >
+              <InputNumber />
+              {"장"}
+            </FormItem>
+            <FormItem
+              name="name"
+              label="할인 액"
+              rules={[
+                {
+                  required: true,
+                  max: 50,
+                  message: "쿠폰 설명을 50자 이내로 입력해주세요",
+                },
+              ]}
+            >
+              <InputNumber />
+              {"원"}
+            </FormItem>
+            <FormItem
+              name="name"
+              label="할인 비율"
+              rules={[
+                {
+                  required: true,
+                  max: 50,
+                  message: "쿠폰 설명을 50자 이내로 입력해주세요",
+                },
+              ]}
+            >
+              <InputNumber />
+              {"%"}
+            </FormItem>
+            <Form.Item
+              name="type"
+              label="쿠폰 구분"
+              rules={[
+                {
+                  required: true,
+                  message: "쿠폰 타입을 선택해주세요",
+                },
+              ]}
+            >
+              <Select style={{ width: 120 }}>
+                <Select.Option value="membership">멤버십</Select.Option>
+                <Select.Option value="meeting">미팅룸</Select.Option>
+                <Select.Option value="coworking">코워킹룸</Select.Option>
+                <Select.Option value="locker">락커</Select.Option>
+                <Select.Option value="lounge">라운지</Select.Option>
+              </Select>
             </Form.Item>
             {/* <Form.Item
               name="type"
@@ -155,23 +325,8 @@ const CouponManage = (props) => {
                 </Radio>
               </Radio.Group>
             </Form.Item> */}
-            <Form.Item
-              name="sticky"
-              label="상단 고정(pin)"
-              rules={[
-                { required: true, message: "상단 고정 여부를 선택해주세요" },
-              ]}
-            >
-              <Radio.Group>
-                <Radio style={radioStyle} value={1}>
-                  고정
-                </Radio>
-                <Radio style={radioStyle} value={0}>
-                  해제
-                </Radio>
-              </Radio.Group>
-            </Form.Item>
-            <Form.Item>
+
+            <Form.Item label="적용 상품">
               <Transfer
                 dataSource={[]}
                 showSearch
@@ -180,17 +335,55 @@ const CouponManage = (props) => {
                 // onChange={handleSpotOptionsChange}
               />
             </Form.Item>
-            <FormItem></FormItem>
-          </Card>
-          <Card bodyStyle={{ padding: "1rem" }} className="mb-2">
-            <Form.Item
-              name="title"
-              label="제목"
-              rules={[{ required: true, message: "제목을 입력해주세요" }]}
-            >
-              <Input />
+            <Form.Item label="적용 스팟">
+              <Transfer
+                dataSource={[]}
+                showSearch
+                targetKeys={[]}
+                // render={(item) => item.title}
+                // onChange={handleSpotOptionsChange}
+              />
             </Form.Item>
-
+            <Form.Item
+              name="start_date"
+              label="발행 기간"
+              rules={[{ required: true, message: "시작일을 선택해주세요" }]}
+            >
+              <>
+                <DatePicker
+                  placeholder="시작일"
+                  onChange={(date, dateString) => {
+                    console.log("change");
+                  }}
+                />
+                <DatePicker
+                  placeholder="종료일"
+                  onChange={(date, dateString) => {
+                    console.log("change");
+                  }}
+                />
+              </>
+            </Form.Item>
+            <Form.Item
+              name="end_date"
+              label="유효 기간"
+              rules={[{ required: true, message: "종료일을 선택해주세요" }]}
+            >
+              <>
+                <DatePicker
+                  placeholder="시작일"
+                  onChange={(date, dateString) => {
+                    console.log("change");
+                  }}
+                />
+                <DatePicker
+                  placeholder="종료일"
+                  onChange={(date, dateString) => {
+                    console.log("change");
+                  }}
+                />
+              </>
+            </Form.Item>
             <Button type="primary" htmlType="submit">
               저장
             </Button>
