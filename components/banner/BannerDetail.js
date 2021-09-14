@@ -74,6 +74,9 @@ const BannerDetail = (props) => {
     useState(false);
   const [popupBannerPreviewImage, setPopupBannerPreviewImage] = useState("");
 
+  // 삭제한 이미지 서버 전송용
+  const [delImages, setDelImages] = useState([]);
+
   // 배너 타깃 체크박스에 사용되는 옵션
   const permissionOptions = [
     {
@@ -152,21 +155,50 @@ const BannerDetail = (props) => {
       }
 
       if (bannerInfo.items && bannerInfo.items.length > 0) {
+        // setBannerItems(bannerInfo.items);
+
         bannerInfo.items.map((bannerItem) => {
           let form = "";
+
+          const bannerImages = [];
+
+          if (bannerItem.images) {
+            bannerItem.images.map((image) => {
+              const settingImage = {
+                thumbUrl: image.image_path,
+                uid: image.image_key,
+              };
+
+              bannerImages.push(settingImage);
+            });
+          }
 
           switch (bannerItem.banner_type) {
             case "top":
               form = topBannerForm;
+
+              if (bannerImages.length > 0) {
+                setTopBannerImage(bannerImages);
+              }
+
               break;
             case "bottom":
               form = bottomBannerForm;
+              if (bannerImages.length > 0) {
+                setBottomBannerImage(bannerImages);
+              }
               break;
             case "swiper":
               form = swiperBannerForm;
+              if (bannerImages.length > 0) {
+                setSwiperBannerImage(bannerImages);
+              }
               break;
             case "popup":
               form = popupBannerForm;
+              if (bannerImages.length > 0) {
+                setPopupBannerImage(bannerImages);
+              }
               break;
             default:
               break;
@@ -176,6 +208,7 @@ const BannerDetail = (props) => {
             title: bannerItem.title,
             link: bannerItem.link,
             target: bannerItem.target,
+            banner_item_id: bannerItem.banner_item_id,
           });
         });
       }
@@ -261,19 +294,27 @@ const BannerDetail = (props) => {
 
     formData.append("banner_id", bannerId ? bannerId : generatedBannerId);
     formData.append("banner_type", type);
+
+    value.banner_item_id &&
+      formData.append("banner_item_id", value.banner_item_id);
+
     formData.append("title", value.title);
     formData.append("link", value.link);
     formData.append("target", value.target ? "_blank" : "_self");
 
-    const images = [];
-
     if (value.images && value.images.length > 0) {
       value.images.map((image) => {
-        images.push(image.originFileObj);
+        if (image.uid.startsWith("rc")) {
+          formData.append("images", image.originFileObj);
+        }
       });
     }
 
-    formData.append("images", images);
+    console.log(`delImages`, delImages);
+
+    if (delImages.length > 0) {
+      formData.append("del_images", JSON.stringify(delImages));
+    }
 
     // formData console
 
@@ -284,8 +325,6 @@ const BannerDetail = (props) => {
     for (let value of formData.values()) {
       console.log(value);
     }
-
-    console.log(`images`, images);
 
     const config = {
       method: "post",
@@ -344,12 +383,12 @@ const BannerDetail = (props) => {
       setTopBannerImage(newFileList);
       topBannerForm.setFieldsValue({ images: newFileList });
 
-      // if (file.image_key) {
-      //   // 서버에서 받아온 파일인 경우
-      //   // 서버에서 삭제하기 위한 배열 세팅
-      //   const newRemovedFileList = [...removedFileList, file.image_key];
-      //   setRemovedFileList(newRemovedFileList);
-      // }
+      if (!file.uid.startsWith("rc")) {
+        // 서버에서 받아온 파일인 경우
+        // 서버에서 삭제하기 위한 배열 세팅
+        const removeFileList = [...delImages, file.uid];
+        setDelImages(removeFileList);
+      }
     }
   };
 
@@ -374,12 +413,12 @@ const BannerDetail = (props) => {
       setBottomBannerImage(newFileList);
       bottomBannerForm.setFieldsValue({ images: newFileList });
 
-      // if (file.image_key) {
-      //   // 서버에서 받아온 파일인 경우
-      //   // 서버에서 삭제하기 위한 배열 세팅
-      //   const newRemovedFileList = [...removedFileList, file.image_key];
-      //   setRemovedFileList(newRemovedFileList);
-      // }
+      if (!file.uid.startsWith("rc")) {
+        // 서버에서 받아온 파일인 경우
+        // 서버에서 삭제하기 위한 배열 세팅
+        const removeFileList = [...delImages, file.uid];
+        setDelImages(removeFileList);
+      }
     }
   };
 
@@ -404,12 +443,12 @@ const BannerDetail = (props) => {
       setSwiperBannerImage(newFileList);
       swiperBannerForm.setFieldsValue({ images: newFileList });
 
-      // if (file.image_key) {
-      //   // 서버에서 받아온 파일인 경우
-      //   // 서버에서 삭제하기 위한 배열 세팅
-      //   const newRemovedFileList = [...removedFileList, file.image_key];
-      //   setRemovedFileList(newRemovedFileList);
-      // }
+      if (!file.uid.startsWith("rc")) {
+        // 서버에서 받아온 파일인 경우
+        // 서버에서 삭제하기 위한 배열 세팅
+        const removeFileList = [...delImages, file.uid];
+        setDelImages(removeFileList);
+      }
     }
   };
 
@@ -434,12 +473,12 @@ const BannerDetail = (props) => {
       setPopupBannerImage(newFileList);
       popupBannerForm.setFieldsValue({ images: newFileList });
 
-      // if (file.image_key) {
-      //   // 서버에서 받아온 파일인 경우
-      //   // 서버에서 삭제하기 위한 배열 세팅
-      //   const newRemovedFileList = [...removedFileList, file.image_key];
-      //   setRemovedFileList(newRemovedFileList);
-      // }
+      if (!file.uid.startsWith("rc")) {
+        // 서버에서 받아온 파일인 경우
+        // 서버에서 삭제하기 위한 배열 세팅
+        const removeFileList = [...delImages, file.uid];
+        setDelImages(removeFileList);
+      }
     }
   };
 
@@ -571,8 +610,10 @@ const BannerDetail = (props) => {
                 </Form.Item>
               </Input.Group>
             </Form.Item>
-
-            <Button type="primary" htmlType="submit">
+            <Form.Item name="banner_item_id">
+              <Input type="hidden" />
+            </Form.Item>
+            <Button type="primary" htmlType="submit" name="button">
               저장
             </Button>
             <Modal
@@ -642,6 +683,9 @@ const BannerDetail = (props) => {
                   <Checkbox.Group options={targetOption} />
                 </Form.Item>
               </Input.Group>
+            </Form.Item>
+            <Form.Item name="banner_item_id">
+              <Input type="hidden" />
             </Form.Item>
             <Button type="primary" htmlType="submit">
               저장
@@ -716,6 +760,9 @@ const BannerDetail = (props) => {
                     </Form.Item>
                   </Input.Group>
                 </Form.Item>
+                <Form.Item name="banner_item_id">
+                  <Input type="hidden" />
+                </Form.Item>
                 <Button type="primary" htmlType="submit">
                   저장
                 </Button>
@@ -789,6 +836,9 @@ const BannerDetail = (props) => {
                   <Checkbox.Group options={targetOption} />
                 </Form.Item>
               </Input.Group>
+            </Form.Item>
+            <Form.Item name="banner_item_id">
+              <Input type="hidden" />
             </Form.Item>
             <Button type="primary" htmlType="submit">
               저장
