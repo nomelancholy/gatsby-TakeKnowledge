@@ -135,16 +135,17 @@ const RateplanDetail = (props) => {
         product_type: productInfo.item.type,
       });
       // 그에 해당하는 옵션 리스트 조회
-      getOptionProductList(productInfo.type);
+      getOptionProductList(productInfo.item.type);
     }
   }, [productInfo]);
 
   // 상품 구분에 따라 option 상품 리스트 조회
   const getOptionProductList = (type) => {
+    console.log(`type`, type);
     axios
       .post(
         `${process.env.BACKEND_API}/admin/product/list`,
-        { page: 1, size: 20, status: "active", type: type },
+        { page: 1, size: 100, status: "active", type: type },
         {
           headers: {
             "Content-Type": "application/json;charset=UTF-8",
@@ -163,11 +164,27 @@ const RateplanDetail = (props) => {
   };
 
   useEffect(() => {
-    // 옵션 상품 리스트가 조회되었고, detail로 들어와서 상품 정보도 있는 경우면
+    // 옵션 상품 리스트가 조회되었고, detail로 들어와서 상품 정보도 있는 경우
     if (optionProductList && productInfo) {
-      form.setFieldsValue({
-        product_id: productInfo.item.product_id,
-      });
+      console.log(`optionProductList`, optionProductList);
+      // 유저가 상품 구분을 변경해서 상품이 없는 type을 선택했을 경우
+      if (optionProductList.length === 0) {
+        console.log("1");
+        form.setFieldsValue({
+          product_id: null,
+        });
+      } else if (optionProductList[0].type !== productInfo.item.type) {
+        console.log("2");
+        // 유저가 상품 구분을 변경했을 경우
+        form.setFieldsValue({
+          product_id: null,
+        });
+      } else {
+        console.log("3");
+        form.setFieldsValue({
+          product_id: productInfo.item.product_id,
+        });
+      }
     }
   }, [optionProductList]);
 
@@ -217,13 +234,8 @@ const RateplanDetail = (props) => {
       });
   };
 
-  // input value change handle
+  // 상품 구분 변경
   const handleProductTypeChange = (type) => {
-    // 상품명 value 초기화
-    form.setFieldsValue({
-      product_id: null,
-    });
-    form.resetFields([product_id]);
     // 상품 구분에 따른 option list 재호출
     getOptionProductList(type);
   };
@@ -243,8 +255,8 @@ const RateplanDetail = (props) => {
           <Card
             title={
               rateplanId && rateplanId !== null
-                ? `상품 ID ${rateplanId}`
-                : "상품 등록"
+                ? `요금제 ID ${rateplanId}`
+                : "요금제 등록"
             }
             extra={<a onClick={() => router.back()}>뒤로 가기</a>}
             bodyStyle={{ padding: "1rem" }}
