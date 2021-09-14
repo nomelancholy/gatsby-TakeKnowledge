@@ -1,4 +1,13 @@
-import { Button, Table, Form, Input, Row, Select } from "antd";
+import {
+  Button,
+  Table,
+  Form,
+  Input,
+  InputNumber,
+  Row,
+  Select,
+  DatePicker,
+} from "antd";
 import { SlidersOutlined, PlusOutlined } from "@ant-design/icons";
 
 import React, { useState, useEffect } from "react";
@@ -9,10 +18,10 @@ import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
-import { couponListcolumns } from "@utils/columns/coupon";
+import { couponResultColumns } from "@utils/columns/coupon";
 
-// 쿠폰 자동 발급
-const CouponAuto = (props) => {
+// 쿠폰 발급 결과
+const CouponResult = (props) => {
   const { user, isLoggedIn, token } = props.auth;
 
   useEffect(() => {
@@ -43,8 +52,7 @@ const CouponAuto = (props) => {
   });
 
   const getCouponList = (params) => {
-    setLoading(true);
-
+    // setLoading(true);
     // axios
     //   .post(
     //     `${process.env.BACKEND_API}/services/notice/list`,
@@ -60,9 +68,7 @@ const CouponAuto = (props) => {
     //   .then((response) => {
     //     const data = response.data;
     //     console.log(`notice data`, data);
-
     //     setCouponList(data.items);
-
     //     // 페이지 네이션 정보 세팅
     //     const pageInfo = {
     //       current: data.page,
@@ -70,12 +76,9 @@ const CouponAuto = (props) => {
     //       pageSize: data.size,
     //       size: data.size,
     //     };
-
     //     setPagination(pageInfo);
-
     //     // 로딩바 세팅
     //     setLoading(false);
-
     //     setParams(params);
     //   })
     //   .catch((error) => {
@@ -148,9 +151,15 @@ const CouponAuto = (props) => {
     getCouponList({ ...params, ...searchParams });
   };
 
+  const [couponStartDateStart, setCouponStartDateStart] = useState("");
+  const [couponStartDateEnd, setCouponStartDateEnd] = useState("");
+
+  const [couponEndDateStart, setCouponEndDateStart] = useState("");
+  const [couponEndDateEnd, setCouponEndDateEnd] = useState("");
+
   return (
     <>
-      <h3>쿠폰 자동 발급</h3>
+      <h3>쿠폰 발급 결과</h3>
 
       <Row type="flex" align="middle" className="py-3">
         <Button
@@ -166,7 +175,7 @@ const CouponAuto = (props) => {
         <Button
           type="primary"
           onClick={() => {
-            Router.push("/coupon/auto/new");
+            Router.push("/coupon/new");
           }}
         >
           <PlusOutlined />
@@ -176,7 +185,7 @@ const CouponAuto = (props) => {
 
       <Table
         size="middle"
-        columns={couponListcolumns}
+        columns={couponResultColumns}
         rowKey={(record) => record.notice_id}
         dataSource={couponList}
         pagination={pagination}
@@ -201,29 +210,53 @@ const CouponAuto = (props) => {
             }
           }}
         >
-          <Form.Item name="notice_id" label="공지 ID">
-            <Input />
+          <Form.Item name="notice_id" label="쿠폰 ID">
+            <InputNumber />
           </Form.Item>
-          <Form.Item name="type" label="공지 유형">
+          <Form.Item name="type" label="쿠폰 유형">
             <Select style={{ width: 160 }}>
               <Select.Option value="normal">일반 공지</Select.Option>
               <Select.Option value="spot">지점 공지</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item name="status" label="사용 여부">
+          <Form.Item name="title" label="쿠폰 명">
+            <Input />
+          </Form.Item>
+          <Form.Item name="status" label="쿠폰 구분">
             <Select style={{ width: 120 }}>
               <Select.Option value="publish">발행</Select.Option>
               <Select.Option value="private">미발행</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item name="sticky" label="상단 노출">
-            <Select style={{ width: 120 }}>
-              <Select.Option value={0}>미노출</Select.Option>
-              <Select.Option value={1}>노출</Select.Option>
-            </Select>
+          <Form.Item name="start_date" label="쿠폰 시작 일자">
+            <>
+              <DatePicker
+                placeholder="시작"
+                onChange={(date, dateString) =>
+                  setCouponStartDateStart(dateString)
+                }
+              />
+              <DatePicker
+                placeholder="종료"
+                onChange={(date, dateString) =>
+                  setCouponStartDateEnd(dateString)
+                }
+              />
+            </>
           </Form.Item>
-          <Form.Item name="title" label="공지 제목">
-            <Input />
+          <Form.Item name="end_date" label="쿠폰 종료 일자">
+            <>
+              <DatePicker
+                placeholder="시작"
+                onChange={(date, dateString) =>
+                  setCouponEndDateStart(dateString)
+                }
+              />
+              <DatePicker
+                placeholder="종료"
+                onChange={(date, dateString) => setCouponEndDateEnd(dateString)}
+              />
+            </>
           </Form.Item>
         </Form>
       </Filter>
@@ -235,4 +268,4 @@ export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
   return { props: initialize(ctx) };
 });
 
-export default connect((state) => state)(CouponAuto);
+export default connect((state) => state)(CouponResult);

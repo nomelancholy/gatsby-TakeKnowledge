@@ -50,42 +50,42 @@ const CouponDirect = (props) => {
   const getCouponList = (params) => {
     setLoading(true);
 
-    axios
-      .post(
-        `${process.env.BACKEND_API}/services/notice/list`,
-        { ...params },
-        {
-          headers: {
-            "Content-Type": "application/json;charset=UTF-8",
-            "Access-Control-Allow-Origin": "*",
-            Authorization: decodeURIComponent(token),
-          },
-        }
-      )
-      .then((response) => {
-        const data = response.data;
-        console.log(`notice data`, data);
+    // axios
+    //   .post(
+    //     `${process.env.BACKEND_API}/services/notice/list`,
+    //     { ...params },
+    //     {
+    //       headers: {
+    //         "Content-Type": "application/json;charset=UTF-8",
+    //         "Access-Control-Allow-Origin": "*",
+    //         Authorization: decodeURIComponent(token),
+    //       },
+    //     }
+    //   )
+    //   .then((response) => {
+    //     const data = response.data;
+    //     console.log(`notice data`, data);
 
-        setCouponList(data.items);
+    //     setCouponList(data.items);
 
-        // 페이지 네이션 정보 세팅
-        const pageInfo = {
-          current: data.page,
-          total: data.total,
-          pageSize: data.size,
-          size: data.size,
-        };
+    //     // 페이지 네이션 정보 세팅
+    //     const pageInfo = {
+    //       current: data.page,
+    //       total: data.total,
+    //       pageSize: data.size,
+    //       size: data.size,
+    //     };
 
-        setPagination(pageInfo);
+    //     setPagination(pageInfo);
 
-        // 로딩바 세팅
-        setLoading(false);
+    //     // 로딩바 세팅
+    //     setLoading(false);
 
-        setParams(params);
-      })
-      .catch((error) => {
-        console.log(`error`, error);
-      });
+    //     setParams(params);
+    //   })
+    //   .catch((error) => {
+    //     console.log(`error`, error);
+    //   });
   };
 
   useEffect(() => {
@@ -171,11 +171,20 @@ const CouponDirect = (props) => {
         <Button
           type="primary"
           onClick={() => {
-            Router.push("/coupon/new");
+            Router.push("/coupon/direct/new");
           }}
         >
           <PlusOutlined />
           <span>등록</span>
+        </Button>
+        <Button
+          type="primary"
+          onClick={() => {
+            Router.push("/coupon/direct/result");
+          }}
+        >
+          <PlusOutlined />
+          <span>발급 결과</span>
         </Button>
       </Row>
 

@@ -163,3 +163,36 @@ export const couponDirectListcolumns = [
     },
   },
 ];
+
+// 쿠폰 발급 결과
+
+export const couponResultColumns = [
+  {
+    title: "쿠폰 이름",
+    dataIndex: "id",
+  },
+  {
+    title: "이메일",
+    dataIndex: "name",
+  },
+  {
+    title: "쿠폰 상태",
+    dataIndex: "status",
+  },
+  {
+    title: "사용자 상태",
+    dataIndex: "email",
+  },
+  {
+    title: "발급 방식",
+    dataIndex: "type",
+  },
+  {
+    title: "발급 일시",
+    dataIndex: "amount",
+  },
+  {
+    title: "개별 쿠폰 코드",
+    dataIndex: "rate",
+  },
+];

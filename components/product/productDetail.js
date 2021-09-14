@@ -126,7 +126,7 @@ const ProductDetail = (props) => {
   // productData 세팅되면 알맞는 엘리먼트에 binding
   useEffect(() => {
     if (productInfo) {
-      // console.log(`productInfo`, productInfo);
+      console.log(`productInfo`, productInfo);
 
       form.setFieldsValue({
         // 상품 구분
