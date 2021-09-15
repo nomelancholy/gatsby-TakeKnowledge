@@ -15,7 +15,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 import Router, { useRouter } from "next/router";
-import dynamic from "next/dynamic";
 import FormItem from "antd/lib/form/FormItem";
 
 const CouponManage = (props) => {
@@ -75,13 +74,29 @@ const CouponManage = (props) => {
   // couponInfo 세팅되면 알맞는 엘리먼트에 binding
   useEffect(() => {
     if (couponInfo) {
+      console.log(`couponInfo`, couponInfo);
       // 공지 상태
       couponForm.setFieldsValue({
         status: couponInfo.status,
-        type: couponInfo.type,
-        sticky: couponInfo.sticky,
-        title: couponInfo.title,
+        available: couponInfo.available,
+        name: couponInfo.name,
+        desc: couponInfo.desc,
+        coupon_category: couponInfo.coupon_category,
+        code: couponInfo.code,
+        total: couponInfo.total,
+        dup_count: couponInfo.dup_count,
+        coupon_type: couponInfo.coupon_type,
       });
+
+      if (couponInfo.coupon_type === "flat") {
+        couponForm.setFieldsValue({
+          discount_amount: couponInfo.discount,
+        });
+      } else if (couponInfo.coupon_type === "rate") {
+        couponForm.setFieldsValue({
+          discount_rate: couponInfo.discount,
+        });
+      }
     }
   }, [couponInfo]);
 
@@ -152,10 +167,10 @@ const CouponManage = (props) => {
               ]}
             >
               <Radio.Group>
-                <Radio style={radioStyle} value={"publish"}>
+                <Radio style={radioStyle} value={"active"}>
                   활성
                 </Radio>
-                <Radio style={radioStyle} value={"private"}>
+                <Radio style={radioStyle} value={"inactive"}>
                   비활성
                 </Radio>
               </Radio.Group>
@@ -171,10 +186,10 @@ const CouponManage = (props) => {
               ]}
             >
               <Radio.Group>
-                <Radio style={radioStyle} value={"publish"}>
+                <Radio style={radioStyle} value={"true"}>
                   활성
                 </Radio>
-                <Radio style={radioStyle} value={"private"}>
+                <Radio style={radioStyle} value={"false"}>
                   비활성
                 </Radio>
               </Radio.Group>
@@ -230,19 +245,19 @@ const CouponManage = (props) => {
             </FormItem>
             <FormItem name="total" label="발행량">
               <InputNumber />
-              {"장"}
+              {/* {"장"} */}
             </FormItem>
             <FormItem name="dup_count" label="중복 허용수">
               <InputNumber />
-              {"장"}
+              {/* {"장"} */}
             </FormItem>
             <FormItem name="discount_amount" label="할인 액">
               <InputNumber />
-              {"원"}
+              {/* {"원"} */}
             </FormItem>
             <FormItem name="discount_rate" label="할인 비율">
               <InputNumber />
-              {"%"}
+              {/* {"%"} */}
             </FormItem>
             <Form.Item
               name="coupon_type"
@@ -260,7 +275,7 @@ const CouponManage = (props) => {
               </Select>
             </Form.Item>
 
-            <Form.Item label="적용 상품">
+            <Form.Item name="product_id" label="적용 상품">
               <Transfer
                 dataSource={[]}
                 showSearch
@@ -269,7 +284,7 @@ const CouponManage = (props) => {
                 // onChange={handleSpotOptionsChange}
               />
             </Form.Item>
-            <Form.Item label="적용 스팟">
+            <Form.Item name="spot_ids" label="적용 스팟">
               <Transfer
                 dataSource={[]}
                 showSearch
