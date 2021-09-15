@@ -18,10 +18,6 @@ import Router, { useRouter } from "next/router";
 import dynamic from "next/dynamic";
 import FormItem from "antd/lib/form/FormItem";
 
-const PostEditor = dynamic(() => import("@utils/Editor"), {
-  ssr: false,
-});
-
 const CouponManage = (props) => {
   const { couponId, token } = props;
 
@@ -43,6 +39,11 @@ const CouponManage = (props) => {
   // 쿠폰 Form
   const [couponForm] = Form.useForm();
 
+  const [pubDateStart, setPubDateStart] = useState("");
+  const [pubDateEnd, setPubDateEnd] = useState("");
+  const [useableDateStart, setUseableDateStart] = useState("");
+  const [useableDateEnd, setUseableDateEnd] = useState("");
+
   useEffect(() => {
     if (couponId) {
       // 수정일 경우
@@ -56,12 +57,12 @@ const CouponManage = (props) => {
 
       axios
         .get(
-          `${process.env.BACKEND_API}/services/notice/get/${noticeId}`,
+          `${process.env.BACKEND_API}/admin/user/coupon/get/${couponId}`,
           config
         )
         .then(function (response) {
-          const noticeInfo = response.data.item;
-          setNoticeInfo(noticeInfo);
+          const couponInfo = response.data.item;
+          setCouponInfo(couponInfo);
         })
         .catch(function (error) {
           console.log(error);
@@ -71,7 +72,7 @@ const CouponManage = (props) => {
     }
   }, []);
 
-  // noticeInfo 세팅되면 알맞는 엘리먼트에 binding
+  // couponInfo 세팅되면 알맞는 엘리먼트에 binding
   useEffect(() => {
     if (couponInfo) {
       // 공지 상태
@@ -85,7 +86,7 @@ const CouponManage = (props) => {
   }, [couponInfo]);
 
   // 저장 버튼 클릭
-  const handleNoticeRegisterSubmit = () => {
+  const handleCouponRegisterSubmit = () => {
     const { type, sticky, status, title } = couponForm.getFieldValue();
 
     let data = {
@@ -98,9 +99,9 @@ const CouponManage = (props) => {
     let url = "";
 
     if (registerMode) {
-      url = `${process.env.BACKEND_API}/services/notice/add`;
+      url = `${process.env.BACKEND_API}/admin/user/coupon/add`;
     } else {
-      url = `${process.env.BACKEND_API}/services/notice/update`;
+      url = `${process.env.BACKEND_API}/admin/user/coupon/update`;
       data.coupon_id = Number(couponId);
     }
 
@@ -134,7 +135,7 @@ const CouponManage = (props) => {
         bodyStyle={{ padding: "1rem" }}
         className="mb-4"
       >
-        <Form form={couponForm} onFinish={handleNoticeRegisterSubmit}>
+        <Form form={couponForm} onFinish={handleCouponRegisterSubmit}>
           <Card
             bodyStyle={{ padding: "1rem" }}
             className="mb-2"
@@ -160,7 +161,7 @@ const CouponManage = (props) => {
               </Radio.Group>
             </Form.Item>
             <Form.Item
-              name="status"
+              name="available"
               label="이용"
               rules={[
                 {
@@ -194,7 +195,7 @@ const CouponManage = (props) => {
               <Input maxLength="15" />
             </FormItem>
             <FormItem
-              name="name"
+              name="desc"
               label="쿠폰 설명"
               rules={[
                 {
@@ -207,7 +208,7 @@ const CouponManage = (props) => {
               <Input maxLength="50" />
             </FormItem>
             <Form.Item
-              name="type"
+              name="coupon_category"
               label="쿠폰 유형"
               rules={[
                 {
@@ -224,77 +225,27 @@ const CouponManage = (props) => {
                 <Select.Option value="lounge">라운지</Select.Option>
               </Select>
             </Form.Item>
-            <FormItem
-              name="name"
-              label="공통 발급 코드"
-              rules={[
-                {
-                  required: true,
-                  max: 50,
-                  message: "쿠폰 설명을 50자 이내로 입력해주세요",
-                },
-              ]}
-            >
-              <Input maxLength="50" />
+            <FormItem name="code" label="공통 발급 코드">
+              <Input />
             </FormItem>
-            <FormItem
-              name="name"
-              label="발행량"
-              rules={[
-                {
-                  required: true,
-                  max: 50,
-                  message: "쿠폰 설명을 50자 이내로 입력해주세요",
-                },
-              ]}
-            >
+            <FormItem name="total" label="발행량">
               <InputNumber />
               {"장"}
             </FormItem>
-            <FormItem
-              name="name"
-              label="중복 허용수"
-              rules={[
-                {
-                  required: true,
-                  max: 50,
-                  message: "쿠폰 설명을 50자 이내로 입력해주세요",
-                },
-              ]}
-            >
+            <FormItem name="dup_count" label="중복 허용수">
               <InputNumber />
               {"장"}
             </FormItem>
-            <FormItem
-              name="name"
-              label="할인 액"
-              rules={[
-                {
-                  required: true,
-                  max: 50,
-                  message: "쿠폰 설명을 50자 이내로 입력해주세요",
-                },
-              ]}
-            >
+            <FormItem name="discount_amount" label="할인 액">
               <InputNumber />
               {"원"}
             </FormItem>
-            <FormItem
-              name="name"
-              label="할인 비율"
-              rules={[
-                {
-                  required: true,
-                  max: 50,
-                  message: "쿠폰 설명을 50자 이내로 입력해주세요",
-                },
-              ]}
-            >
+            <FormItem name="discount_rate" label="할인 비율">
               <InputNumber />
               {"%"}
             </FormItem>
             <Form.Item
-              name="type"
+              name="coupon_type"
               label="쿠폰 구분"
               rules={[
                 {
@@ -304,27 +255,10 @@ const CouponManage = (props) => {
               ]}
             >
               <Select style={{ width: 120 }}>
-                <Select.Option value="membership">멤버십</Select.Option>
-                <Select.Option value="meeting">미팅룸</Select.Option>
-                <Select.Option value="coworking">코워킹룸</Select.Option>
-                <Select.Option value="locker">락커</Select.Option>
-                <Select.Option value="lounge">라운지</Select.Option>
+                <Select.Option value="flat">정액 할인</Select.Option>
+                <Select.Option value="rate">비율 할인</Select.Option>
               </Select>
             </Form.Item>
-            {/* <Form.Item
-              name="type"
-              label="공지 유형"
-              rules={[{ required: true, message: "공지 유형을 선택해주세요" }]}
-            >
-              <Radio.Group>
-                <Radio style={radioStyle} value={"normal"}>
-                  일반 공지
-                </Radio>
-                <Radio style={radioStyle} value={"spot"}>
-                  지점 공지
-                </Radio>
-              </Radio.Group>
-            </Form.Item> */}
 
             <Form.Item label="적용 상품">
               <Transfer
@@ -345,7 +279,7 @@ const CouponManage = (props) => {
               />
             </Form.Item>
             <Form.Item
-              name="start_date"
+              name="pub_date"
               label="발행 기간"
               rules={[{ required: true, message: "시작일을 선택해주세요" }]}
             >
@@ -353,19 +287,19 @@ const CouponManage = (props) => {
                 <DatePicker
                   placeholder="시작일"
                   onChange={(date, dateString) => {
-                    console.log("change");
+                    setPubDateStart(dateString);
                   }}
                 />
                 <DatePicker
                   placeholder="종료일"
                   onChange={(date, dateString) => {
-                    console.log("change");
+                    setPubDateEnd(dateString);
                   }}
                 />
               </>
             </Form.Item>
             <Form.Item
-              name="end_date"
+              name="useable_date"
               label="유효 기간"
               rules={[{ required: true, message: "종료일을 선택해주세요" }]}
             >
@@ -373,13 +307,13 @@ const CouponManage = (props) => {
                 <DatePicker
                   placeholder="시작일"
                   onChange={(date, dateString) => {
-                    console.log("change");
+                    setUseableDateStart(dateString);
                   }}
                 />
                 <DatePicker
                   placeholder="종료일"
                   onChange={(date, dateString) => {
-                    console.log("change");
+                    setUseableDateEnd(dateString);
                   }}
                 />
               </>

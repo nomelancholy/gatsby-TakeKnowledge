@@ -6,6 +6,9 @@ export const couponListcolumns = [
   {
     title: "쿠폰 ID",
     dataIndex: "coupon_id",
+    render: (text, record) => {
+      return <a href={`/coupon/${text}`}>{text}</a>;
+    },
   },
   {
     title: "쿠폰명",
