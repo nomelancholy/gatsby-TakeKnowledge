@@ -5,7 +5,7 @@ import { Button } from "antd";
 export const couponListcolumns = [
   {
     title: "쿠폰 ID",
-    dataIndex: "id",
+    dataIndex: "coupon_id",
   },
   {
     title: "쿠폰명",
@@ -13,35 +13,108 @@ export const couponListcolumns = [
   },
   {
     title: "쿠폰 유형",
-    dataIndex: "type",
+    dataIndex: "coupon_type",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (text === "flat") {
+        renderText = "정액 할인";
+      } else if (text === "rate") {
+        renderText = "비율 할인";
+      }
+
+      return renderText;
+    },
   },
   {
     title: "활성/비활성",
     dataIndex: "status",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (text === "active") {
+        renderText = "활성";
+      } else if (text === "inactive") {
+        renderText = "비활성";
+      }
+
+      return renderText;
+    },
   },
   {
     title: "쿠폰 구분",
-    dataIndex: "email",
+    dataIndex: "coupon_category",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (text === "meeting") {
+        renderText = "미팅룸";
+      } else if (text === "coworking") {
+        renderText = "코워킹룸";
+      } else if (text === "locker") {
+        renderText = "락커룸";
+      } else if (text === "lounge") {
+        renderText = "라운지";
+      } else if (text === "membership") {
+        renderText = "멤버쉽";
+      }
+
+      return renderText;
+    },
   },
   {
     title: "쿠폰 설명(고객 노출)",
-    dataIndex: "email",
+    dataIndex: "desc",
   },
   {
     title: "할인액",
-    dataIndex: "amount",
+    dataIndex: "discount",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (record.coupon_type === "flat") {
+        renderText = text.toLocaleString("ko-KR");
+      }
+
+      return renderText;
+    },
   },
   {
     title: "할인 비율",
-    dataIndex: "rate",
+    dataIndex: "discount",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (record.coupon_type === "rate") {
+        renderText = text;
+      }
+
+      return renderText;
+    },
   },
   {
     title: "적용 상품 id",
-    dataIndex: "email",
+    dataIndex: "product_ids",
+    render: (text, record) => {
+      let renderText = "";
+
+      let array = [];
+
+      if (text && text.length > 0) {
+        array = text.split("|");
+
+        renderText = array.join(", ");
+      }
+
+      return renderText;
+    },
   },
   {
     title: "발행량",
-    dataIndex: "email",
+    dataIndex: "total",
+    render: (text, record) => {
+      return text.toLocaleString("ko-KR");
+    },
   },
   {
     title: "발급 현황",
@@ -53,15 +126,15 @@ export const couponListcolumns = [
   },
   {
     title: "발행 시작일",
-    dataIndex: "email",
+    dataIndex: "pub_date_start",
   },
   {
     title: "발행 종료일",
-    dataIndex: "email",
+    dataIndex: "pub_date_end",
   },
   {
     title: "생성 일시",
-    dataIndex: "email",
+    dataIndex: "regdate",
   },
 ];
 

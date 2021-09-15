@@ -52,38 +52,38 @@ const Coupon = (props) => {
   });
 
   const getCouponList = (params) => {
-    // setLoading(true);
-    // axios
-    //   .post(
-    //     `${process.env.BACKEND_API}/services/notice/list`,
-    //     { ...params },
-    //     {
-    //       headers: {
-    //         "Content-Type": "application/json;charset=UTF-8",
-    //         "Access-Control-Allow-Origin": "*",
-    //         Authorization: decodeURIComponent(token),
-    //       },
-    //     }
-    //   )
-    //   .then((response) => {
-    //     const data = response.data;
-    //     console.log(`notice data`, data);
-    //     setCouponList(data.items);
-    //     // 페이지 네이션 정보 세팅
-    //     const pageInfo = {
-    //       current: data.page,
-    //       total: data.total,
-    //       pageSize: data.size,
-    //       size: data.size,
-    //     };
-    //     setPagination(pageInfo);
-    //     // 로딩바 세팅
-    //     setLoading(false);
-    //     setParams(params);
-    //   })
-    //   .catch((error) => {
-    //     console.log(`error`, error);
-    //   });
+    setLoading(true);
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/user/coupon/list`,
+        { ...params },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        const data = response.data;
+        console.log(`notice data`, data);
+        setCouponList(data.items);
+        // 페이지 네이션 정보 세팅
+        const pageInfo = {
+          current: data.page,
+          total: data.total,
+          pageSize: data.size,
+          size: data.size,
+        };
+        setPagination(pageInfo);
+        // 로딩바 세팅
+        setLoading(false);
+        setParams(params);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
   };
 
   useEffect(() => {
@@ -210,25 +210,28 @@ const Coupon = (props) => {
             }
           }}
         >
-          <Form.Item name="notice_id" label="쿠폰 ID">
+          <Form.Item name="coupon_id" label="쿠폰 ID">
             <InputNumber />
           </Form.Item>
-          <Form.Item name="type" label="쿠폰 유형">
+          <Form.Item name="coupon_type" label="쿠폰 유형">
             <Select style={{ width: 160 }}>
-              <Select.Option value="normal">일반 공지</Select.Option>
-              <Select.Option value="spot">지점 공지</Select.Option>
+              <Select.Option value="flat">정액 할인</Select.Option>
+              <Select.Option value="rate">비율 할인</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item name="title" label="쿠폰 명">
+          <Form.Item name="name" label="쿠폰 명">
             <Input />
           </Form.Item>
-          <Form.Item name="status" label="쿠폰 구분">
+          <Form.Item name="coupon_category" label="쿠폰 구분">
             <Select style={{ width: 120 }}>
-              <Select.Option value="publish">발행</Select.Option>
-              <Select.Option value="private">미발행</Select.Option>
+              <Select.Option value="meeting">미팅룸</Select.Option>
+              <Select.Option value="coworking">코워킹룸</Select.Option>
+              <Select.Option value="locker">락커룸</Select.Option>
+              <Select.Option value="lounge">라운지</Select.Option>
+              <Select.Option value="membership">멤버쉽</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item name="start_date" label="쿠폰 시작 일자">
+          <Form.Item name="pub_date_start" label="쿠폰 시작 일자">
             <>
               <DatePicker
                 placeholder="시작"
@@ -244,7 +247,7 @@ const Coupon = (props) => {
               />
             </>
           </Form.Item>
-          <Form.Item name="end_date" label="쿠폰 종료 일자">
+          <Form.Item name="pub_date_end" label="쿠폰 종료 일자">
             <>
               <DatePicker
                 placeholder="시작"
