@@ -36,10 +36,50 @@ const EventDetail = (props) => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  const [couponList, setCouponList] = useState(undefined);
+
+  const [applyCoupon, setApplyCoupon] = useState(undefined);
+
   // 공지 Form
   const [eventForm] = Form.useForm();
 
+  const getCouponList = () => {
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/user/coupon/list`,
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        const data = response.data;
+
+        // auto complete option 형태로 가공
+        const optionList = data.items.map((coupon) => {
+          const optionObj = {
+            value: coupon.name,
+            label: coupon.name,
+            id: coupon.coupon_id,
+          };
+
+          return optionObj;
+        });
+
+        setCouponList(optionList);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
+
   useEffect(() => {
+    getCouponList();
+
     if (eventId) {
       // 수정일 경우
       setRegisterMode(false);
@@ -51,7 +91,10 @@ const EventDetail = (props) => {
       };
 
       axios
-        .get(`${process.env.BACKEND_API}/public/events/get/${eventId}`, config)
+        .get(
+          `${process.env.BACKEND_API}/services/events/get/${eventId}`,
+          config
+        )
         .then(function (response) {
           const eventInfo = response.data.item;
           setEventInfo(eventInfo);
@@ -77,6 +120,13 @@ const EventDetail = (props) => {
         end_date: moment(eventInfo.end_date),
       });
 
+      if (eventInfo.coupon) {
+        setApplyCoupon(eventInfo.coupon_id);
+        eventForm.setFieldsValue({
+          coupon: eventInfo.coupon.name,
+        });
+      }
+
       // 전송용 state에도 세팅
       setStartDate(eventInfo.start_date.replace(/\./gi, "-"));
       setEndDate(eventInfo.end_date.replace(/\./gi, "-"));
@@ -85,16 +135,22 @@ const EventDetail = (props) => {
 
   // 저장 버튼 클릭
   const handleEventRegisterSubmit = () => {
-    console.log("클릭");
-    const { title, path, status } = eventForm.getFieldValue();
+    const { title, path, status, coupon } = eventForm.getFieldValue();
 
     let data = {
       title,
       path,
       status,
+      coupon_id: applyCoupon,
       start_date: startDate,
       end_date: endDate,
     };
+
+    if (coupon) {
+      data.coupon_id = applyCoupon;
+    } else {
+      data.del_coupon = true;
+    }
 
     let url = "";
 
@@ -133,31 +189,10 @@ const EventDetail = (props) => {
     setEndDate(dateString);
   };
 
-  const [searchOptions, setSearchOptions] = useState([]);
-
-  const coupons = [
-    { label: "원데이 1만원 할인", id: "1" },
-    { label: "원스팟 1만원 할인", id: "2" },
-  ];
-
   // 객체 배열에서 입력 텍스트를 label에 포함한 객체만 찾아서 return
 
-  const options = [{ label: "test", value: "test" }];
-
-  const handleSearch = (text) => {
-    const options = coupons.filter((coupon) => {
-      if (coupon.label.includes(text)) {
-        return { label: coupon.label, value: coupon.id };
-      }
-    });
-    setSearchOptions(options);
-  };
-
-  const [applyCoupon, setApplyCoupon] = useState(undefined);
-
-  const handleSelect = (data) => {
-    console.log(`data`, data);
-    setApplyCoupon(data);
+  const handleSelect = (data, option) => {
+    setApplyCoupon(option.id);
   };
 
   return (
@@ -203,10 +238,12 @@ const EventDetail = (props) => {
             >
               <Input />
             </Form.Item>
-            <Form.Item label="적용 쿠폰 검색">
+            <Form.Item name="coupon" label="적용 쿠폰 검색">
               <AutoComplete
-                options={searchOptions}
-                onSearch={handleSearch}
+                options={couponList}
+                filterOption={(inputValue, option) =>
+                  option.value.includes(inputValue)
+                }
                 onSelect={handleSelect}
               />
             </Form.Item>
