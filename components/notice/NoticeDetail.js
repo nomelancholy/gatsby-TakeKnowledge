@@ -8,7 +8,6 @@ import {
   Radio,
   Transfer,
   DatePicker,
-  TimePicker,
   Upload,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
@@ -129,6 +128,7 @@ const NoticeDetail = (props) => {
   // noticeInfo 세팅되면 알맞는 엘리먼트에 binding
   useEffect(() => {
     if (noticeInfo) {
+      console.log(`noticeInfo`, noticeInfo);
       // 공지 상태
       noticeForm.setFieldsValue({
         status: noticeInfo.status,
@@ -146,7 +146,14 @@ const NoticeDetail = (props) => {
         setTargetSpots(targetSpots);
       }
 
-      console.log(`noticeInfo`, noticeInfo);
+      if (noticeInfo.file_path) {
+        const imageObj = {
+          thumbUrl: noticeInfo.file_path,
+          uid: 1,
+        };
+
+        setNoticeImage([imageObj]);
+      }
 
       setReservedDate(noticeInfo.reserved_datetime.replace(/\./gi, "-"));
     }
@@ -155,8 +162,6 @@ const NoticeDetail = (props) => {
   // 저장 버튼 클릭
   const handleNoticeRegisterSubmit = () => {
     const { type, sticky, status, title, images } = noticeForm.getFieldValue();
-
-    console.log(`noticeForm.getFieldValue()`, noticeForm.getFieldValue());
 
     const formData = new FormData();
 
@@ -180,9 +185,9 @@ const NoticeDetail = (props) => {
       formData.append("notice_id", noticeId);
     }
 
-    if (noticeImage && noticeImage.length > 0) {
-      console.log(`noticeImage[0].originFileObj`, noticeImage[0].originFileObj);
+    if (noticeImage && noticeImage.length > 0 && noticeImage[0].originFileObj) {
       formData.append("file", noticeImage[0].originFileObj);
+      // formData.append("del_file", false);
     }
 
     const config = {
@@ -220,7 +225,6 @@ const NoticeDetail = (props) => {
 
   const handleNoticeImageChange = ({ file }) => {
     if (file.status === "done") {
-      console.log(`file`, file);
       // 파일 추가
       setNoticeImage([...noticeImage, file]);
     } else if (file.status === "removed") {
@@ -233,14 +237,30 @@ const NoticeDetail = (props) => {
 
       setNoticeImage(newFileList);
 
-      console.log(`file.uid`, file.uid);
-
-      if (!file.uid.startsWith("rc")) {
+      if (typeof file.uid === "number") {
         // 서버에서 받아온 파일인 경우
-        // 서버에서 삭제하기 위한 배열 세팅
-        // 삭제 확인
-        // const removeFileList = [...delImages, file.uid];
-        // setDelImages(removeFileList);
+        const formData = new FormData();
+
+        formData.append("notice_id", noticeId);
+        formData.append("del_file", true);
+
+        const config = {
+          method: "post",
+          url: `${process.env.BACKEND_API}/services/notice/update`,
+          headers: {
+            Authorization: decodeURIComponent(token),
+          },
+          data: formData,
+        };
+
+        axios(config)
+          .then(function (response) {
+            if (response.status === 200) {
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
       }
     }
   };
