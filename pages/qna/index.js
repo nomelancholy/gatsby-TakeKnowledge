@@ -153,7 +153,6 @@ const Qna = (props) => {
     axios(config)
       .then(function (response) {
         const data = response.data;
-        console.log(`qna data`, data);
 
         // 데이터 바인딩
         setQnaList(data.items);
@@ -329,8 +328,9 @@ const Qna = (props) => {
           <Form.Item name="status" label="처리 상태">
             <Select style={{ width: 200 }}>
               <Select.Option value="wait">대기</Select.Option>
-              <Select.Option value="done">해결</Select.Option>
               <Select.Option value="trash">삭제</Select.Option>
+              <Select.Option value="inprogress">진행중</Select.Option>
+              <Select.Option value="done">해결</Select.Option>
             </Select>
           </Form.Item>
           <Form.Item name="regdate" label="생성 일시">

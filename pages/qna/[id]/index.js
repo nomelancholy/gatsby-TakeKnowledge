@@ -1,11 +1,13 @@
 import { Button, Form, Input, Row, Modal, Card, Radio, Popconfirm } from "antd";
-
+import { PlusOutlined } from "@ant-design/icons";
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { useRouter } from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import axios from "axios";
+import ReplyCard from "@components/qna/ReplyCard";
+import { is } from "date-fns/locale";
 
 const radioStyle = {
   display: "inline",
@@ -31,8 +33,19 @@ const QnaDetail = (props) => {
   // Modal 관련 state
   const [okModalVisible, setOkModalVisible] = useState(false);
 
-  // 답장을 단 적이 있는 경우 (작성/수정 flag)
-  const [replyQid, setReplyQid] = useState(undefined);
+  // 답변 리스트
+  const [replyList, setReplyList] = useState(undefined);
+
+  // 상태가 대기, 삭제일 경우 상태 변경 불가
+  // 상태가 진행중, 해결일 경우 상태 변경 가능
+  // flag state
+  const [isStatusCanEdit, setIsStatusCanEdit] = useState(false);
+
+  // 생성한 답장 id 저장용 state
+  const [newCount, setNewCount] = useState(1);
+
+  const [isReplyRegister, setIsReplyRegister] = useState(false);
+  const [isStatusUpdate, setIsStatusUpdate] = useState(false);
 
   // 처리 상태
   const [statusForm] = Form.useForm();
@@ -40,8 +53,6 @@ const QnaDetail = (props) => {
   const [categoryForm] = Form.useForm();
   // 문의하기 내용
   const [questionForm] = Form.useForm();
-  // 답장
-  const [replyForm] = Form.useForm();
 
   // 문의 상세 조회
   useEffect(() => {
@@ -65,7 +76,15 @@ const QnaDetail = (props) => {
   useEffect(() => {
     // 문의 상세 정보 세팅되면
     if (qnaDetail) {
+      console.log(`qnaDetail`, qnaDetail);
       // 처리 상태
+
+      if (qnaDetail.status === "inprogress" || qnaDetail.status === "done") {
+        setIsStatusCanEdit(true);
+      } else {
+        setIsStatusCanEdit(false);
+      }
+
       statusForm.setFieldsValue({
         status: qnaDetail.status,
       });
@@ -90,41 +109,74 @@ const QnaDetail = (props) => {
 
       // 답장
       if (qnaDetail.reply) {
-        replyForm.setFieldsValue({
-          // 답장
-          reply: qnaDetail.reply.content,
-          // 담당자
-          reply_user: qnaDetail.reply.user.user_name,
-          // 답장 생성 일시
-          reply_regdate: qnaDetail.reply.regdate,
-        });
-        // 답장이 있는 경우 저장 버튼 클릭시 수정으로 보내야 하므로 qid 세팅
-        setReplyQid(qnaDetail.reply.qid);
+        setReplyList(qnaDetail.reply);
+      } else {
+        setReplyList([{ qid: `new${newCount}` }]);
+        setNewCount(newCount + 1);
       }
     }
   }, [qnaDetail]);
 
-  // 저장 버튼 클릭
-  const handleReplyRegisterSubmit = () => {
-    let url = "";
+  const handleAddReply = () => {
+    setReplyList([...replyList, { qid: `new${newCount}` }]);
+    setNewCount(newCount + 1);
+  };
 
-    url = `${process.env.BACKEND_API}/user/qna/write`;
+  const handleReplyDelete = (qid) => {
+    const newReplyList = replyList.filter((reply) => reply.qid !== qid);
+    setReplyList(newReplyList);
+
+    // 서버에 저장된 답변의 qid type = number
+    // 화면에서 생성한 답변의 qid type = new... 로 string
+
+    // 서버에 저장된 답변의 경우 서버에서도 삭제
+    if (typeof qid === "number") {
+      const config = {
+        method: "post",
+        url: `${process.env.BACKEND_API}/user/qna/delete`,
+        headers: {
+          Authorization: decodeURIComponent(token),
+        },
+        data: {
+          qid: qid,
+        },
+      };
+
+      axios(config)
+        .then(function (response) {
+          if (response.status === 200) {
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+  };
+
+  // 답장 저장 버튼 클릭
+  const handleReplyRegisterSubmit = ({ contents, file, qid, type }) => {
+    let url = "";
 
     const formData = new FormData();
 
     const { title } = questionForm.getFieldValue();
     const { classification, category } = categoryForm.getFieldValue();
-    const { reply, file } = replyForm.getFieldValue();
 
     formData.append("title", title);
     formData.append("classification", classification);
     formData.append("category", category);
-    formData.append("content", reply);
+    formData.append("content", contents);
     formData.append("parent", id);
+    if (file) {
+      formData.append("file", file);
+    }
 
-    if (replyQid) {
+    if (type === "register") {
+      url = `${process.env.BACKEND_API}/user/qna/write`;
+      setIsReplyRegister(true);
+    } else {
       url = `${process.env.BACKEND_API}/user/qna/edit`;
-      formData.append("qid", replyQid);
+      formData.append("qid", qid);
     }
 
     const config = {
@@ -147,22 +199,28 @@ const QnaDetail = (props) => {
       });
   };
 
-  const handleRemove = () => {
+  const handleStatusSave = () => {
+    const formData = new FormData();
+
+    const { status } = statusForm.getFieldValue();
+
+    formData.append("qid", id);
+    formData.append("status", status);
+
     const config = {
       method: "post",
-      url: `${process.env.BACKEND_API}/user/qna/delete`,
+      url: `${process.env.BACKEND_API}/user/qna/edit`,
       headers: {
         Authorization: decodeURIComponent(token),
       },
-      data: {
-        qid: id,
-      },
+      data: formData,
     };
 
     axios(config)
       .then(function (response) {
         if (response.status === 200) {
-          router.push("/qna");
+          setIsStatusUpdate(true);
+          setOkModalVisible(true);
         }
       })
       .catch(function (error) {
@@ -182,18 +240,26 @@ const QnaDetail = (props) => {
           title={`처리 상태`}
           bodyStyle={{ padding: "1rem" }}
           className="mb-4"
+          extra={
+            <Button type="primary" onClick={handleStatusSave}>
+              저장
+            </Button>
+          }
         >
           <Form form={statusForm}>
             <Form.Item name="status">
-              <Radio.Group disabled>
-                <Radio style={radioStyle} value={"wait"}>
+              <Radio.Group disabled={isStatusCanEdit ? false : true}>
+                <Radio style={radioStyle} value={"wait"} disabled>
                   대기
+                </Radio>
+                <Radio style={radioStyle} value={"trash"} disabled>
+                  삭제
+                </Radio>
+                <Radio style={radioStyle} value={"inprogress"}>
+                  진행중
                 </Radio>
                 <Radio style={radioStyle} value={"done"}>
                   해결
-                </Radio>
-                <Radio style={radioStyle} value={"trash"}>
-                  삭제
                 </Radio>
               </Radio.Group>
             </Form.Item>
@@ -231,50 +297,48 @@ const QnaDetail = (props) => {
             </Form.Item>
           </Form>
         </Card>
-        <Card title={`답장`} bodyStyle={{ padding: "1rem" }} className="mb-4">
-          <Form form={replyForm} onFinish={handleReplyRegisterSubmit}>
-            <Form.Item
-              name="reply"
-              label="내용"
-              rules={[{ required: true, message: "답변 내용을 입력해주세요" }]}
-            >
-              <Input.TextArea />
-            </Form.Item>
-            {replyQid && (
-              <>
-                <Form.Item name="reply_user" label="담당자">
-                  <Input disabled />
-                </Form.Item>
-                <Form.Item name="reply_regdate" label="생성 일시">
-                  <Input disabled />
-                </Form.Item>
-              </>
-            )}
-            <Button type="primary" htmlType="submit">
-              저장
-            </Button>
-            <Popconfirm
-              title={"삭제하시겠습니까?"}
-              onConfirm={handleRemove}
-              okText={"삭제"}
-              cancelText={"취소"}
-            >
-              <Button>삭제</Button>
-            </Popconfirm>
-            <Modal
-              visible={okModalVisible}
-              okText="확인"
-              onOk={() => {
-                router.push("/qna");
-              }}
-              onCancel={() => {
-                setOkModalVisible(false);
-              }}
-              cancelButtonProps={{ style: { display: "none" } }}
-            >
-              {replyQid ? "답변 수정 완료" : "답변 등록 완료"}
-            </Modal>
-          </Form>
+        <Card
+          title={`답장`}
+          bodyStyle={{ padding: "1rem" }}
+          className="mb-4"
+          extra={
+            <>
+              <a onClick={handleAddReply}>
+                <PlusOutlined />
+              </a>
+            </>
+          }
+        >
+          {replyList && (
+            <>
+              {replyList.map((reply) => (
+                <ReplyCard
+                  key={reply.qid}
+                  reply={reply}
+                  handleReplyDelete={handleReplyDelete}
+                  handleReplyRegisterSubmit={handleReplyRegisterSubmit}
+                  token={token}
+                />
+              ))}
+            </>
+          )}
+          <Modal
+            visible={okModalVisible}
+            okText="확인"
+            onOk={() => {
+              setOkModalVisible(false);
+            }}
+            onCancel={() => {
+              setOkModalVisible(false);
+            }}
+            cancelButtonProps={{ style: { display: "none" } }}
+          >
+            {isStatusUpdate
+              ? "상태 수정 완료"
+              : isReplyRegister
+              ? "답변 등록 완료"
+              : "답변 수정 완료"}
+          </Modal>
         </Card>
       </Card>
 

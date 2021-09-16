@@ -37,10 +37,12 @@ export const qnaListColumns = [
 
       if (text === "wait") {
         renderText = "대기";
-      } else if (text === "done") {
-        renderText = "해결";
       } else if (text === "trash") {
         renderText = "삭제";
+      } else if (text === "inprogress") {
+        renderText = "진행중";
+      } else if (text === "done") {
+        renderText = "해결";
       }
 
       return renderText;
