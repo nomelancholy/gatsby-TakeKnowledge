@@ -206,20 +206,21 @@ const Notice = (props) => {
           </Form.Item>
           <Form.Item name="type" label="공지 유형">
             <Select style={{ width: 160 }}>
-              <Select.Option value="normal">일반 공지</Select.Option>
-              <Select.Option value="spot">지점 공지</Select.Option>
+              <Select.Option value="normal">전체 공지</Select.Option>
+              <Select.Option value="spot">스팟 공지</Select.Option>
             </Select>
           </Form.Item>
           <Form.Item name="status" label="사용 여부">
             <Select style={{ width: 120 }}>
-              <Select.Option value="publish">발행</Select.Option>
-              <Select.Option value="private">미발행</Select.Option>
+              <Select.Option value="publish">활성</Select.Option>
+              <Select.Option value="private">비활성</Select.Option>
+              <Select.Option value="trash">삭제</Select.Option>
             </Select>
           </Form.Item>
           <Form.Item name="sticky" label="상단 노출">
             <Select style={{ width: 120 }}>
-              <Select.Option value={0}>미노출</Select.Option>
-              <Select.Option value={1}>노출</Select.Option>
+              <Select.Option value={0}>X</Select.Option>
+              <Select.Option value={1}>O</Select.Option>
             </Select>
           </Form.Item>
           <Form.Item name="title" label="공지 제목">

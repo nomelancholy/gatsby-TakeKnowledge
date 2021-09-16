@@ -1,4 +1,19 @@
-import { Button, Form, Input, Row, Modal, Card, Radio, Transfer } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  Row,
+  Modal,
+  Card,
+  Radio,
+  Transfer,
+  DatePicker,
+  TimePicker,
+  Upload,
+} from "antd";
+import { UploadOutlined } from "@ant-design/icons";
+
+import moment from "moment";
 import React, { useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
@@ -31,10 +46,20 @@ const NoticeDetail = (props) => {
 
   const [okModalVisible, setOkModalVisible] = useState(false);
 
+  const [spotOptions, setSpotOptions] = useState([]);
+
+  const [noticeImage, setNoticeImage] = useState([]);
+  const [noticePreviewVisible, setNoticePreviewVisible] = useState(false);
+  const [noticePreviewImage, setNoticePreviewImage] = useState("");
+
+  const [targetSpots, setTargetSpots] = useState([]);
+
+  const [isSpotNotice, setIsSpotNotice] = useState(false);
+
+  const [reservedDate, setReservedDate] = useState("");
+
   // 공지 Form
   const [noticeForm] = Form.useForm();
-
-  const [spotOptions, setSpotOptions] = useState([]);
 
   const getSpotOptions = () => {
     axios
@@ -51,13 +76,12 @@ const NoticeDetail = (props) => {
       )
       .then((response) => {
         const data = response.data.items;
-        console.log(`data`, data);
 
         const options = [];
 
         data.map((spot) => {
           const spotOption = {
-            key: spot.spot_id,
+            key: spot.spot_id.toString(),
             title: spot.name,
           };
 
@@ -70,10 +94,6 @@ const NoticeDetail = (props) => {
         console.log(`error`, error);
       });
   };
-
-  useEffect(() => {
-    console.log(`spotOptions`, spotOptions);
-  }, [spotOptions]);
 
   useEffect(() => {
     // 스팟 리스트 불러서 spotOptions에 세팅
@@ -115,23 +135,41 @@ const NoticeDetail = (props) => {
         type: noticeInfo.type,
         sticky: noticeInfo.sticky,
         title: noticeInfo.title,
+        reserved_datetime: moment(noticeInfo.reserved_datetime),
       });
 
       setContent(noticeInfo.content);
+
+      if (noticeInfo.type === "spot") {
+        setIsSpotNotice(true);
+        const targetSpots = noticeInfo.spot_ids.split("|");
+        setTargetSpots(targetSpots);
+      }
+
+      console.log(`noticeInfo`, noticeInfo);
+
+      setReservedDate(noticeInfo.reserved_datetime.replace(/\./gi, "-"));
     }
   }, [noticeInfo]);
 
   // 저장 버튼 클릭
   const handleNoticeRegisterSubmit = () => {
-    const { type, sticky, status, title } = noticeForm.getFieldValue();
+    const { type, sticky, status, title, images } = noticeForm.getFieldValue();
 
-    let data = {
-      type: type,
-      title: title,
-      content: content,
-      sticky: sticky,
-      status: status,
-    };
+    console.log(`noticeForm.getFieldValue()`, noticeForm.getFieldValue());
+
+    const formData = new FormData();
+
+    formData.append("type", type);
+    formData.append("title", title);
+    formData.append("content", content);
+    formData.append("sticky", sticky);
+    formData.append("status", status);
+    formData.append("reserved_datetime", reservedDate);
+
+    if (type === "spot") {
+      formData.append("spot_ids", targetSpots.join("|"));
+    }
 
     let url = "";
 
@@ -139,7 +177,12 @@ const NoticeDetail = (props) => {
       url = `${process.env.BACKEND_API}/services/notice/add`;
     } else {
       url = `${process.env.BACKEND_API}/services/notice/update`;
-      data.notice_id = Number(noticeId);
+      formData.append("notice_id", noticeId);
+    }
+
+    if (noticeImage && noticeImage.length > 0) {
+      console.log(`noticeImage[0].originFileObj`, noticeImage[0].originFileObj);
+      formData.append("file", noticeImage[0].originFileObj);
     }
 
     const config = {
@@ -148,7 +191,7 @@ const NoticeDetail = (props) => {
       headers: {
         Authorization: decodeURIComponent(token),
       },
-      data: data,
+      data: formData,
     };
 
     axios(config)
@@ -170,7 +213,49 @@ const NoticeDetail = (props) => {
     setTargetSpots(targetKeys);
   };
 
-  const [targetSpots, setTargetSpots] = useState([]);
+  const handleNoticePreview = (file) => {
+    setNoticePreviewVisible(true);
+    setNoticePreviewImage(file.url || file.thumbUrl);
+  };
+
+  const handleNoticeImageChange = ({ file }) => {
+    if (file.status === "done") {
+      console.log(`file`, file);
+      // 파일 추가
+      setNoticeImage([...noticeImage, file]);
+    } else if (file.status === "removed") {
+      // 파일 삭제
+
+      // 삭제된 파일 list 에서 삭제
+      const newFileList = noticeImage.filter((fileObj) => {
+        return fileObj.uid !== file.uid;
+      });
+
+      setNoticeImage(newFileList);
+
+      console.log(`file.uid`, file.uid);
+
+      if (!file.uid.startsWith("rc")) {
+        // 서버에서 받아온 파일인 경우
+        // 서버에서 삭제하기 위한 배열 세팅
+        // 삭제 확인
+        // const removeFileList = [...delImages, file.uid];
+        // setDelImages(removeFileList);
+      }
+    }
+  };
+
+  const handleTypeChange = (e) => {
+    if (e.target.value === "normal") {
+      setIsSpotNotice(false);
+    } else if (e.target.value === "spot") {
+      setIsSpotNotice(true);
+    }
+  };
+
+  const handleReservedDateChange = (date, dateString) => {
+    setReservedDate(dateString);
+  };
 
   return (
     <>
@@ -201,20 +286,7 @@ const NoticeDetail = (props) => {
                 </Radio>
               </Radio.Group>
             </Form.Item>
-            {/* <Form.Item
-              name="type"
-              label="공지 유형"
-              rules={[{ required: true, message: "공지 유형을 선택해주세요" }]}
-            >
-              <Radio.Group>
-                <Radio style={radioStyle} value={"normal"}>
-                  일반 공지
-                </Radio>
-                <Radio style={radioStyle} value={"spot"}>
-                  지점 공지
-                </Radio>
-              </Radio.Group>
-            </Form.Item> */}
+
             <Form.Item
               name="sticky"
               label="상단 고정(pin)"
@@ -231,18 +303,68 @@ const NoticeDetail = (props) => {
                 </Radio>
               </Radio.Group>
             </Form.Item>
-            <Form.Item>
-              <Transfer
-                dataSource={spotOptions}
-                showSearch
-                targetKeys={targetSpots}
-                render={(item) => item.title}
-                onChange={handleSpotOptionsChange}
-              />
+            <Form.Item
+              name="type"
+              label="공지 유형"
+              rules={[{ required: true, message: "공지 유형을 선택해주세요" }]}
+            >
+              <Radio.Group onChange={handleTypeChange}>
+                <Radio style={radioStyle} value={"normal"}>
+                  전체 공지
+                </Radio>
+                <Radio style={radioStyle} value={"spot"}>
+                  스팟 공지
+                </Radio>
+              </Radio.Group>
             </Form.Item>
-            <FormItem></FormItem>
+            {isSpotNotice && (
+              <Form.Item name={"spot_ids"} label="스팟 선택">
+                <Transfer
+                  dataSource={spotOptions}
+                  showSearch
+                  targetKeys={targetSpots}
+                  render={(item) => item.title}
+                  onChange={handleSpotOptionsChange}
+                />
+              </Form.Item>
+            )}
+
+            <FormItem name="reserved_datetime" label="실행 일시">
+              <DatePicker
+                showTime
+                format="YYYY-MM-DD HH:mm"
+                name="reserved_datetime"
+                onChange={handleReservedDateChange}
+              />
+            </FormItem>
           </Card>
           <Card bodyStyle={{ padding: "1rem" }} className="mb-2">
+            <Form.Item name="images" label="이미지">
+              <Upload
+                name="images"
+                listType="picture-card"
+                fileList={noticeImage}
+                onChange={handleNoticeImageChange}
+                onPreview={handleNoticePreview}
+              >
+                {noticeImage.length < 1 && (
+                  <Button icon={<UploadOutlined />}>업로드</Button>
+                )}
+              </Upload>
+              <Modal
+                visible={noticePreviewVisible}
+                footer={null}
+                onCancel={() => {
+                  setNoticePreviewVisible(false);
+                }}
+              >
+                <img
+                  alt="상단 배너"
+                  style={{ width: "100%" }}
+                  src={noticePreviewImage}
+                />
+              </Modal>
+            </Form.Item>
             <Form.Item
               name="title"
               label="제목"

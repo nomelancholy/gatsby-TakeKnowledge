@@ -7,7 +7,6 @@ import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
 import axios from "axios";
 import ReplyCard from "@components/qna/ReplyCard";
-import { is } from "date-fns/locale";
 
 const radioStyle = {
   display: "inline",

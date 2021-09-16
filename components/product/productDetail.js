@@ -11,7 +11,7 @@ import {
   Checkbox,
   Select,
 } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { UploadOutlined, PlusCircleOutlined } from "@ant-design/icons";
 
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
@@ -713,7 +713,9 @@ const ProductDetail = (props) => {
               title="사용 가능 스팟"
               extra={
                 <>
-                  <a onClick={handleAddSpot}>+</a>
+                  <a onClick={handleAddSpot}>
+                    <PlusCircleOutlined />
+                  </a>
                 </>
               }
               bodyStyle={{ padding: "1rem" }}

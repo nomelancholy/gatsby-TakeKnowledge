@@ -12,7 +12,21 @@ export const noticeListcolumns = [
       return <a href={`/notice/${record.notice_id}`}>{text}</a>;
     },
   },
+  {
+    title: "공지 유형",
+    dataIndex: "type",
+    render: (text, record) => {
+      let renderText = "";
 
+      if (text === "normal") {
+        renderText = "전체 공지";
+      } else if (text === "spot") {
+        renderText = "스팟 공지";
+      }
+
+      return renderText;
+    },
+  },
   {
     title: "상단 노출",
     dataIndex: "sticky",
