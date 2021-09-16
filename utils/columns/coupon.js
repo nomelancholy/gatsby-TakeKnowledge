@@ -22,7 +22,7 @@ export const couponListcolumns = [
 
       if (text === "flat") {
         renderText = "정액 할인";
-      } else if (text === "rate") {
+      } else if (text === "ratio") {
         renderText = "비율 할인";
       }
 
@@ -88,7 +88,7 @@ export const couponListcolumns = [
     render: (text, record) => {
       let renderText = "";
 
-      if (record.coupon_type === "rate") {
+      if (record.coupon_type === "ratio") {
         renderText = text;
       }
 
