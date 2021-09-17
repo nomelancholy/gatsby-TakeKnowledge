@@ -145,23 +145,97 @@ export const couponListcolumns = [
 export const couponAutoListcolumns = [
   {
     title: "자동 발급 ID",
-    dataIndex: "id",
+    dataIndex: "cai_id",
+    render: (text, record) => {
+      return <a href={`/coupon/${text}`}>{text}</a>;
+    },
   },
   {
     title: "쿠폰명",
-    dataIndex: "name",
+    dataIndex: "coupon",
+    render: (text, record) => {
+      return text.name;
+    },
   },
   {
     title: "자동 발급 상태",
     dataIndex: "status",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (text === "active") {
+        renderText = "실행";
+      } else if (text === "inactive") {
+        renderText = "중단";
+      }
+
+      return renderText;
+    },
   },
   {
     title: "대상",
     dataIndex: "target",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (text === "all") {
+        renderText = "전체";
+      } else if (text === "user") {
+        renderText = "회원";
+      } else if (text === "member") {
+        renderText = "멤버";
+      } else if (text === "referral") {
+        renderText = "추천인";
+      } else if (text === "niminee") {
+        renderText = "피추천인";
+      }
+
+      return renderText;
+    },
   },
   {
-    title: "유형",
-    dataIndex: "type",
+    title: "자동발급 유형",
+    dataIndex: "issue_category",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (text === "birthday") {
+        renderText = "생일";
+      } else if (text === "issue_day") {
+        renderText = "지정일";
+      } else if (text === "join") {
+        renderText = "회원가입";
+      } else if (text === "membership_expired") {
+        renderText = "멤버십 만료";
+      } else if (text === "membership_terminate") {
+        renderText = "멤버십 해지";
+      } else if (text === "referral") {
+        renderText = "리퍼럴";
+      }
+
+      return renderText;
+    },
+  },
+  {
+    title: "쿠폰 구분",
+    dataIndex: "coupon",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (text.coupon_category === "meeting") {
+        renderText = "미팅룸";
+      } else if (text.coupon_category === "coworking") {
+        renderText = "코워킹룸";
+      } else if (text.coupon_category === "locker") {
+        renderText = "락커룸";
+      } else if (text.coupon_category === "lounge") {
+        renderText = "라운지";
+      } else if (text.coupon_category === "membership") {
+        renderText = "멤버쉽";
+      }
+
+      return renderText;
+    },
   },
   {
     title: "적용 쿠폰 id",
@@ -169,73 +243,198 @@ export const couponAutoListcolumns = [
   },
   {
     title: "쿠폰 설명(고객 노출)",
-    dataIndex: "description",
+    dataIndex: "coupon",
+    render: (text, record) => {
+      return text.desc;
+    },
+  },
+  {
+    title: "쿠폰 유형",
+    dataIndex: "coupon",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (text.coupon_type === "flat") {
+        renderText = "정액 할인";
+      } else if (text === "ratio") {
+        renderText = "비율 할인";
+      }
+
+      return renderText;
+    },
   },
   {
     title: "할인액",
-    dataIndex: "amount",
+    dataIndex: "coupon",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (text.coupon_type === "flat") {
+        renderText = text.discount.toLocaleString("ko-KR");
+      }
+
+      return renderText;
+    },
   },
   {
     title: "할인 비율",
-    dataIndex: "rate",
+    dataIndex: "coupon",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (text.coupon_type === "ratio") {
+        renderText = text.discount;
+      }
+
+      return renderText;
+    },
   },
   {
     title: "발급량",
-    dataIndex: "email",
+    dataIndex: "coupon",
+    render: (text, record) => {
+      return text.total;
+    },
   },
   {
     title: "생성 일시",
-    dataIndex: "email",
+    dataIndex: "regdate",
   },
 ];
 
 // 쿠폰 직접 발급 리스트
-export const couponDirectListcolumns = [
+export const couponManualListcolumns = [
   {
     title: "직접발급 ID",
-    dataIndex: "id",
+    dataIndex: "cmi_id",
   },
   {
-    title: "쿠폰명",
-    dataIndex: "name",
+    title: "쿠폰 명",
+    dataIndex: "coupon",
+    render: (text, record) => {
+      return text.name;
+    },
   },
   {
     title: "직접발급 상태",
     dataIndex: "status",
-  },
-  {
-    title: "쿠폰 설명(고객 노출)",
-    dataIndex: "email",
-  },
-  {
-    title: "쿠폰 유형",
-    dataIndex: "type",
-  },
-  {
-    title: "할인액",
-    dataIndex: "amount",
-  },
-  {
-    title: "할인 비율",
-    dataIndex: "rate",
-  },
-  {
-    title: "발급량",
-    dataIndex: "email",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (text === "active") {
+        renderText = "실행";
+      } else if (text === "inactive") {
+        renderText = "중단";
+      }
+
+      return renderText;
+    },
   },
   {
     title: "발급 방식",
-    dataIndex: "email",
+    dataIndex: "issue_type",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (text === "each") {
+        renderText = "개별 발급";
+      } else if (text === "bundle") {
+        renderText = "대량 발급";
+      }
+
+      return renderText;
+    },
   },
   {
+    title: "쿠폰 구분",
+    dataIndex: "coupon",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (text.coupon_category === "meeting") {
+        renderText = "미팅룸";
+      } else if (text.coupon_category === "coworking") {
+        renderText = "코워킹룸";
+      } else if (text.coupon_category === "locker") {
+        renderText = "락커룸";
+      } else if (text.coupon_category === "lounge") {
+        renderText = "라운지";
+      } else if (text.coupon_category === "membership") {
+        renderText = "멤버쉽";
+      }
+
+      return renderText;
+    },
+  },
+  {
+    title: "적용 쿠폰 ID",
+    dataIndex: "coupon_id",
+  },
+  {
+    title: "쿠폰 설명(고객 노출)",
+    dataIndex: "coupon",
+    render: (text, record) => {
+      return text.desc;
+    },
+  },
+  {
+    title: "쿠폰 유형",
+    dataIndex: "coupon",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (text.coupon_type === "flat") {
+        renderText = "정액 할인";
+      } else if (text === "ratio") {
+        renderText = "비율 할인";
+      }
+
+      return renderText;
+    },
+  },
+  {
+    title: "할인액",
+    dataIndex: "coupon",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (text.coupon_type === "flat") {
+        renderText = text.discount.toLocaleString("ko-KR");
+      }
+
+      return renderText;
+    },
+  },
+  {
+    title: "할인 비율",
+    dataIndex: "coupon",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (text.coupon_type === "ratio") {
+        renderText = text.discount;
+      }
+
+      return renderText;
+    },
+  },
+  {
+    title: "발급량",
+    dataIndex: "coupon",
+    render: (text, record) => {
+      return text.total;
+    },
+  },
+
+  {
     title: "발급 일시",
-    dataIndex: "email",
+    dataIndex: "regdate",
   },
   {
     title: "",
     dataIndex: "",
     render: (text, record) => {
-      return <Button>환불</Button>;
+      return <Button type="primary">엑셀 다운로드</Button>;
     },
   },
 ];

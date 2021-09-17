@@ -44,11 +44,12 @@ const Coupon = (props) => {
   const [searchForm] = useForm();
 
   const [params, setParams] = useState({
-    notice_id: undefined,
-    status: undefined,
-    type: undefined,
-    sticky: undefined,
-    title: undefined,
+    coupon_id: undefined,
+    name: undefined,
+    coupon_type: undefined,
+    coupon_category: undefined,
+    pub_date_start: undefined,
+    pub_date_end: undefined,
   });
 
   const getCouponList = (params) => {
@@ -115,11 +116,14 @@ const Coupon = (props) => {
     });
 
     const searchParams = {
-      notice_id: searchFormValues.notice_id,
-      status: searchFormValues.status,
-      type: searchFormValues.type,
-      sticky: searchFormValues.sticky,
-      title: searchFormValues.title,
+      coupon_id: searchFormValues.coupon_id,
+      name: searchFormValues.name,
+      coupon_type: searchFormValues.coupon_type,
+      coupon_category: searchFormValues.coupon_category,
+      pub_date_start_start: couponStartDateStart,
+      pub_date_start_end: couponStartDateEnd,
+      pub_date_end_start: couponEndDateStart,
+      pub_date_end_end: couponEndDateEnd,
       page: 1,
       size: 20,
     };
@@ -186,7 +190,7 @@ const Coupon = (props) => {
       <Table
         size="middle"
         columns={couponListcolumns}
-        rowKey={(record) => record.notice_id}
+        rowKey={(record) => record.coupon_id}
         dataSource={couponList}
         pagination={pagination}
         loading={loading}

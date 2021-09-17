@@ -23,8 +23,8 @@ const PostEditor = dynamic(() => import("@utils/Editor"), {
   ssr: false,
 });
 
-const CouponDirect = (props) => {
-  const { couponDirectId, token } = props;
+const CouponManual = (props) => {
+  const { couponManualId, token } = props;
 
   const radioStyle = {
     display: "inline",
@@ -400,4 +400,4 @@ const CouponDirect = (props) => {
   );
 };
 
-export default connect((state) => state)(CouponDirect);
+export default connect((state) => state)(CouponManual);

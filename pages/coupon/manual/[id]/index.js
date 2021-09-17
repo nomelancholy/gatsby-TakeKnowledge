@@ -3,9 +3,9 @@ import { connect } from "react-redux";
 import { useRouter } from "next/router";
 import { wrapper } from "@state/stores";
 import initialize from "@utils/initialize";
-import CouponDirectDetail from "@components/coupon/CouponDirectDetail";
+import CouponManualDetail from "@components/coupon/CouponManualDetail";
 
-const CouponDirectWithId = (props) => {
+const CouponManualWithId = (props) => {
   const router = useRouter();
   const { id } = router.query;
   const { user, isLoggedIn, token } = props.auth;
@@ -16,11 +16,11 @@ const CouponDirectWithId = (props) => {
     }
   }, [isLoggedIn]);
 
-  return <CouponDirectDetail couponAutoId={id} token={token} />;
+  return <CouponManualDetail couponManualId={id} token={token} />;
 };
 
 export const getServerSideProps = wrapper.getServerSideProps((ctx) => {
   return { props: initialize(ctx) };
 });
 
-export default connect((state) => state)(CouponDirectWithId);
+export default connect((state) => state)(CouponManualWithId);
