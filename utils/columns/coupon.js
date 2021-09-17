@@ -147,7 +147,7 @@ export const couponAutoListcolumns = [
     title: "자동 발급 ID",
     dataIndex: "cai_id",
     render: (text, record) => {
-      return <a href={`/coupon/${text}`}>{text}</a>;
+      return <a href={`/coupon/auto/${text}`}>{text}</a>;
     },
   },
   {
@@ -307,6 +307,9 @@ export const couponManualListcolumns = [
   {
     title: "직접발급 ID",
     dataIndex: "cmi_id",
+    render: (text, record) => {
+      return <a href={`/coupon/manual/${text}`}>{text}</a>;
+    },
   },
   {
     title: "쿠폰 명",
@@ -443,31 +446,80 @@ export const couponManualListcolumns = [
 
 export const couponResultColumns = [
   {
+    title: "직접 발급 ID",
+    dataIndex: "ci_id",
+  },
+  {
     title: "쿠폰 이름",
-    dataIndex: "id",
+    dataIndex: "coupon",
+    render: (text, record) => {
+      return text.name;
+    },
   },
   {
     title: "이메일",
-    dataIndex: "name",
+    dataIndex: "email",
   },
   {
     title: "쿠폰 상태",
     dataIndex: "status",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (text === "published") {
+        renderText = "발행";
+      } else if (text === "issued") {
+        if (record.user_coupon.status === "expired") {
+          renderText = "기간 만료";
+        } else if (record.user_coupon.status === "used") {
+          renderText = "사용 완료";
+        } else if (record.user_coupon.status === "issued") {
+          renderText = "발급 완료";
+        }
+      }
+
+      return renderText;
+    },
   },
   {
     title: "사용자 상태",
-    dataIndex: "email",
+    dataIndex: "user",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (text) {
+        renderText = "회원";
+      } else {
+        renderText = "비회원";
+      }
+
+      return renderText;
+    },
   },
   {
     title: "발급 방식",
-    dataIndex: "type",
+    dataIndex: "issue_info",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (text.issue_type === "bundle") {
+        renderText = "대량발급";
+      } else if (text.issue_type === "each") {
+        renderText = "개별발급";
+      }
+
+      return renderText;
+    },
   },
   {
     title: "발급 일시",
-    dataIndex: "amount",
+    dataIndex: "issue_info",
+    render: (text, record) => {
+      return text.regdate;
+    },
   },
   {
     title: "개별 쿠폰 코드",
-    dataIndex: "rate",
+    dataIndex: "serial",
   },
 ];
