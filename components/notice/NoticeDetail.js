@@ -46,12 +46,11 @@ const NoticeDetail = (props) => {
   const [okModalVisible, setOkModalVisible] = useState(false);
 
   const [spotOptions, setSpotOptions] = useState([]);
+  const [targetSpots, setTargetSpots] = useState([]);
 
   const [noticeImage, setNoticeImage] = useState([]);
   const [noticePreviewVisible, setNoticePreviewVisible] = useState(false);
   const [noticePreviewImage, setNoticePreviewImage] = useState("");
-
-  const [targetSpots, setTargetSpots] = useState([]);
 
   const [isSpotNotice, setIsSpotNotice] = useState(false);
 

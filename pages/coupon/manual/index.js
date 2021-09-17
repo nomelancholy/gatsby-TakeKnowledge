@@ -198,7 +198,7 @@ const CouponManual = (props) => {
         <Button
           type="primary"
           onClick={() => {
-            Router.push("/coupon/direct/result");
+            Router.push("/coupon/manual/result");
           }}
         >
           <PlusOutlined />
