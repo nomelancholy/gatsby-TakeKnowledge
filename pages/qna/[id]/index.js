@@ -1,4 +1,14 @@
-import { Button, Form, Input, Row, Modal, Card, Radio, Popconfirm } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  Row,
+  Modal,
+  Card,
+  Radio,
+  Popconfirm,
+  Upload,
+} from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
@@ -42,9 +52,14 @@ const QnaDetail = (props) => {
 
   // 생성한 답장 id 저장용 state
   const [newCount, setNewCount] = useState(1);
-
+  // Modal 문구 (수정 or 등록) 변경을 위한 state
   const [isReplyRegister, setIsReplyRegister] = useState(false);
   const [isStatusUpdate, setIsStatusUpdate] = useState(false);
+
+  // QNA 이미지 파일 관련 state
+  const [qnaImage, setQnaImage] = useState([]);
+  const [qnaPreviewVisible, setQnaPreviewVisible] = useState(false);
+  const [qnaPreviewImage, setQnaPreviewImage] = useState("");
 
   // 처리 상태
   const [statusForm] = Form.useForm();
@@ -105,6 +120,17 @@ const QnaDetail = (props) => {
         // 내용
         content: qnaDetail.content,
       });
+
+      // 문의 이미지
+
+      if (qnaDetail.file_path) {
+        const imageObject = {
+          thumbUrl: qnaDetail.file_path,
+          uid: qnaDetail.uid,
+        };
+
+        setQnaImage([imageObject]);
+      }
 
       // 답장
       if (qnaDetail.reply) {
@@ -227,6 +253,11 @@ const QnaDetail = (props) => {
       });
   };
 
+  const handleQnaPreview = (file) => {
+    setQnaPreviewVisible(true);
+    setQnaPreviewImage(file.url || file.thumbUrl);
+  };
+
   return (
     <>
       <Card
@@ -291,6 +322,34 @@ const QnaDetail = (props) => {
             <Form.Item name="title" label="제목">
               <Input disabled />
             </Form.Item>
+            {qnaImage && qnaImage.length > 0 && (
+              <Form.Item name="images" label="이미지">
+                <>
+                  <Upload
+                    name="images"
+                    listType="picture-card"
+                    fileList={qnaImage}
+                    onPreview={handleQnaPreview}
+                    disabled
+                  />
+
+                  <Modal
+                    visible={qnaPreviewVisible}
+                    footer={null}
+                    onCancel={() => {
+                      setQnaPreviewVisible(false);
+                    }}
+                  >
+                    <img
+                      alt="팝업 배너"
+                      style={{ width: "100%" }}
+                      src={qnaPreviewImage}
+                    />
+                  </Modal>
+                </>
+              </Form.Item>
+            )}
+
             <Form.Item name="content" label="내용">
               <Input.TextArea disabled />
             </Form.Item>

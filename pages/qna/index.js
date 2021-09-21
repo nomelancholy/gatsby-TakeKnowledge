@@ -304,7 +304,7 @@ const Qna = (props) => {
           <Form.Item name="qid" label="문의 ID">
             <Input />
           </Form.Item>
-          <Form.Item name="classification" label="문의 유형">
+          <Form.Item name="classification" label="문의 유형 1">
             <Select
               style={{ width: 200 }}
               onChange={handleClassificationChange}

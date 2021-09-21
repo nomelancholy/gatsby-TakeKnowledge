@@ -7,7 +7,7 @@ export const qnaListColumns = [
     dataIndex: "qid",
   },
   {
-    title: "문의 유형",
+    title: "문의 유형 1",
     dataIndex: "classification",
   },
 

@@ -9,6 +9,7 @@ const ReplyCard = (props) => {
 
   const [registerMode, setRegisterMode] = useState(true);
 
+  // 답장 이미지 파일 관련 state
   const [replyImage, setReplyImage] = useState([]);
   const [replyPreviewVisible, setReplyPreviewVisible] = useState(false);
   const [replyPreviewImage, setReplyPreviewImage] = useState("");
