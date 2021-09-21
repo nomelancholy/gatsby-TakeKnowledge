@@ -38,6 +38,9 @@ const NoticeDetail = (props) => {
   // new / detial 구분 state
   const [registerMode, setRegisterMode] = useState(true);
 
+  // 지점 / 전체 공지 구분 state
+  const [isSpotNotice, setIsSpotNotice] = useState(false);
+
   const [noticeInfo, setNoticeInfo] = useState(undefined);
 
   // 에디터 컨텐츠 state
@@ -45,20 +48,24 @@ const NoticeDetail = (props) => {
 
   const [okModalVisible, setOkModalVisible] = useState(false);
 
+  // 스팟 선택 option/tagets state
   const [spotOptions, setSpotOptions] = useState([]);
   const [targetSpots, setTargetSpots] = useState([]);
 
+  // 공지 이미지 관련 state
   const [noticeImage, setNoticeImage] = useState([]);
   const [noticePreviewVisible, setNoticePreviewVisible] = useState(false);
   const [noticePreviewImage, setNoticePreviewImage] = useState("");
 
-  const [isSpotNotice, setIsSpotNotice] = useState(false);
-
-  const [reservedDate, setReservedDate] = useState("");
+  // 공지 노출기간 datePicker 값 세팅 state
+  const [reservedDate, setReservedDate] = useState(
+    moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
+  );
 
   // 공지 Form
   const [noticeForm] = Form.useForm();
 
+  // 스팟 선택 옵션 스팟 호출
   const getSpotOptions = () => {
     axios
       .post(
@@ -77,6 +84,7 @@ const NoticeDetail = (props) => {
 
         const options = [];
 
+        // 적용 스팟 옵션 가공 후 세팅
         data.map((spot) => {
           const spotOption = {
             key: spot.spot_id.toString(),
@@ -137,10 +145,14 @@ const NoticeDetail = (props) => {
         reserved_datetime: moment(noticeInfo.reserved_datetime),
       });
 
+      // 공지 내용
       setContent(noticeInfo.content);
 
+      // 지점 공지인 경우
       if (noticeInfo.type === "spot") {
+        // flag true로 변경 후
         setIsSpotNotice(true);
+        // 적용되어 있는 상품 세팅
         const targetSpots = noticeInfo.spot_ids.split("|");
         setTargetSpots(targetSpots);
       }
@@ -154,7 +166,9 @@ const NoticeDetail = (props) => {
         setNoticeImage([imageObj]);
       }
 
-      setReservedDate(noticeInfo.reserved_datetime.replace(/\./gi, "-"));
+      if (noticeInfo.reserved_datetime) {
+        setReservedDate(noticeInfo.reserved_datetime.replace(/\./gi, "-"));
+      }
     }
   }, [noticeInfo]);
 
@@ -284,7 +298,15 @@ const NoticeDetail = (props) => {
         bodyStyle={{ padding: "1rem" }}
         className="mb-4"
       >
-        <Form form={noticeForm} onFinish={handleNoticeRegisterSubmit}>
+        <Form
+          form={noticeForm}
+          onFinish={handleNoticeRegisterSubmit}
+          initialValues={{
+            status: "private",
+            sticky: 0,
+            reserved_datetime: moment(),
+          }}
+        >
           <Card bodyStyle={{ padding: "1rem" }} className="mb-2">
             <Form.Item
               name="status"
@@ -332,7 +354,7 @@ const NoticeDetail = (props) => {
                   전체 공지
                 </Radio>
                 <Radio style={radioStyle} value={"spot"}>
-                  스팟 공지
+                  지점 공지
                 </Radio>
               </Radio.Group>
             </Form.Item>

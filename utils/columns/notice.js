@@ -21,7 +21,7 @@ export const noticeListcolumns = [
       if (text === "normal") {
         renderText = "전체 공지";
       } else if (text === "spot") {
-        renderText = "스팟 공지";
+        renderText = "지점 공지";
       }
 
       return renderText;
