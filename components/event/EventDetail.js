@@ -33,16 +33,25 @@ const EventDetail = (props) => {
 
   const [okModalVisible, setOkModalVisible] = useState(false);
 
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  // 이벤트 시작, 종료일 state
+  const [startDate, setStartDate] = useState(
+    moment(new Date()).format("YYYY-MM-DD")
+  );
+  const [endDate, setEndDate] = useState(
+    moment(
+      new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
+    ).format("YYYY-MM-DD")
+  );
 
+  // 적용 쿠폰 옵션 리스트 state
   const [couponList, setCouponList] = useState(undefined);
-
+  // 적용한 쿠폰 state
   const [applyCoupon, setApplyCoupon] = useState(undefined);
 
-  // 공지 Form
+  // 이벤트 Form
   const [eventForm] = Form.useForm();
 
+  // option coupon list 조회
   const getCouponList = () => {
     axios
       .post(
@@ -78,6 +87,7 @@ const EventDetail = (props) => {
   };
 
   useEffect(() => {
+    // 옵션 쿠폰 리스트 조회
     getCouponList();
 
     if (eventId) {
@@ -181,6 +191,7 @@ const EventDetail = (props) => {
       });
   };
 
+  // 이벤트 시작, 종료일 변경 처리
   const handleStartDateChange = (date, dateString) => {
     setStartDate(dateString);
   };
@@ -189,8 +200,7 @@ const EventDetail = (props) => {
     setEndDate(dateString);
   };
 
-  // 객체 배열에서 입력 텍스트를 label에 포함한 객체만 찾아서 return
-
+  // 적용 쿠폰 검색 - 선택
   const handleSelect = (data, option) => {
     setApplyCoupon(option.id);
   };
@@ -205,14 +215,24 @@ const EventDetail = (props) => {
         bodyStyle={{ padding: "1rem" }}
         className="mb-4"
       >
-        <Form form={eventForm} onFinish={handleEventRegisterSubmit}>
+        <Form
+          form={eventForm}
+          onFinish={handleEventRegisterSubmit}
+          initialValues={{
+            status: "private",
+            start_date: moment(new Date()),
+            end_date: moment(
+              new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
+            ),
+          }}
+        >
           <Card bodyStyle={{ padding: "1rem" }} className="mb-2">
             <Form.Item
               name="title"
               label="이벤트 제목"
               rules={[{ required: true, message: "제목을 입력해주세요" }]}
             >
-              <Input />
+              <Input maxLength={50} />
             </Form.Item>
             <Form.Item
               name="status"
