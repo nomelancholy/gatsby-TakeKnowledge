@@ -35,14 +35,22 @@ const BannerDetail = (props) => {
   // new / detial 구분 state
   const [registerMode, setRegisterMode] = useState(true);
 
-  const [hasSwiperBanner, setHasSwiperBanner] = useState(false);
+  // 롤링 배너 구분 state
+  const [hasSwiperBanner, setHasSwiperBanner] = useState(true);
 
   const [bannerInfo, setBannerInfo] = useState(undefined);
 
   const [okModalVisible, setOkModalVisible] = useState(false);
 
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  // 배너 시작, 종료일 state
+  const [startDate, setStartDate] = useState(
+    moment(new Date()).format("YYYY-MM-DD")
+  );
+  const [endDate, setEndDate] = useState(
+    moment(
+      new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
+    ).format("YYYY-MM-DD")
+  );
 
   // 배너 Form
   const [bannerForm] = Form.useForm();
@@ -55,6 +63,7 @@ const BannerDetail = (props) => {
   // 팝업 배너 Form
   const [popupBannerForm] = Form.useForm();
 
+  // 이미지 관련 state
   const [topBannerImage, setTopBannerImage] = useState([]);
   const [topBannerPreviewVisible, setTopBannerPreviewVisible] = useState(false);
   const [topBannerPreviewImage, setTopBannerPreviewImage] = useState("");
@@ -154,6 +163,7 @@ const BannerDetail = (props) => {
         setHasSwiperBanner(true);
       }
 
+      // 이미지 세팅
       if (bannerInfo.items && bannerInfo.items.length > 0) {
         // setBannerItems(bannerInfo.items);
 
@@ -261,7 +271,7 @@ const BannerDetail = (props) => {
       });
   };
 
-  // 배너 아이템 (상단, 하단, 팝업, 롤링 배너)
+  // 배너 아이템 (상단, 하단, 팝업, 롤링 배너) 등록
   const handleBannerItemSubmit = (type) => {
     if (!(bannerId || generatedBannerId)) {
       return false;
@@ -295,6 +305,7 @@ const BannerDetail = (props) => {
     formData.append("banner_id", bannerId ? bannerId : generatedBannerId);
     formData.append("banner_type", type);
 
+    // 배너 아이템 수정일 경우
     value.banner_item_id &&
       formData.append("banner_item_id", value.banner_item_id);
 
@@ -310,21 +321,20 @@ const BannerDetail = (props) => {
       });
     }
 
-    console.log(`delImages`, delImages);
-
+    // 삭제 이미지가 있는 경우 전송 추가
     if (delImages.length > 0) {
       formData.append("del_images", JSON.stringify(delImages));
     }
 
     // formData console
 
-    for (let key of formData.keys()) {
-      console.log(key);
-    }
+    // for (let key of formData.keys()) {
+    //   console.log(key);
+    // }
 
-    for (let value of formData.values()) {
-      console.log(value);
-    }
+    // for (let value of formData.values()) {
+    //   console.log(value);
+    // }
 
     const config = {
       method: "post",
@@ -494,7 +504,14 @@ const BannerDetail = (props) => {
           <Form
             form={bannerForm}
             onFinish={handleBannerRegisterSubmit}
-            initialValues={{ status: "publish" }}
+            initialValues={{
+              status: "private",
+              path: "home",
+              start_date: moment(new Date()),
+              end_date: moment(
+                new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
+              ),
+            }}
           >
             <Form.Item name="status" label="활성/비활성">
               <Radio.Group>
@@ -506,7 +523,11 @@ const BannerDetail = (props) => {
                 </Radio>
               </Radio.Group>
             </Form.Item>
-            <Form.Item name="path" label="위치">
+            <Form.Item
+              name="path"
+              label="위치"
+              rules={[{ required: true, message: "위치를 선택해주세요" }]}
+            >
               <Select style={{ width: 120 }} onChange={handlePathChange}>
                 <Select.Option value="home">홈</Select.Option>
                 <Select.Option value="spot">스팟</Select.Option>
@@ -514,11 +535,7 @@ const BannerDetail = (props) => {
                 <Select.Option value="mypage">마이페이지</Select.Option>
               </Select>
             </Form.Item>
-            <Form.Item
-              name="permission"
-              label="배너 타깃"
-              rules={[{ required: true, message: "배너 타깃을 선택해주세요" }]}
-            >
+            <Form.Item name="permission" label="배너 타깃">
               <Checkbox.Group options={permissionOptions} />
             </Form.Item>
 
@@ -569,7 +586,11 @@ const BannerDetail = (props) => {
               handleBannerItemSubmit("top");
             }}
           >
-            <Form.Item name="title" label="제목">
+            <Form.Item
+              name="title"
+              label="제목"
+              rules={[{ required: true, message: "제목을 입력해주세요" }]}
+            >
               <Input></Input>
             </Form.Item>
             <Form.Item name="images" label="이미지">
@@ -643,7 +664,11 @@ const BannerDetail = (props) => {
               handleBannerItemSubmit("bottom");
             }}
           >
-            <Form.Item name="title" label="제목">
+            <Form.Item
+              name="title"
+              label="제목"
+              rules={[{ required: true, message: "제목을 입력해주세요" }]}
+            >
               <Input></Input>
             </Form.Item>
             <Form.Item name="images" label="이미지">
@@ -719,7 +744,11 @@ const BannerDetail = (props) => {
                   handleBannerItemSubmit("swiper");
                 }}
               >
-                <Form.Item name="title" label="제목">
+                <Form.Item
+                  name="title"
+                  label="제목"
+                  rules={[{ required: true, message: "제목을 입력해주세요" }]}
+                >
                   <Input></Input>
                 </Form.Item>
                 <Form.Item name="images" label="이미지">
@@ -796,7 +825,11 @@ const BannerDetail = (props) => {
               handleBannerItemSubmit("popup");
             }}
           >
-            <Form.Item name="title" label="제목">
+            <Form.Item
+              name="title"
+              label="제목"
+              rules={[{ required: true, message: "제목을 입력해주세요" }]}
+            >
               <Input></Input>
             </Form.Item>
             <Form.Item name="images" label="이미지">
