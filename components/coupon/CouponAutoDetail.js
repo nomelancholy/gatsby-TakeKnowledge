@@ -178,23 +178,17 @@ const CouponAuto = (props) => {
     const { status, coupon_id, issue_category, target, issue_date } =
       autoCouponForm.getFieldValue();
 
-    console.log(`status`, status);
-    console.log(`coupon_id`, applyCoupon);
-    console.log(`issue_category`, issue_category);
-    console.log(`target`, target);
-    console.log(`issue_date`, moment(issue_date).format("YYYY-MM-DD HH:mm:ss"));
-
     let data = {
       status,
-      coupon_id: applyCoupon,
-      issue_category,
-      target,
-      issue_date: moment(issue_date).format("YYYY-MM-DD HH:mm:ss"),
     };
 
     let url = "";
 
     if (registerMode) {
+      data.coupon_id = applyCoupon;
+      data.issue_category = issue_category;
+      data.target = target;
+      data.issue_date = moment(issue_date).format("YYYY-MM-DD HH:mm:ss");
       url = `${process.env.BACKEND_API}/admin/user/coupon/issue_auto/add`;
     } else {
       url = `${process.env.BACKEND_API}/admin/user/coupon/issue_auto/update`;
@@ -373,6 +367,7 @@ const CouponAuto = (props) => {
                   option.value.includes(inputValue)
                 }
                 onSelect={handleSelect}
+                disabled={registerMode ? false : true}
               />
             </Form.Item>
           </Card>
@@ -498,6 +493,7 @@ const CouponAuto = (props) => {
               <Select
                 style={{ width: 120 }}
                 onChange={handleIssueCategoryChange}
+                disabled={registerMode ? false : true}
               >
                 <Select.Option value="birthday">생일</Select.Option>
                 <Select.Option value="issue_day">지정일</Select.Option>
@@ -521,7 +517,11 @@ const CouponAuto = (props) => {
                 },
               ]}
             >
-              <Select style={{ width: 120 }} options={targetOptions}></Select>
+              <Select
+                style={{ width: 120 }}
+                options={targetOptions}
+                disabled={registerMode ? false : true}
+              ></Select>
             </Form.Item>
             {isIssueDay && (
               <Form.Item
@@ -538,6 +538,7 @@ const CouponAuto = (props) => {
                   showTime
                   format="YYYY-MM-DD HH:mm"
                   name="reserved_datetime"
+                  disabled={registerMode ? false : true}
                   onChange={(date, dateString) => {
                     setIssueDate(dateString);
                   }}
