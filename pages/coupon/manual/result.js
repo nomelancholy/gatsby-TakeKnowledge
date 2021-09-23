@@ -19,6 +19,7 @@ import initialize from "@utils/initialize";
 import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
 import { couponResultColumns } from "@utils/columns/coupon";
+import router from "next/router";
 
 // 쿠폰 발급 결과
 const CouponResult = (props) => {
@@ -159,8 +160,16 @@ const CouponResult = (props) => {
 
   return (
     <>
-      <h3>쿠폰 발급 결과</h3>
-
+      <>
+        <h3>쿠폰 발급 결과</h3>
+        <Button
+          onClick={() => {
+            router.back();
+          }}
+        >
+          뒤로 가기{" "}
+        </Button>
+      </>
       <Row type="flex" align="middle" className="py-3">
         <Button
           type="primary"
