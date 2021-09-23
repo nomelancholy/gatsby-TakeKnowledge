@@ -1,4 +1,5 @@
 import { Button } from "antd";
+import axios from "axios";
 
 // 쿠폰 관리 리스트
 // api 주소
@@ -302,145 +303,171 @@ export const couponAutoListcolumns = [
   },
 ];
 
+// 서버 통신 + 토큰 전달 문제로 coupon/manual/index.js 내부로 이동
 // 쿠폰 직접 발급 리스트
-export const couponManualListcolumns = [
-  {
-    title: "직접발급 ID",
-    dataIndex: "cmi_id",
-    render: (text, record) => {
-      return <a href={`/coupon/manual/${text}`}>{text}</a>;
-    },
-  },
-  {
-    title: "쿠폰 명",
-    dataIndex: "coupon",
-    render: (text, record) => {
-      return text.name;
-    },
-  },
-  {
-    title: "직접발급 상태",
-    dataIndex: "status",
-    render: (text, record) => {
-      let renderText = "";
+// export const couponManualListcolumns = [
+//   {
+//     title: "직접발급 ID",
+//     dataIndex: "cmi_id",
+//     render: (text, record) => {
+//       return <a href={`/coupon/manual/${text}`}>{text}</a>;
+//     },
+//   },
+//   {
+//     title: "쿠폰 명",
+//     dataIndex: "coupon",
+//     render: (text, record) => {
+//       return text.name;
+//     },
+//   },
+//   {
+//     title: "직접발급 상태",
+//     dataIndex: "status",
+//     render: (text, record) => {
+//       let renderText = "";
 
-      if (text === "active") {
-        renderText = "실행";
-      } else if (text === "inactive") {
-        renderText = "중단";
-      }
+//       if (text === "active") {
+//         renderText = "실행";
+//       } else if (text === "inactive") {
+//         renderText = "중단";
+//       }
 
-      return renderText;
-    },
-  },
-  {
-    title: "발급 방식",
-    dataIndex: "issue_type",
-    render: (text, record) => {
-      let renderText = "";
+//       return renderText;
+//     },
+//   },
+//   {
+//     title: "발급 방식",
+//     dataIndex: "issue_type",
+//     render: (text, record) => {
+//       let renderText = "";
 
-      if (text === "each") {
-        renderText = "개별 발급";
-      } else if (text === "bundle") {
-        renderText = "대량 발급";
-      }
+//       if (text === "each") {
+//         renderText = "개별 발급";
+//       } else if (text === "bundle") {
+//         renderText = "대량 발급";
+//       }
 
-      return renderText;
-    },
-  },
-  {
-    title: "쿠폰 구분",
-    dataIndex: "coupon",
-    render: (text, record) => {
-      let renderText = "";
+//       return renderText;
+//     },
+//   },
+//   {
+//     title: "쿠폰 구분",
+//     dataIndex: "coupon",
+//     render: (text, record) => {
+//       let renderText = "";
 
-      if (text.coupon_category === "meeting") {
-        renderText = "미팅룸";
-      } else if (text.coupon_category === "coworking") {
-        renderText = "코워킹룸";
-      } else if (text.coupon_category === "locker") {
-        renderText = "락커룸";
-      } else if (text.coupon_category === "lounge") {
-        renderText = "라운지";
-      } else if (text.coupon_category === "membership") {
-        renderText = "멤버쉽";
-      }
+//       if (text.coupon_category === "meeting") {
+//         renderText = "미팅룸";
+//       } else if (text.coupon_category === "coworking") {
+//         renderText = "코워킹룸";
+//       } else if (text.coupon_category === "locker") {
+//         renderText = "락커룸";
+//       } else if (text.coupon_category === "lounge") {
+//         renderText = "라운지";
+//       } else if (text.coupon_category === "membership") {
+//         renderText = "멤버쉽";
+//       }
 
-      return renderText;
-    },
-  },
-  {
-    title: "적용 쿠폰 ID",
-    dataIndex: "coupon_id",
-  },
-  {
-    title: "쿠폰 설명(고객 노출)",
-    dataIndex: "coupon",
-    render: (text, record) => {
-      return text.desc;
-    },
-  },
-  {
-    title: "쿠폰 유형",
-    dataIndex: "coupon",
-    render: (text, record) => {
-      let renderText = "";
+//       return renderText;
+//     },
+//   },
+//   {
+//     title: "적용 쿠폰 ID",
+//     dataIndex: "coupon_id",
+//   },
+//   {
+//     title: "쿠폰 설명(고객 노출)",
+//     dataIndex: "coupon",
+//     render: (text, record) => {
+//       return text.desc;
+//     },
+//   },
+//   {
+//     title: "쿠폰 유형",
+//     dataIndex: "coupon",
+//     render: (text, record) => {
+//       let renderText = "";
 
-      if (text.coupon_type === "flat") {
-        renderText = "정액 할인";
-      } else if (text === "ratio") {
-        renderText = "비율 할인";
-      }
+//       if (text.coupon_type === "flat") {
+//         renderText = "정액 할인";
+//       } else if (text === "ratio") {
+//         renderText = "비율 할인";
+//       }
 
-      return renderText;
-    },
-  },
-  {
-    title: "할인액",
-    dataIndex: "coupon",
-    render: (text, record) => {
-      let renderText = "";
+//       return renderText;
+//     },
+//   },
+//   {
+//     title: "할인액",
+//     dataIndex: "coupon",
+//     render: (text, record) => {
+//       let renderText = "";
 
-      if (text.coupon_type === "flat") {
-        renderText = text.discount.toLocaleString("ko-KR");
-      }
+//       if (text.coupon_type === "flat") {
+//         renderText = text.discount.toLocaleString("ko-KR");
+//       }
 
-      return renderText;
-    },
-  },
-  {
-    title: "할인 비율",
-    dataIndex: "coupon",
-    render: (text, record) => {
-      let renderText = "";
+//       return renderText;
+//     },
+//   },
+//   {
+//     title: "할인 비율",
+//     dataIndex: "coupon",
+//     render: (text, record) => {
+//       let renderText = "";
 
-      if (text.coupon_type === "ratio") {
-        renderText = text.discount;
-      }
+//       if (text.coupon_type === "ratio") {
+//         renderText = text.discount;
+//       }
 
-      return renderText;
-    },
-  },
-  {
-    title: "발급량",
-    dataIndex: "coupon",
-    render: (text, record) => {
-      return text.total;
-    },
-  },
+//       return renderText;
+//     },
+//   },
+//   {
+//     title: "발급량",
+//     dataIndex: "coupon",
+//     render: (text, record) => {
+//       return text.total;
+//     },
+//   },
 
-  {
-    title: "발급 일시",
-    dataIndex: "regdate",
-  },
-  {
-    title: "",
-    dataIndex: "",
-    render: (text, record) => {
-      return <Button type="primary">엑셀 다운로드</Button>;
-    },
-  },
-];
+//   {
+//     title: "발급 일시",
+//     dataIndex: "regdate",
+//   },
+//   {
+//     title: "",
+//     dataIndex: "",
+//     render: (text, record) => {
+//       return (
+//         <Button
+//           type="primary"
+//           onClick={() => {
+//             const config = {
+//               headers: {
+//                 Authorization: decodeURIComponent(token),
+//               },
+//             };
+
+//             axios
+//               .get(
+//                 `${process.env.BACKEND_API}/admin/user/coupon/issued/excel/${record.cmi_id}`,
+//                 config
+//               )
+//               .then(function (response) {
+//                 console.log(`response`, response);
+//               })
+//               .catch(function (error) {
+//                 console.log(error);
+//               });
+//           }}
+//         >
+//           엑셀 다운로드
+//         </Button>
+//       );
+//     },
+//   },
+// ];
 
 // 쿠폰 발급 결과
 
