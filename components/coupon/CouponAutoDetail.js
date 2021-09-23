@@ -90,6 +90,7 @@ const CouponAuto = (props) => {
         console.log(`error`, error);
       });
   };
+
   useEffect(() => {
     // 쿠폰 리스트 로드
     getCouponOptions();
@@ -121,7 +122,7 @@ const CouponAuto = (props) => {
     }
   }, []);
 
-  // noticeInfo 세팅되면 알맞는 엘리먼트에 binding
+  // autoCouponInfo 세팅되면 알맞는 엘리먼트에 binding
   useEffect(() => {
     if (autoCouponInfo) {
       console.log(`autoCouponInfo`, autoCouponInfo);
@@ -174,7 +175,7 @@ const CouponAuto = (props) => {
   }, [autoCouponInfo]);
 
   // 저장 버튼 클릭
-  const handleNoticeRegisterSubmit = () => {
+  const handleAutoCouponRegisterSubmit = () => {
     const { status, coupon_id, issue_category, target, issue_date } =
       autoCouponForm.getFieldValue();
 
@@ -328,7 +329,7 @@ const CouponAuto = (props) => {
       >
         <Form
           form={autoCouponForm}
-          onFinish={handleNoticeRegisterSubmit}
+          onFinish={handleAutoCouponRegisterSubmit}
           initialValues={{ status: "inactive", issue_date: moment(new Date()) }}
         >
           <Card bodyStyle={{ padding: "1rem" }} className="mb-2">

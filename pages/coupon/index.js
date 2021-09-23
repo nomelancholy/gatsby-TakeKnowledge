@@ -68,7 +68,7 @@ const Coupon = (props) => {
       )
       .then((response) => {
         const data = response.data;
-        console.log(`notice data`, data);
+        console.log(`coupon data`, data);
         setCouponList(data.items);
         // 페이지 네이션 정보 세팅
         const pageInfo = {
