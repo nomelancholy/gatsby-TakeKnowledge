@@ -278,7 +278,7 @@ const QnaDetail = (props) => {
         >
           <Form form={statusForm}>
             <Form.Item name="status">
-              <Radio.Group disabled={isStatusCanEdit ? false : true}>
+              <Radio.Group>
                 <Radio style={radioStyle} value={"wait"} disabled>
                   대기
                 </Radio>
