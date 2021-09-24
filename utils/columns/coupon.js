@@ -155,7 +155,7 @@ export const couponAutoListcolumns = [
     title: "쿠폰명",
     dataIndex: "coupon",
     render: (text, record) => {
-      return text.name;
+      return <a href={`/coupon/${text.coupon_id}`}>{text.name}</a>;
     },
   },
   {
@@ -168,6 +168,21 @@ export const couponAutoListcolumns = [
         renderText = "실행";
       } else if (text === "inactive") {
         renderText = "중단";
+      }
+
+      return renderText;
+    },
+  },
+  {
+    title: "이용",
+    dataIndex: "coupon",
+    render: (text, record) => {
+      let renderText = "";
+
+      if (text.available) {
+        renderText = "활성";
+      } else {
+        renderText = "비활성";
       }
 
       return renderText;

@@ -245,6 +245,7 @@ const CouponManual = (props) => {
 
   const [params, setParams] = useState({
     cmi_id: undefined,
+    name: undefined,
     issue_type: undefined,
     coupon_category: undefined,
     coupon_type: undefined,
@@ -325,6 +326,7 @@ const CouponManual = (props) => {
 
     const searchParams = {
       cmi_id: searchFormValues.cmi_id,
+      name: searchFormValues.name,
       issue_type: searchFormValues.issue_type,
       coupon_category: searchFormValues.coupon_category,
       coupon_type: searchFormValues.coupon_type,
@@ -352,6 +354,7 @@ const CouponManual = (props) => {
     // params state reset
     const searchParams = {
       cmi_id: undefined,
+      name: undefined,
       issue_type: undefined,
       coupon_category: undefined,
       coupon_type: undefined,
@@ -430,6 +433,9 @@ const CouponManual = (props) => {
         >
           <Form.Item name="cmi_id" label="직접발급 ID">
             <InputNumber />
+          </Form.Item>
+          <Form.Item name="name" label="쿠폰명">
+            <Input />
           </Form.Item>
           <Form.Item name="issue_type" label="발급 방식">
             <Select style={{ width: 160 }}>
