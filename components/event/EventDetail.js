@@ -56,7 +56,10 @@ const EventDetail = (props) => {
     axios
       .post(
         `${process.env.BACKEND_API}/admin/user/coupon/list`,
-        {},
+        {
+          start_pub_date_end: moment().format("YYYY-MM-DD"),
+          start_useable_date_end: moment().format("YYYY-MM-DD"),
+        },
         {
           headers: {
             "Content-Type": "application/json;charset=UTF-8",
