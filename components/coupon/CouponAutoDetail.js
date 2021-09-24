@@ -251,13 +251,35 @@ const CouponAuto = (props) => {
         code: couponInfo.code,
         total: couponInfo.total,
         coupon_category: couponInfo.coupon_category,
-        product_ids: couponInfo.product_ids,
-        spot_ids: couponInfo.spot_ids,
         pub_date_start: moment(couponInfo.pub_date_start),
         pub_date_end: moment(couponInfo.pub_date_end),
         useable_date_start: moment(couponInfo.useable_date_start),
         useable_date_end: moment(couponInfo.useable_date_end),
       });
+
+      if (couponInfo.products && couponInfo.products.length > 0) {
+        let productNameArray = [];
+
+        couponInfo.products.map((product) => {
+          productNameArray.push(product.name);
+        });
+
+        couponForm.setFieldsValue({
+          products: productNameArray.join(", "),
+        });
+      }
+
+      if (couponInfo.spots && couponInfo.spots.length > 0) {
+        let spotNameArray = [];
+
+        couponInfo.spots.map((spot) => {
+          spotNameArray.push(spot.name);
+        });
+
+        couponForm.setFieldsValue({
+          spots: spotNameArray.join(", "),
+        });
+      }
 
       if (couponInfo.coupon_category === "membership") {
         setIsAllAply(false);
@@ -420,16 +442,13 @@ const CouponAuto = (props) => {
                 </Select>
               </Form.Item>
               {!isAllAply && (
-                <>
-                  <Form.Item name="product_ids" label="적용 상품">
-                    <Input disabled />
-                  </Form.Item>
-                  <Form.Item name="spot_ids" label="적용 스팟">
-                    <Input disabled />
-                  </Form.Item>
-                </>
+                <Form.Item name="products" label="적용 상품">
+                  <Input disabled />
+                </Form.Item>
               )}
-
+              <Form.Item name="spots" label="적용 스팟">
+                <Input disabled />
+              </Form.Item>
               <Form.Item name="pub_date" label="발행 기간">
                 <Form.Item
                   name="pub_date_start"

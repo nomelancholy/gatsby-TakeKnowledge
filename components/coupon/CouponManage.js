@@ -113,7 +113,7 @@ const CouponManage = (props) => {
     axios
       .post(
         `${process.env.BACKEND_API}/admin/product/list`,
-        {},
+        { type: "membership" },
         {
           headers: {
             "Content-Type": "application/json;charset=UTF-8",
@@ -454,7 +454,16 @@ const CouponManage = (props) => {
               </Select>
             </Form.Item>
 
-            <FormItem name="code" label="공통 발급 코드">
+            <FormItem
+              name="code"
+              label="공통 발급 코드"
+              rules={[
+                {
+                  required: true,
+                  message: "공통 발급 코드를 입력해주세요",
+                },
+              ]}
+            >
               <Input />
             </FormItem>
             <FormItem
@@ -538,45 +547,44 @@ const CouponManage = (props) => {
             </Form.Item>
 
             {!isAllAply && (
-              <>
-                <Form.Item
-                  name="product_ids"
-                  label="적용 상품"
-                  rules={[
-                    {
-                      required: true,
-                      message: "적용 상품을 선택해주세요",
-                    },
-                  ]}
-                >
-                  <Transfer
-                    dataSource={productOptions}
-                    showSearch
-                    targetKeys={targetProducts}
-                    render={(item) => item.title}
-                    onChange={handleProductOptionsChange}
-                  />
-                </Form.Item>
-                <Form.Item
-                  name="spot_ids"
-                  label="적용 스팟"
-                  rules={[
-                    {
-                      required: true,
-                      message: "적용 스팟을 선택해주세요",
-                    },
-                  ]}
-                >
-                  <Transfer
-                    dataSource={spotOptions}
-                    showSearch
-                    targetKeys={targetSpots}
-                    render={(item) => item.title}
-                    onChange={handleSpotOptionsChange}
-                  />
-                </Form.Item>
-              </>
+              <Form.Item
+                name="product_ids"
+                label="적용 상품"
+                rules={[
+                  {
+                    required: true,
+                    message: "적용 상품을 선택해주세요",
+                  },
+                ]}
+              >
+                <Transfer
+                  dataSource={productOptions}
+                  showSearch
+                  targetKeys={targetProducts}
+                  render={(item) => item.title}
+                  onChange={handleProductOptionsChange}
+                />
+              </Form.Item>
             )}
+            <Form.Item
+              name="spot_ids"
+              label="적용 스팟"
+              rules={[
+                {
+                  required: true,
+                  message: "적용 스팟을 선택해주세요",
+                },
+              ]}
+            >
+              <Transfer
+                dataSource={spotOptions}
+                showSearch
+                targetKeys={targetSpots}
+                render={(item) => item.title}
+                onChange={handleSpotOptionsChange}
+              />
+            </Form.Item>
+
             <Form.Item name="pub_date" label="발행 기간">
               <Form.Item
                 name="pub_date_start"
