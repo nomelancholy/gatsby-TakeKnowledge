@@ -57,11 +57,6 @@ const NoticeDetail = (props) => {
   const [noticePreviewVisible, setNoticePreviewVisible] = useState(false);
   const [noticePreviewImage, setNoticePreviewImage] = useState("");
 
-  // 공지 노출기간 datePicker 값 세팅 state
-  const [reservedDate, setReservedDate] = useState(
-    moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
-  );
-
   // 공지 Form
   const [noticeForm] = Form.useForm();
 
@@ -84,11 +79,12 @@ const NoticeDetail = (props) => {
 
         const options = [];
 
-        // 적용 스팟 옵션 가공 후 세팅
+        // 적용 스팟 옵션 가공 후 세팅 (비활성일 경우 비활성)
         data.map((spot) => {
           const spotOption = {
             key: spot.spot_id.toString(),
-            title: spot.name,
+            title:
+              spot.status === "active" ? spot.name : `${spot.name} (비활성)`,
           };
 
           options.push(spotOption);
@@ -135,14 +131,13 @@ const NoticeDetail = (props) => {
   // noticeInfo 세팅되면 알맞는 엘리먼트에 binding
   useEffect(() => {
     if (noticeInfo) {
-      console.log(`noticeInfo`, noticeInfo);
-      // 공지 상태
       noticeForm.setFieldsValue({
         status: noticeInfo.status,
         type: noticeInfo.type,
         sticky: noticeInfo.sticky,
         title: noticeInfo.title,
-        reserved_datetime: moment(noticeInfo.reserved_datetime),
+        home_dp_start: moment(noticeInfo.home_dp_start),
+        home_dp_end: moment(noticeInfo.home_dp_end),
       });
 
       // 공지 내용
@@ -152,11 +147,12 @@ const NoticeDetail = (props) => {
       if (noticeInfo.type === "spot") {
         // flag true로 변경 후
         setIsSpotNotice(true);
-        // 적용되어 있는 상품 세팅
+        // 적용 스팟 세팅
         const targetSpots = noticeInfo.spot_ids.split("|");
         setTargetSpots(targetSpots);
       }
 
+      // 이미지 세팅
       if (noticeInfo.file_path) {
         const imageObj = {
           thumbUrl: noticeInfo.file_path,
@@ -165,16 +161,13 @@ const NoticeDetail = (props) => {
 
         setNoticeImage([imageObj]);
       }
-
-      if (noticeInfo.reserved_datetime) {
-        setReservedDate(noticeInfo.reserved_datetime.replace(/\./gi, "-"));
-      }
     }
   }, [noticeInfo]);
 
   // 저장 버튼 클릭
   const handleNoticeRegisterSubmit = () => {
-    const { type, sticky, status, title, images } = noticeForm.getFieldValue();
+    const { type, sticky, status, title, images, home_dp_start, home_dp_end } =
+      noticeForm.getFieldValue();
 
     const formData = new FormData();
 
@@ -183,7 +176,14 @@ const NoticeDetail = (props) => {
     formData.append("content", content);
     formData.append("sticky", sticky);
     formData.append("status", status);
-    formData.append("reserved_datetime", reservedDate);
+    formData.append(
+      "home_dp_start",
+      moment(home_dp_start).format("YYYY-MM-DD HH:mm")
+    );
+    formData.append(
+      "home_dp_end",
+      moment(home_dp_end).format("YYYY-MM-DD HH:mm")
+    );
 
     if (type === "spot") {
       formData.append("spot_ids", targetSpots.join("|"));
@@ -223,19 +223,21 @@ const NoticeDetail = (props) => {
       });
   };
 
-  const handleEditorChange = (content) => {
-    setContent(content);
+  // 공지 유형 변경
+  const handleTypeChange = (e) => {
+    if (e.target.value === "spot") {
+      setIsSpotNotice(true);
+    } else {
+      setIsSpotNotice(false);
+    }
   };
 
+  // 지점 공지 선택 시 나오는 적용 스팟 변경
   const handleSpotOptionsChange = (targetKeys) => {
     setTargetSpots(targetKeys);
   };
 
-  const handleNoticePreview = (file) => {
-    setNoticePreviewVisible(true);
-    setNoticePreviewImage(file.url || file.thumbUrl);
-  };
-
+  // 이미지 변경
   const handleNoticeImageChange = ({ file }) => {
     if (file.status === "done") {
       // 파일 추가
@@ -278,16 +280,15 @@ const NoticeDetail = (props) => {
     }
   };
 
-  const handleTypeChange = (e) => {
-    if (e.target.value === "normal") {
-      setIsSpotNotice(false);
-    } else if (e.target.value === "spot") {
-      setIsSpotNotice(true);
-    }
+  // 이미지 프리뷰 클릭
+  const handleNoticePreview = (file) => {
+    setNoticePreviewVisible(true);
+    setNoticePreviewImage(file.url || file.thumbUrl);
   };
 
-  const handleReservedDateChange = (date, dateString) => {
-    setReservedDate(dateString);
+  // 에디터 변경
+  const handleEditorChange = (content) => {
+    setContent(content);
   };
 
   return (
@@ -356,6 +357,9 @@ const NoticeDetail = (props) => {
                 <Radio style={radioStyle} value={"spot"}>
                   지점 공지
                 </Radio>
+                <Radio style={radioStyle} value={"home"}>
+                  긴급 공지
+                </Radio>
               </Radio.Group>
             </Form.Item>
             {isSpotNotice && (
@@ -370,13 +374,51 @@ const NoticeDetail = (props) => {
               </Form.Item>
             )}
 
-            <FormItem name="reserved_datetime" label="실행 일시">
-              <DatePicker
-                showTime
-                format="YYYY-MM-DD HH:mm"
-                name="reserved_datetime"
-                onChange={handleReservedDateChange}
-              />
+            <FormItem name="home_dp" label="홈 노출 기간">
+              <Form.Item
+                name="home_dp_start"
+                style={{ display: "inline-block" }}
+                rules={[
+                  {
+                    required: true,
+                    message: "홈 노출 기간 시작일을 선택해주세요",
+                  },
+                ]}
+              >
+                <DatePicker
+                  showTime
+                  format="YYYY-MM-DD HH:mm"
+                  name="home_dp_start"
+                  placeholder="시작일"
+                />
+              </Form.Item>
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "24px",
+                  lineHeight: "32px",
+                  textAlign: "center",
+                }}
+              >
+                -
+              </span>
+              <Form.Item
+                name="home_dp_end"
+                style={{ display: "inline-block" }}
+                rules={[
+                  {
+                    required: true,
+                    message: "홈 노출 기간 종료일을 선택해주세요",
+                  },
+                ]}
+              >
+                <DatePicker
+                  showTime
+                  format="YYYY-MM-DD HH:mm"
+                  name="home_dp_end"
+                  placeholder="종료일"
+                />
+              </Form.Item>
             </FormItem>
           </Card>
           <Card bodyStyle={{ padding: "1rem" }} className="mb-2">
