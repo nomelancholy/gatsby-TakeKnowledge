@@ -10,6 +10,7 @@ import initialize from "@utils/initialize";
 import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
 import { qnaListColumns } from "@utils/columns/qna";
+import moment from "moment";
 
 // 문의 관리
 const Qna = (props) => {
@@ -123,10 +124,6 @@ const Qna = (props) => {
 
   const [searchForm] = useForm();
 
-  // 기간 검색 datepicker 값 저장 state
-  const [regdateStart, setRegdateStart] = useState(undefined);
-  const [regdateEnd, setRegdateEnd] = useState(undefined);
-
   // 파라미터 state - 초기엔 초기값, 이후엔 바로 직전의 params 저장
   const [params, setParams] = useState({
     status: undefined,
@@ -207,7 +204,8 @@ const Qna = (props) => {
   };
 
   const handleSearch = () => {
-    const searchFormValues = searchForm.getFieldsValue();
+    const { qid, classification, category, status, start_date, end_date } =
+      searchForm.getFieldsValue();
 
     setPagination({
       page: 1,
@@ -216,12 +214,12 @@ const Qna = (props) => {
     });
 
     const searchParams = {
-      qid: searchFormValues.qid,
-      classification: searchFormValues.classification,
-      category: searchFormValues.category,
-      status: searchFormValues.status,
-      start_date: regdateStart,
-      end_date: regdateEnd,
+      qid,
+      classification,
+      category,
+      status,
+      start_date: start_date && moment(start_date).format("YYYY-MM-DD"),
+      end_date: end_date && moment(end_date).format("YYYY-MM-DD"),
       page: 1,
       size: 20,
     };
@@ -238,9 +236,6 @@ const Qna = (props) => {
       size: 20,
       pageSize: 20,
     });
-
-    setRegdateStart(undefined);
-    setRegdateEnd(undefined);
 
     // params state reset
     const searchParams = {
@@ -334,16 +329,22 @@ const Qna = (props) => {
             </Select>
           </Form.Item>
           <Form.Item name="regdate" label="생성 일시">
-            <>
-              <DatePicker
-                placeholder="시작"
-                onChange={(date, dateString) => setRegdateStart(dateString)}
-              />
-              <DatePicker
-                placeholder="종료"
-                onChange={(date, dateString) => setRegdateEnd(dateString)}
-              />
-            </>
+            <Form.Item name="start_date" style={{ display: "inline-block" }}>
+              <DatePicker placeholder="시작일자" style={{ width: "100px" }} />
+            </Form.Item>
+            <span
+              style={{
+                display: "inline-block",
+                width: "24px",
+                lineHeight: "32px",
+                textAlign: "center",
+              }}
+            >
+              -
+            </span>
+            <Form.Item name="end_date" style={{ display: "inline-block" }}>
+              <DatePicker placeholder="종료일자" style={{ width: "100px" }} />
+            </Form.Item>
           </Form.Item>
         </Form>
       </Filter>
