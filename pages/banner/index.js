@@ -19,6 +19,7 @@ import initialize from "@utils/initialize";
 import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
 import { bannerListcolumns } from "@utils/columns/banner";
+import moment from "moment";
 
 // 배너 관리
 const Banner = (props) => {
@@ -40,11 +41,6 @@ const Banner = (props) => {
   const [loading, setLoading] = useState(false);
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
-
-  const [bannerStartDateStart, setBannerStartDateStart] = useState(undefined);
-  const [bannerStartDateEnd, setBannerStartDateEnd] = useState(undefined);
-  const [bannerEndDateStart, setBannerEndDateStart] = useState(undefined);
-  const [bannerEndDateEnd, setBannerEndDateEnd] = useState(undefined);
 
   const [searchForm] = useForm();
 
@@ -81,7 +77,7 @@ const Banner = (props) => {
 
         setBannerList(data.items);
 
-        // // 페이지 네이션 정보 세팅
+        // 페이지 네이션 정보 세팅
         const pageInfo = {
           current: data.page,
           total: data.total,
@@ -91,7 +87,7 @@ const Banner = (props) => {
 
         setPagination(pageInfo);
 
-        // // 로딩바 세팅
+        //  로딩바 세팅
         setLoading(false);
 
         setParams(params);
@@ -121,8 +117,17 @@ const Banner = (props) => {
   };
 
   const handleSearch = () => {
-    const { banner_id, title, path, status, permission } =
-      searchForm.getFieldsValue();
+    const {
+      banner_id,
+      title,
+      path,
+      status,
+      permission,
+      start_date_start,
+      start_date_end,
+      end_date_start,
+      end_date_end,
+    } = searchForm.getFieldsValue();
 
     setPagination({
       page: 1,
@@ -136,10 +141,13 @@ const Banner = (props) => {
       path,
       status,
       permission,
-      start_date_start: bannerStartDateStart,
-      start_date_end: bannerStartDateEnd,
-      end_date_start: bannerEndDateStart,
-      end_date_end: bannerEndDateEnd,
+      start_date_start:
+        start_date_start && moment(start_date_start).format("YYYY-MM-DD"),
+      start_date_end:
+        start_date_end && moment(start_date_end).format("YYYY-MM-DD"),
+      end_date_start:
+        end_date_start && moment(end_date_start).format("YYYY-MM-DD"),
+      end_date_end: end_date_end && moment(end_date_end).format("YYYY-MM-DD"),
       page: 1,
       size: 20,
     };
@@ -150,11 +158,6 @@ const Banner = (props) => {
   const handleReset = () => {
     // form Item reset
     searchForm.resetFields();
-
-    setBannerStartDateStart(undefined);
-    setBannerStartDateEnd(undefined);
-    setBannerEndDateStart(undefined);
-    setBannerEndDateEnd(undefined);
 
     setPagination({
       page: 1,
@@ -262,34 +265,49 @@ const Banner = (props) => {
             </Select>
           </Form.Item>
           <Form.Item name="start_date" label="배너 적용 시작 일자">
-            <>
-              <DatePicker
-                placeholder="시작"
-                onChange={(date, dateString) =>
-                  setBannerStartDateStart(dateString)
-                }
-              />
-              <DatePicker
-                placeholder="종료"
-                onChange={(date, dateString) =>
-                  setBannerStartDateEnd(dateString)
-                }
-              />
-            </>
+            <Form.Item
+              name="start_date_start"
+              style={{ display: "inline-block" }}
+            >
+              <DatePicker placeholder="시작일자" style={{ width: "100px" }} />
+            </Form.Item>
+            <span
+              style={{
+                display: "inline-block",
+                width: "24px",
+                lineHeight: "32px",
+                textAlign: "center",
+              }}
+            >
+              -
+            </span>
+            <Form.Item
+              name="start_date_end"
+              style={{ display: "inline-block" }}
+            >
+              <DatePicker placeholder="종료일자" style={{ width: "100px" }} />
+            </Form.Item>
           </Form.Item>
           <Form.Item name="end_date" label="배너 적용 종료 일자">
-            <>
-              <DatePicker
-                placeholder="시작"
-                onChange={(date, dateString) =>
-                  setBannerEndDateStart(dateString)
-                }
-              />
-              <DatePicker
-                placeholder="종료"
-                onChange={(date, dateString) => setBannerEndDateEnd(dateString)}
-              />
-            </>
+            <Form.Item
+              name="end_date_start"
+              style={{ display: "inline-block" }}
+            >
+              <DatePicker placeholder="시작일자" style={{ width: "100px" }} />
+            </Form.Item>
+            <span
+              style={{
+                display: "inline-block",
+                width: "24px",
+                lineHeight: "32px",
+                textAlign: "center",
+              }}
+            >
+              -
+            </span>
+            <Form.Item name="end_date_end" style={{ display: "inline-block" }}>
+              <DatePicker placeholder="종료일자" style={{ width: "100px" }} />
+            </Form.Item>
           </Form.Item>
         </Form>
       </Filter>
