@@ -251,7 +251,6 @@ const Rateplan = (props) => {
             <Select style={{ width: 160 }} onChange={handleProductTypeChange}>
               <Select.Option value="membership">멤버십</Select.Option>
               <Select.Option value="service">부가서비스</Select.Option>
-              <Select.Option value="voucher">이용권</Select.Option>
             </Select>
           </Form.Item>
           <Form.Item name="product_id" label="상품명">

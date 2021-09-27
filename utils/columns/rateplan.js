@@ -16,8 +16,6 @@ export const rateplanListColumns = [
         renderText = "멤버십";
       } else if (text.type === "service") {
         renderText = "부가서비스";
-      } else if (text.type === "voucher") {
-        renderText = "이용권";
       }
 
       return renderText;
@@ -78,3 +76,69 @@ export const rateplanListColumns = [
     dataIndex: "regdate",
   },
 ];
+
+// 요금제 상세 - 지점별 상품 요금 테이블 컬럼
+// 구현 단계에서 state 활용 필요해 RateplanDetail.js 내부로 이동
+// export const rateBySpotListColumns = [
+//   {
+//     title: "",
+//     dataIndex: "spot_name",
+//   },
+//   {
+//     title: "상품 요금(A)",
+//     dataIndex: "price",
+//     editable: true,
+//     onCell: () => ({
+//       editing: true,
+//     }),
+
+//     // render: (text, record) => {
+//     //   let renderText = "";
+
+//     //   if (text.type === "membership") {
+//     //     renderText = "멤버십";
+//     //   } else if (text.type === "service") {
+//     //     renderText = "부가서비스";
+//     //   } else if (text.type === "voucher") {
+//     //     renderText = "이용권";
+//     //   }
+
+//     //   return renderText;
+//     // },
+//   },
+//   {
+//     title: "할인액(B)",
+//     dataIndex: "dc_price",
+//     editable: true,
+//     // render: (text, record) => {
+//     //   return text.name;
+//     // },
+//     onCell: () => ({
+//       editing: false,
+//     }),
+//   },
+//   {
+//     title: "합계 금액 (A-B)",
+//     dataIndex: "total",
+//     render: (text, record) => {
+//       return <a href={`/rateplan/${record.rateplan_id}`}>{text}</a>;
+//     },
+//   },
+//   {
+//     title: "",
+//     dataIndex: "operation",
+//     render: (text, record) => {
+//       return (
+//         <Typography.Link
+//           onClick={() => {
+//             console.log(`record`, record);
+//           }}
+//         >
+//           수정
+//         </Typography.Link>
+//       );
+//       // const editable =
+//       // return <a href={`/rateplan/${record.rateplan_id}`}>{text}</a>;
+//     },
+//   },
+// ];
