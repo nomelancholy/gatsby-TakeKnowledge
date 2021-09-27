@@ -19,6 +19,7 @@ import initialize from "@utils/initialize";
 import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
 import { eventListcolumns } from "@utils/columns/event";
+import moment from "moment";
 
 // 이벤트 관리
 const Event = (props) => {
@@ -40,11 +41,6 @@ const Event = (props) => {
   const [loading, setLoading] = useState(false);
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
-
-  const [eventStartDateStart, setEventStartDateStart] = useState(undefined);
-  const [eventStartDateEnd, setEventStartDateEnd] = useState(undefined);
-  const [eventEndDateStart, setEventEndDateStart] = useState(undefined);
-  const [eventEndDateEnd, setEventEndDateEnd] = useState(undefined);
 
   const [searchForm] = useForm();
 
@@ -119,7 +115,15 @@ const Event = (props) => {
   };
 
   const handleSearch = () => {
-    const searchFormValues = searchForm.getFieldsValue();
+    const {
+      event_id,
+      title,
+      status,
+      start_date_start,
+      start_date_end,
+      end_date_start,
+      end_date_end,
+    } = searchForm.getFieldsValue();
 
     setPagination({
       page: 1,
@@ -128,13 +132,16 @@ const Event = (props) => {
     });
 
     const searchParams = {
-      event_id: searchFormValues.event_id,
-      title: searchFormValues.title,
-      start_date_start: eventStartDateStart,
-      start_date_end: eventStartDateEnd,
-      end_date_start: eventEndDateStart,
-      end_date_end: eventEndDateEnd,
-      status: searchFormValues.status,
+      event_id,
+      title,
+      status,
+      start_date_start:
+        start_date_start && moment(start_date_start).format("YYYY-MM-DD"),
+      start_date_end:
+        start_date_end && moment(start_date_end).format("YYYY-MM-DD"),
+      end_date_start:
+        end_date_start && moment(end_date_start).format("YYYY-MM-DD"),
+      end_date_end: end_date_end && moment(end_date_end).format("YYYY-MM-DD"),
       page: 1,
       size: 20,
     };
@@ -145,11 +152,6 @@ const Event = (props) => {
   const handleReset = () => {
     // form Item reset
     searchForm.resetFields();
-
-    setEventStartDateStart(undefined);
-    setEventStartDateEnd(undefined);
-    setEventEndDateStart(undefined);
-    setEventEndDateEnd(undefined);
 
     setPagination({
       page: 1,
@@ -227,7 +229,7 @@ const Event = (props) => {
           }}
         >
           <Form.Item name="event_id" label="이벤트 ID">
-            <InputNumber min="1" />
+            <InputNumber min={1} />
           </Form.Item>
           <Form.Item name="title" label="이벤트 제목">
             <Input />
@@ -240,34 +242,49 @@ const Event = (props) => {
             </Select>
           </Form.Item>
           <Form.Item name="start_date" label="이벤트 시작 일자">
-            <>
-              <DatePicker
-                placeholder="시작"
-                onChange={(date, dateString) =>
-                  setEventStartDateStart(dateString)
-                }
-              />
-              <DatePicker
-                placeholder="종료"
-                onChange={(date, dateString) =>
-                  setEventStartDateEnd(dateString)
-                }
-              />
-            </>
+            <Form.Item
+              name="start_date_start"
+              style={{ display: "inline-block" }}
+            >
+              <DatePicker placeholder="시작일자" style={{ width: "100px" }} />
+            </Form.Item>
+            <span
+              style={{
+                display: "inline-block",
+                width: "24px",
+                lineHeight: "32px",
+                textAlign: "center",
+              }}
+            >
+              -
+            </span>
+            <Form.Item
+              name="start_date_end"
+              style={{ display: "inline-block" }}
+            >
+              <DatePicker placeholder="종료일자" style={{ width: "100px" }} />
+            </Form.Item>
           </Form.Item>
           <Form.Item name="end_date" label="이벤트 종료 일자">
-            <>
-              <DatePicker
-                placeholder="시작"
-                onChange={(date, dateString) =>
-                  setEventEndDateStart(dateString)
-                }
-              />
-              <DatePicker
-                placeholder="종료"
-                onChange={(date, dateString) => setEventEndDateEnd(dateString)}
-              />
-            </>
+            <Form.Item
+              name="end_date_start"
+              style={{ display: "inline-block" }}
+            >
+              <DatePicker placeholder="시작일자" style={{ width: "100px" }} />
+            </Form.Item>
+            <span
+              style={{
+                display: "inline-block",
+                width: "24px",
+                lineHeight: "32px",
+                textAlign: "center",
+              }}
+            >
+              -
+            </span>
+            <Form.Item name="end_date_end" style={{ display: "inline-block" }}>
+              <DatePicker placeholder="종료일자" style={{ width: "100px" }} />
+            </Form.Item>
           </Form.Item>
         </Form>
       </Filter>
