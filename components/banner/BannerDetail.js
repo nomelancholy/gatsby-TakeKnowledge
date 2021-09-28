@@ -30,6 +30,7 @@ const BannerDetail = (props) => {
 
   const router = useRouter();
 
+  // 배너 등록 후 바로 각각의 띠 배너 수정을 위해 생성된 배너 아이디 저장 state
   const [generatedBannerId, setGeneratedBannerId] = useState(undefined);
 
   // new / detial 구분 state
@@ -38,19 +39,10 @@ const BannerDetail = (props) => {
   // 롤링 배너 구분 state
   const [hasSwiperBanner, setHasSwiperBanner] = useState(true);
 
+  // 배너 정보 저장 state
   const [bannerInfo, setBannerInfo] = useState(undefined);
-
+  // modal 표시 구분 state
   const [okModalVisible, setOkModalVisible] = useState(false);
-
-  // 배너 시작, 종료일 state
-  const [startDate, setStartDate] = useState(
-    moment(new Date()).format("YYYY-MM-DD")
-  );
-  const [endDate, setEndDate] = useState(
-    moment(
-      new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
-    ).format("YYYY-MM-DD")
-  );
 
   // 배너 Form
   const [bannerForm] = Form.useForm();
@@ -143,6 +135,7 @@ const BannerDetail = (props) => {
     if (bannerInfo) {
       console.log(`bannerInfo`, bannerInfo);
 
+      // 배너 타깃 |을 기준으로 split
       const permissionArray = bannerInfo.permission.split("|");
       // 이벤트 상태
       bannerForm.setFieldsValue({
@@ -152,10 +145,6 @@ const BannerDetail = (props) => {
         start_date: moment(bannerInfo.start_date),
         end_date: moment(bannerInfo.end_date),
       });
-
-      // 전송용 state에도 세팅
-      setStartDate(bannerInfo.start_date.replace(/\./gi, "-"));
-      setEndDate(bannerInfo.end_date.replace(/\./gi, "-"));
 
       // 배너 위치가 홈일경우
       if (bannerInfo.path === "home") {
@@ -227,17 +216,16 @@ const BannerDetail = (props) => {
 
   // 배너 저장 버튼 클릭
   const handleBannerRegisterSubmit = () => {
-    const { status, path, permission } = bannerForm.getFieldValue();
+    const { status, path, permission, start_date, end_date } =
+      bannerForm.getFieldValue();
 
     let data = {
       path,
       permission: permission.join("|"),
       status,
-      start_date: startDate,
-      end_date: endDate,
+      start_date: moment(start_date).format("YYYY-MM-DD"),
+      end_date: moment(end_date).format("YYYY-MM-DD"),
     };
-
-    console.log(`data`, data);
 
     let url = "";
 
@@ -273,11 +261,10 @@ const BannerDetail = (props) => {
 
   // 배너 아이템 (상단, 하단, 팝업, 롤링 배너) 등록
   const handleBannerItemSubmit = (type) => {
+    // 배너 아이디나 생성 배너 아이디가 없으면 return false
     if (!(bannerId || generatedBannerId)) {
       return false;
     }
-
-    console.log(`type`, type);
 
     let value = "";
 
@@ -298,24 +285,25 @@ const BannerDetail = (props) => {
         break;
     }
 
-    console.log(`value`, value);
-
     const formData = new FormData();
 
     formData.append("banner_id", bannerId ? bannerId : generatedBannerId);
     formData.append("banner_type", type);
 
-    // 배너 아이템 수정일 경우
-    value.banner_item_id &&
-      formData.append("banner_item_id", value.banner_item_id);
-
     formData.append("title", value.title);
     formData.append("link", value.link);
     formData.append("target", value.target ? "_blank" : "_self");
 
+    // 배너 아이템 수정일 경우
+    if (value.banner_item_id) {
+      formData.append("banner_item_id", value.banner_item_id);
+    }
+
     if (value.images && value.images.length > 0) {
       value.images.map((image) => {
+        // 화면에 보이는 이미지들 중
         if (image.uid.startsWith("rc")) {
+          // 서버에 등록되어 있지 않은 이미지들만 formData에 추가
           formData.append("images", image.originFileObj);
         }
       });
@@ -325,16 +313,6 @@ const BannerDetail = (props) => {
     if (delImages.length > 0) {
       formData.append("del_images", JSON.stringify(delImages));
     }
-
-    // formData console
-
-    // for (let key of formData.keys()) {
-    //   console.log(key);
-    // }
-
-    // for (let value of formData.values()) {
-    //   console.log(value);
-    // }
 
     const config = {
       method: "post",
@@ -356,22 +334,18 @@ const BannerDetail = (props) => {
       });
   };
 
-  const handleStartDateChange = (date, dateString) => {
-    setStartDate(dateString);
-  };
-
-  const handleEndDateChange = (date, dateString) => {
-    setEndDate(dateString);
-  };
-
+  // 배너 위치 변경시
   const handlePathChange = (value) => {
     if (value === "home") {
+      // 롤릴 배너 활성
       setHasSwiperBanner(true);
     } else {
+      // 롤링 배너 비활성
       setHasSwiperBanner(false);
     }
   };
 
+  // ↓ 이미지 미리 보기 + 변경 관련 함수
   const handleTopBannerPreview = (file) => {
     setTopBannerPreviewVisible(true);
     setTopBannerPreviewImage(file.url || file.thumbUrl);
@@ -544,17 +518,14 @@ const BannerDetail = (props) => {
               label="시작일"
               rules={[{ required: true, message: "시작일을 선택해주세요" }]}
             >
-              <DatePicker
-                placeholder="시작일"
-                onChange={handleStartDateChange}
-              />
+              <DatePicker placeholder="시작일" />
             </Form.Item>
             <Form.Item
               name="end_date"
               label="종료일"
               rules={[{ required: true, message: "종료일을 선택해주세요" }]}
             >
-              <DatePicker placeholder="종료일" onChange={handleEndDateChange} />
+              <DatePicker placeholder="종료일" />
             </Form.Item>
             <Button type="primary" htmlType="submit">
               저장
