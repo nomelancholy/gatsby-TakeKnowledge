@@ -29,19 +29,11 @@ const EventDetail = (props) => {
   // new / detial 구분 state
   const [registerMode, setRegisterMode] = useState(true);
 
+  // 이벤트 상세 정보 저장 state
   const [eventInfo, setEventInfo] = useState(undefined);
 
+  // modal 표시 구분 state
   const [okModalVisible, setOkModalVisible] = useState(false);
-
-  // 이벤트 시작, 종료일 state
-  const [startDate, setStartDate] = useState(
-    moment(new Date()).format("YYYY-MM-DD")
-  );
-  const [endDate, setEndDate] = useState(
-    moment(
-      new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
-    ).format("YYYY-MM-DD")
-  );
 
   // 적용 쿠폰 옵션 리스트 state
   const [couponList, setCouponList] = useState(undefined);
@@ -50,44 +42,6 @@ const EventDetail = (props) => {
 
   // 이벤트 Form
   const [eventForm] = Form.useForm();
-
-  // option coupon list 조회
-  const getCouponList = () => {
-    axios
-      .post(
-        `${process.env.BACKEND_API}/admin/user/coupon/list`,
-        {
-          start_pub_date_end: moment().format("YYYY-MM-DD"),
-          start_useable_date_end: moment().format("YYYY-MM-DD"),
-        },
-        {
-          headers: {
-            "Content-Type": "application/json;charset=UTF-8",
-            "Access-Control-Allow-Origin": "*",
-            Authorization: decodeURIComponent(token),
-          },
-        }
-      )
-      .then((response) => {
-        const data = response.data;
-
-        // auto complete option 형태로 가공
-        const optionList = data.items.map((coupon) => {
-          const optionObj = {
-            value: coupon.name,
-            label: coupon.name,
-            id: coupon.coupon_id,
-          };
-
-          return optionObj;
-        });
-
-        setCouponList(optionList);
-      })
-      .catch((error) => {
-        console.log(`error`, error);
-      });
-  };
 
   useEffect(() => {
     // 옵션 쿠폰 리스트 조회
@@ -139,24 +93,59 @@ const EventDetail = (props) => {
           coupon: eventInfo.coupon.name,
         });
       }
-
-      // 전송용 state에도 세팅
-      setStartDate(eventInfo.start_date.replace(/\./gi, "-"));
-      setEndDate(eventInfo.end_date.replace(/\./gi, "-"));
     }
   }, [eventInfo]);
 
+  // option coupon list 조회
+  const getCouponList = () => {
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/user/coupon/list`,
+        {
+          start_pub_date_end: moment().format("YYYY-MM-DD"),
+          start_useable_date_end: moment().format("YYYY-MM-DD"),
+        },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        const data = response.data;
+
+        // auto complete option 형태로 가공
+        const optionList = data.items.map((coupon) => {
+          const optionObj = {
+            value: coupon.name,
+            label: coupon.name,
+            id: coupon.coupon_id,
+          };
+
+          return optionObj;
+        });
+
+        setCouponList(optionList);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
+
   // 저장 버튼 클릭
   const handleEventRegisterSubmit = () => {
-    const { title, path, status, coupon } = eventForm.getFieldValue();
+    const { title, path, status, coupon, start_date, end_date } =
+      eventForm.getFieldValue();
 
     let data = {
       title,
       path,
       status,
       coupon_id: applyCoupon,
-      start_date: startDate,
-      end_date: endDate,
+      start_date: moment(start_date).format("YYYY-MM-DD"),
+      end_date: moment(end_date).format("YYYY-MM-DD"),
     };
 
     if (coupon) {
@@ -192,20 +181,6 @@ const EventDetail = (props) => {
       .catch(function (error) {
         console.log(error);
       });
-  };
-
-  // 이벤트 시작, 종료일 변경 처리
-  const handleStartDateChange = (date, dateString) => {
-    setStartDate(dateString);
-  };
-
-  const handleEndDateChange = (date, dateString) => {
-    setEndDate(dateString);
-  };
-
-  // 적용 쿠폰 검색 - 선택
-  const handleSelect = (data, option) => {
-    setApplyCoupon(option.id);
   };
 
   return (
@@ -267,7 +242,9 @@ const EventDetail = (props) => {
                 filterOption={(inputValue, option) =>
                   option.value.includes(inputValue)
                 }
-                onSelect={handleSelect}
+                onSelect={(data, option) => {
+                  setApplyCoupon(option.id);
+                }}
               />
             </Form.Item>
             <Form.Item
@@ -277,10 +254,7 @@ const EventDetail = (props) => {
                 { required: true, message: "이벤트 시작일을 선택해주세요" },
               ]}
             >
-              <DatePicker
-                placeholder="이벤트 시작일"
-                onChange={handleStartDateChange}
-              />
+              <DatePicker placeholder="이벤트 시작일" />
             </Form.Item>
             <Form.Item
               name="end_date"
@@ -289,10 +263,7 @@ const EventDetail = (props) => {
                 { required: true, message: "이벤트 종료일을 선택해주세요" },
               ]}
             >
-              <DatePicker
-                placeholder="이벤트 종료일"
-                onChange={handleEndDateChange}
-              />
+              <DatePicker placeholder="이벤트 종료일" />
             </Form.Item>
           </Card>
 
