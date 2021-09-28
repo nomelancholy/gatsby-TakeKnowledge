@@ -45,11 +45,6 @@ const QnaDetail = (props) => {
   // 답변 리스트
   const [replyList, setReplyList] = useState(undefined);
 
-  // 상태가 대기, 삭제일 경우 상태 변경 불가
-  // 상태가 진행중, 해결일 경우 상태 변경 가능
-  // flag state
-  const [isStatusCanEdit, setIsStatusCanEdit] = useState(false);
-
   // 생성한 답장 id 저장용 state
   const [newCount, setNewCount] = useState(1);
   // Modal 문구 (수정 or 등록) 변경을 위한 state
@@ -90,15 +85,7 @@ const QnaDetail = (props) => {
   useEffect(() => {
     // 문의 상세 정보 세팅되면
     if (qnaDetail) {
-      console.log(`qnaDetail`, qnaDetail);
       // 처리 상태
-
-      if (qnaDetail.status === "inprogress" || qnaDetail.status === "done") {
-        setIsStatusCanEdit(true);
-      } else {
-        setIsStatusCanEdit(false);
-      }
-
       statusForm.setFieldsValue({
         status: qnaDetail.status,
       });
@@ -134,19 +121,24 @@ const QnaDetail = (props) => {
 
       // 답장
       if (qnaDetail.reply) {
+        // 있을 경우 바인딩
         setReplyList(qnaDetail.reply);
       } else {
+        // 없을 경우 하나만 생성
         setReplyList([{ qid: `new${newCount}` }]);
+        // 추가될 경우를 대비해 newCount 1증가
         setNewCount(newCount + 1);
       }
     }
   }, [qnaDetail]);
 
+  // 답장 추가
   const handleAddReply = () => {
     setReplyList([...replyList, { qid: `new${newCount}` }]);
     setNewCount(newCount + 1);
   };
 
+  // 답장 (replyCard) 삭제
   const handleReplyDelete = (qid) => {
     const newReplyList = replyList.filter((reply) => reply.qid !== qid);
     setReplyList(newReplyList);
@@ -178,7 +170,7 @@ const QnaDetail = (props) => {
     }
   };
 
-  // 답장 저장 버튼 클릭
+  // 답장 작성 후 (replyCard) 저장 or 수정 버튼 클릭
   const handleReplyRegisterSubmit = ({ contents, file, qid, type }) => {
     let url = "";
 
@@ -224,6 +216,7 @@ const QnaDetail = (props) => {
       });
   };
 
+  // 처리 상태 저장
   const handleStatusSave = () => {
     const formData = new FormData();
 
@@ -253,6 +246,7 @@ const QnaDetail = (props) => {
       });
   };
 
+  // 유저가 올린 문의 이미지 미리보기
   const handleQnaPreview = (file) => {
     setQnaPreviewVisible(true);
     setQnaPreviewImage(file.url || file.thumbUrl);

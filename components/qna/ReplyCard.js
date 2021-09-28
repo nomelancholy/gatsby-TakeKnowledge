@@ -18,7 +18,7 @@ const ReplyCard = (props) => {
   const [replyForm] = Form.useForm();
 
   useEffect(() => {
-    // 서버에 답장이 등록되어 있는 경우
+    // 서버에 등록된 답장이 있는 경우
     if (typeof reply.qid === "number") {
       setRegisterMode(false);
 
@@ -31,7 +31,7 @@ const ReplyCard = (props) => {
         reply_regdate: reply.regdate,
       });
 
-      // file_path, uid
+      // 등록된 답장에 이미지가 있는 경우
       if (reply.file_path) {
         const imageObject = {
           thumbUrl: reply.file_path,
@@ -43,6 +43,7 @@ const ReplyCard = (props) => {
     }
   }, []);
 
+  // 답장 저장 버튼 클릭시
   const handleSubmit = () => {
     const { contents, images } = replyForm.getFieldValue();
 
@@ -64,6 +65,7 @@ const ReplyCard = (props) => {
     handleReplyRegisterSubmit(replyObject);
   };
 
+  // 답장 삭제 버튼 클릭시
   const handleRemove = () => {
     handleReplyDelete(reply.qid);
   };
@@ -112,6 +114,7 @@ const ReplyCard = (props) => {
     }
   };
 
+  // 답장에 등록된 이미지 미리보기
   const handleReplyPreview = (file) => {
     setReplyPreviewVisible(true);
     setReplyPreviewImage(file.url || file.thumbUrl);
