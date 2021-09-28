@@ -46,8 +46,6 @@ const NoticeDetail = (props) => {
   // 에디터 컨텐츠 state
   const [content, setContent] = useState("");
 
-  const [okModalVisible, setOkModalVisible] = useState(false);
-
   // 스팟 선택 option/tagets state
   const [spotOptions, setSpotOptions] = useState([]);
   const [targetSpots, setTargetSpots] = useState([]);
@@ -57,15 +55,18 @@ const NoticeDetail = (props) => {
   const [noticePreviewVisible, setNoticePreviewVisible] = useState(false);
   const [noticePreviewImage, setNoticePreviewImage] = useState("");
 
+  // modal 표시 관련 state
+  const [okModalVisible, setOkModalVisible] = useState(false);
+
   // 공지 Form
   const [noticeForm] = Form.useForm();
 
-  // 스팟 선택 옵션 스팟 호출
+  // 스팟 선택 옵션 스팟 호출 및 세팅
   const getSpotOptions = () => {
     axios
       .post(
         `${process.env.BACKEND_API}/admin/spot/list`,
-        {},
+        { page: 1, size: 100 },
         {
           headers: {
             "Content-Type": "application/json;charset=UTF-8",
@@ -166,7 +167,7 @@ const NoticeDetail = (props) => {
 
   // 저장 버튼 클릭
   const handleNoticeRegisterSubmit = () => {
-    const { type, sticky, status, title, images, home_dp_start, home_dp_end } =
+    const { type, sticky, status, title, home_dp_start, home_dp_end } =
       noticeForm.getFieldValue();
 
     const formData = new FormData();
@@ -200,7 +201,6 @@ const NoticeDetail = (props) => {
 
     if (noticeImage && noticeImage.length > 0 && noticeImage[0].originFileObj) {
       formData.append("file", noticeImage[0].originFileObj);
-      // formData.append("del_file", false);
     }
 
     const config = {
