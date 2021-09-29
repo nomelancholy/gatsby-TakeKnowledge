@@ -12,14 +12,18 @@ const Space = (props) => {
   const { user, isLoggedIn, token } = props.auth;
   const { type, spotId, desc, images } = props;
 
+  // 좌측 상단 타이틀
   const [title, setTitle] = useState("");
+  // 공간 리스트 state
   const [spaceList, setSpaceList] = useState([]);
 
+  // 이미지 파일 관련 state
   const [fileList, setFileList] = useState([]);
   const [removedFileList, setRemovedFileList] = useState([]);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
 
+  // modal 표시 구분 state
   const [okModalVisible, setOkModalVisible] = useState(false);
   const [form] = Form.useForm();
 
@@ -35,7 +39,6 @@ const Space = (props) => {
         case "coworking":
           setTitle("코워킹룸");
           break;
-
         case "locker":
           setTitle("락커");
           break;
@@ -44,8 +47,8 @@ const Space = (props) => {
       }
     }
 
-    // 내려줄 데이터 조회
     if (spotId) {
+      // spotId와 type을 파라미터로로 태그로 표현할 space list 데이터 조회
       const config = {
         method: "post",
         url: `${process.env.BACKEND_API}/spot/space/list`,
@@ -74,6 +77,7 @@ const Space = (props) => {
       });
     }
 
+    // 이미지 세팅
     if (images) {
       const optionImages = [];
 
@@ -93,6 +97,7 @@ const Space = (props) => {
     }
   }, []);
 
+  // 저장 버튼 클릭시
   const handleSpotSpaceInfoUpdate = () => {
     const formData = new FormData();
 
@@ -136,6 +141,7 @@ const Space = (props) => {
       });
   };
 
+  // 파일 변경시
   const handleFileChange = ({ file }) => {
     if (file.status === "done") {
       // 파일 추가
@@ -203,19 +209,22 @@ const Space = (props) => {
           <Form.Item name={`${type}_desc`} label="설명">
             <Input.TextArea rows={3}></Input.TextArea>
           </Form.Item>
-          <Form.Item name={`${type}_list`} label={`${title} 리스트`}>
-            <>
-              {spaceList && spaceList.length !== 0 ? (
-                spaceList.map((spaceObj) => {
-                  return (
-                    <Tag key={spaceObj.space_id}>{spaceObj.space.name}</Tag>
-                  );
-                })
-              ) : (
-                <>-</>
-              )}
-            </>
-          </Form.Item>
+          {type !== "lounge" && (
+            <Form.Item name={`${type}_list`} label={`${title} 리스트`}>
+              <>
+                {spaceList && spaceList.length !== 0 ? (
+                  spaceList.map((spaceObj) => {
+                    return (
+                      <Tag key={spaceObj.space_id}>{spaceObj.space.name}</Tag>
+                    );
+                  })
+                ) : (
+                  <>-</>
+                )}
+              </>
+            </Form.Item>
+          )}
+
           <Button
             type="primary"
             onClick={() => {

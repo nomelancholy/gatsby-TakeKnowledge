@@ -9,11 +9,6 @@ export const spotListcolumns = [
     title: "스팟명",
     dataIndex: "name",
     render: (text, record) => {
-      // if (record.status === "trash") {
-      //   return text;
-      // } else {
-      //   return <a href={`/spot/${record.spot_id}`}>{text}</a>;
-      // }
       return <a href={`/spot/${record.spot_id}`}>{text}</a>;
     },
   },

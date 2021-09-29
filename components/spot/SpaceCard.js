@@ -27,8 +27,9 @@ const SpaceCard = (props) => {
   // 등록 수정 flag state
   const [isNew, setIsNew] = useState(true);
 
-  // options state
+  // 시설 정보 체크박스 옵션 세팅용 state
   const [settingSpaceOptions, setSettingSpaceOptions] = useState([]);
+  // 시설 정보 (서버 전송용) state
   const [validSpaceOptions, setValidSpaceOptions] = useState([]);
 
   // 파일 관련 state
@@ -51,7 +52,7 @@ const SpaceCard = (props) => {
     lineHeight: "30px",
   };
 
-  // 시설정보 options
+  // 공간 type별 시설정보 options
   const lounge_options = [
     { label: "컴포트 시트", value: "comport" },
     { label: "오픈 시트", value: "open" },
@@ -65,6 +66,7 @@ const SpaceCard = (props) => {
   ];
   const cowork_options = [{ label: "멀티탭", value: "multitab" }];
 
+  // 공간 type별 시설 정보 배열
   const lounge_option_array = ["comport", "open", "focus"];
   const meeting_option_array = ["board", "tv", "hdmi", "multitab"];
   const cowork_option_array = ["multitab"];
@@ -108,11 +110,12 @@ const SpaceCard = (props) => {
 
       form.setFieldsValue({
         // images: spaceInfo.images,
-        [`${spaceInfo.space_id}_property`]: spaceInfo.space.property,
-        [`${spaceInfo.space_id}_name`]: spaceInfo.space.name,
-        [`${spaceInfo.space_id}_seat_capacity`]: spaceInfo.space.seat_capacity,
-        [`${spaceInfo.space_id}_max_seat_capacity`]: spaceInfo.space.seat_limit,
-        [`${spaceInfo.space_id}_floor`]: spaceInfo.space.floor,
+        property: spaceInfo.space.property,
+        name: spaceInfo.space.name,
+        seat_capacity: spaceInfo.space.seat_capacity,
+        max_seat_capacity: spaceInfo.space.seat_limit,
+        guest_limit: spaceInfo.space.guest_limit,
+        floor: spaceInfo.space.floor,
       });
 
       let checkOptions = [];
@@ -125,7 +128,7 @@ const SpaceCard = (props) => {
         });
 
         form.setFieldsValue({
-          [`${spaceInfo.space_id}_options`]: checkOptions,
+          options: checkOptions,
         });
       }
 
@@ -135,6 +138,8 @@ const SpaceCard = (props) => {
 
   const handleSpaceChangeSumbit = (values) => {
     let data = new FormData();
+
+    console.log(`values`, values);
 
     let url = "";
 
@@ -146,21 +151,24 @@ const SpaceCard = (props) => {
       url = `${process.env.BACKEND_API}/admin/spot/space/update`;
     }
 
-    data.append("property", values[`${spaceInfo.space_id}_property`]);
+    data.append("property", values.property);
+
+    if (values.guest_limit) {
+      data.append("guest_limit", values.guest_limit);
+    }
 
     // 락커는 아래 정보들이 들어가지 않음
     if (type !== "locker") {
-      data.append("name", values[`${spaceInfo.space_id}_name`]);
+      data.append("name", values.name);
       data.append("type", type);
 
-      data.append(
-        "seat_capacity",
-        values[`${spaceInfo.space_id}_seat_capacity`]
-      );
-      data.append("floor", values[`${spaceInfo.space_id}_floor`]);
+      data.append("seat_capacity", values.seat_capacity);
 
-      const validOptionInfos = values[`${spaceInfo.space_id}_options`];
+      data.append("floor", values.floor);
 
+      const validOptionInfos = values.options;
+
+      // 시설 정보 입력 데이터 서버에 정의되어 있는 형태로 가공
       let options = {};
       if (validOptionInfos) {
         validSpaceOptions.map((spaceOption) => {
@@ -175,19 +183,19 @@ const SpaceCard = (props) => {
       data.append("options", JSON.stringify(options));
     }
 
-    if (removedFileList.length > 0) {
-      data.append("del_images", JSON.stringify(removedFileList));
-    }
-
     // 파일 처리
-
-    if (values[`${spaceInfo.space_id}_images`]) {
-      values[`${spaceInfo.space_id}_images`].map((image, index) => {
+    if (values.images) {
+      values.images.map((image, index) => {
         // image.uid가 rc로 시작하면 새로 올린 이미지
         if (image.uid.startsWith("rc")) {
           data.append(`image${index + 1}`, image.originFileObj);
         }
       });
+    }
+
+    // 삭제 파일 처리
+    if (removedFileList.length > 0) {
+      data.append("del_images", JSON.stringify(removedFileList));
     }
 
     const config = {
@@ -210,6 +218,7 @@ const SpaceCard = (props) => {
       });
   };
 
+  // 공간 삭제
   const handleSpaceRemove = () => {
     if (spaceInfo.space) {
       const config = {
@@ -234,12 +243,13 @@ const SpaceCard = (props) => {
     handleSpaceDeleted(spaceInfo.space_id);
   };
 
+  // 이미지 파일 변경
   const handleFileChange = ({ file }) => {
     if (file.status === "done") {
       // 파일 추가
       setFileList([...fileList, file]);
       form.setFieldsValue({
-        [`${spaceInfo.space_id}_images`]: [...fileList, file],
+        images: [...fileList, file],
       });
     } else if (file.status === "removed") {
       // 파일 삭제
@@ -249,7 +259,7 @@ const SpaceCard = (props) => {
         (fileObj) => fileObj.uid !== file.uid
       );
       setFileList(newFileList);
-      form.setFieldsValue({ [`${spaceInfo.space_id}_images`]: newFileList });
+      form.setFieldsValue({ images: newFileList });
 
       if (!file.uid.startsWith("rc")) {
         // 서버에서 받아온 파일인 경우
@@ -265,14 +275,11 @@ const SpaceCard = (props) => {
     setPreviewImage(file.url || file.thumbUrl);
   };
 
+  // 인원 입력시 최대 인원 세팅
   const handleSeatCapacityChange = (seat_capacity) => {
     form.setFieldsValue({
       max_seat_capacity: Math.floor(seat_capacity * 1.5),
     });
-  };
-
-  const handlePropertyChange = (e) => {
-    setProperty(e.target.value);
   };
 
   return (
@@ -298,7 +305,7 @@ const SpaceCard = (props) => {
           onFinish={handleSpaceChangeSumbit}
         >
           <Form.Item
-            name={`${spaceInfo.space_id}_images`}
+            name={`images`}
             label={`${title} 이미지 (최대 5장까지 첨부 가능)`}
           >
             <>
@@ -328,7 +335,7 @@ const SpaceCard = (props) => {
               </Modal>
             </>
           </Form.Item>
-          <Form.Item name={`${spaceInfo.space_id}_options`} label={"시설 정보"}>
+          <Form.Item name={`options`} label={"시설 정보"}>
             {type === "locker" ? (
               <>-</>
             ) : (
@@ -336,26 +343,31 @@ const SpaceCard = (props) => {
             )}
           </Form.Item>
           <Form.Item
-            name={`${spaceInfo.space_id}_property`}
+            name={`property`}
             label="파이브스팟 전용"
             rules={[{ required: true, message: "전용 여부 선택은 필수입니다" }]}
           >
-            <Radio.Group onChange={handlePropertyChange} value={property}>
+            <Radio.Group
+              onChange={(e) => {
+                setProperty(e.target.value);
+              }}
+              value={property}
+            >
               <Radio style={radioStyle} value={"fivespot"}>
                 전용
               </Radio>
               <Radio style={radioStyle} value={"fastfive"}>
                 공용
               </Radio>
-              {/* <Radio style={radioStyle} value={"none"}>
+              <Radio style={radioStyle} value={"none"}>
                 설정 없음
-              </Radio> */}
+              </Radio>
             </Radio.Group>
           </Form.Item>
           {type !== "locker" && (
             <>
               <Form.Item
-                name={`${spaceInfo.space_id}_name`}
+                name={`name`}
                 label={`${title} 이름`}
                 rules={[
                   {
@@ -367,7 +379,7 @@ const SpaceCard = (props) => {
                 <Input />
               </Form.Item>
               <Form.Item
-                name={`${spaceInfo.space_id}_seat_capacity`}
+                name={`seat_capacity`}
                 label="인원"
                 rules={[
                   { required: true, message: "인원은 필수 입력 사항입니다" },
@@ -380,16 +392,18 @@ const SpaceCard = (props) => {
                 <InputNumber min={0} onChange={handleSeatCapacityChange} />
               </Form.Item>
               {type === "lounge" && (
-                <Form.Item
-                  name={`${spaceInfo.space_id}_max_seat_capacity`}
-                  label="최대 인원"
-                >
-                  <InputNumber disabled={true} />
-                </Form.Item>
+                <>
+                  <Form.Item name={`max_seat_capacity`} label="최대 인원">
+                    <InputNumber disabled={true} />
+                  </Form.Item>
+                  <Form.Item name={`guest_limit`} label="게스트 인원">
+                    <InputNumber />
+                  </Form.Item>
+                </>
               )}
 
               <Form.Item
-                name={`${spaceInfo.space_id}_floor`}
+                name={`floor`}
                 label="층 정보"
                 rules={[
                   { required: true, message: "층 정보는 필수 입력 사항입니다" },

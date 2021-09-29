@@ -37,14 +37,16 @@ const SpotDetail = (props) => {
 
   // spot 관련 state
   const [spotInfo, setSpotInfo] = useState(undefined);
-  // file 관련 state
 
+  // file 관련 state
   const [fileList, setFileList] = useState([]);
   const [removedFileList, setRemovedFileList] = useState([]);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
 
+  // modal 표시 구분 state
   const [okModalVisible, setOkModalVisible] = useState(false);
+
   const [form] = Form.useForm();
 
   // 시설정보 checkbox 옵션
@@ -93,9 +95,10 @@ const SpotDetail = (props) => {
         address_etc: spotInfo.address_etc,
         operation_time: spotInfo.operation_time,
         seat_capacity: spotInfo.seat_capacity,
+        max_seat_capacity: Math.floor(spotInfo.seat_capacity * 1.5),
+        guest_limit: spotInfo.guest_limit,
         content: spotInfo.content,
         property: spotInfo.property,
-        max_seat_capacity: Math.floor(spotInfo.seat_capacity * 1.5),
       });
 
       // 시설 정보 binding
@@ -180,6 +183,7 @@ const SpotDetail = (props) => {
 
     formData.append("operation_time", values.operation_time);
     formData.append("seat_capacity", values.seat_capacity);
+    formData.append("guest_limit", values.guest_limit);
     formData.append("excerpt", JSON.stringify(excerpt));
 
     if (removedFileList.length > 0) {
@@ -218,6 +222,14 @@ const SpotDetail = (props) => {
       });
   };
 
+  // 인원 입력시
+  const handleSeatCapacityChange = (seat_capacity) => {
+    form.setFieldsValue({
+      max_seat_capacity: Math.floor(seat_capacity * 1.5),
+    });
+  };
+
+  // 파일 변경시
   const handleFileChange = ({ file }) => {
     if (file.status === "done") {
       // 파일 추가
@@ -245,12 +257,6 @@ const SpotDetail = (props) => {
   const handlePreview = (file) => {
     setPreviewVisible(true);
     setPreviewImage(file.url || file.thumbUrl);
-  };
-
-  const handleSeatCapacityChange = (seat_capacity) => {
-    form.setFieldsValue({
-      max_seat_capacity: Math.floor(seat_capacity * 1.5),
-    });
   };
 
   const userAddressEtcRef = useRef(null);
@@ -353,14 +359,13 @@ const SpotDetail = (props) => {
                   },
                 ]}
               >
-                <InputNumber
-                  min={0}
-                  initialValues={0}
-                  onChange={handleSeatCapacityChange}
-                />
+                <InputNumber min={0} onChange={handleSeatCapacityChange} />
               </Form.Item>
               <Form.Item name="max_seat_capacity" label="최대 인원">
                 <InputNumber disabled={true} />
+              </Form.Item>
+              <Form.Item name="guest_limit" label="게스트 인원">
+                <InputNumber min={0} />
               </Form.Item>
               <Form.Item
                 name="images"

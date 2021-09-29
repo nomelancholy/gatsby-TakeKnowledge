@@ -92,6 +92,7 @@ const Spot = (props) => {
     formData.append("status", "inactive");
     formData.append("operation_time", "연중무휴, 24시간");
     formData.append("seat_capacity", 0);
+    formData.append("guest_limit", 0);
 
     const config = {
       method: "post",

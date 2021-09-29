@@ -36,6 +36,10 @@ const SpaceDetail = (props) => {
         break;
     }
 
+    // Space의 상세 페이지긴 하지만 props가 전달되는 하위 컴포넌트가 아니기에
+    // 주소에서 받아온 spotId와 type을 활용해 space list 다시 호출
+    // router에서 값 받아오는 코드는 (page/spot/[id]/space_type/index.js)에 존재
+
     const config = {
       method: "post",
       url: `${process.env.BACKEND_API}/spot/space/list`,
@@ -57,6 +61,7 @@ const SpaceDetail = (props) => {
       });
   }, []);
 
+  // 공간 추가
   const handleAddSpace = () => {
     // 신규 공간 생성시 현재 있는 가장 뒤쪽 space_id + 1 부터 부여
     let newId = 0;
