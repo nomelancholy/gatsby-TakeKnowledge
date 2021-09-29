@@ -22,7 +22,6 @@ import { useForm } from "antd/lib/form/Form";
 import { userListColumns } from "@utils/columns/user";
 import XLSX from "xlsx";
 import moment from "moment";
-import { ReadStream } from "fs";
 
 // 회원 관리
 const User = (props) => {
@@ -165,99 +164,85 @@ const User = (props) => {
     getUserList(pagination);
   }, []);
 
-  // 엑셀 관련 테스트
+  // 엑셀 관련 테스트 코드
 
-  const [excelUploadModalVisible, setExcelUploadModalVisible] = useState(false);
+  // const [excelUploadModalVisible, setExcelUploadModalVisible] = useState(false);
 
-  const excelUpload = (event) => {
-    console.log("upload 클릭");
+  // const excelUpload = (event) => {
+  //   console.log("upload 클릭");
 
-    console.log(`event.file.originFileObj`, event.file.originFileObj);
+  //   console.log(`event.file.originFileObj`, event.file.originFileObj);
 
-    const fileReader = new FileReader();
+  //   const fileReader = new FileReader();
 
-    fileReader.readAsBinaryString(event.file.originFileObj);
+  //   fileReader.readAsBinaryString(event.file.originFileObj);
 
-    fileReader.onload = () => {
-      const data = fileReader.result;
-      const workbook = XLSX.read(data, { type: "binary" });
-      workbook.SheetNames.map((sheetName) => {
-        console.log(`sheetName`, sheetName);
-        const rowObj = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-        console.log(`rowObj`, rowObj);
-      });
-    };
-  };
+  //   fileReader.onload = () => {
+  //     const data = fileReader.result;
+  //     const workbook = XLSX.read(data, { type: "binary" });
+  //     workbook.SheetNames.map((sheetName) => {
+  //       console.log(`sheetName`, sheetName);
+  //       const rowObj = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+  //       console.log(`rowObj`, rowObj);
+  //     });
+  //   };
+  // };
 
-  const excelDownload = () => {
-    // userList 길이가 0일 경우 early return
-    if (userList.length === 0) {
-      return;
-    }
+  // const excelDownload = () => {
+  //   // userList 길이가 0일 경우 early return
+  //   if (userList.length === 0) {
+  //     return;
+  //   }
 
-    const colums = ["회원 ID", "회원 명", "회원 구분", "회원 역할"];
+  //   const colums = ["회원 ID", "회원 명", "회원 구분", "회원 역할"];
 
-    // userList = 객체 들을 담은 배열
-    // XLSX.aoa_to_sheet에서 필요로 하는 건 배열들을 담은 배열
-    // 변환 작업
+  //   // userList = 객체 들을 담은 배열
+  //   // XLSX.aoa_to_sheet에서 필요로 하는 건 배열들을 담은 배열
+  //   // 변환 작업
 
-    let excelData = [colums];
+  //   let excelData = [colums];
 
-    userList.map((userData) => {
-      const dataSheet = [];
-      dataSheet.push(userData.uid);
-      dataSheet.push(userData.user_name);
+  //   userList.map((userData) => {
+  //     const dataSheet = [];
+  //     dataSheet.push(userData.uid);
+  //     dataSheet.push(userData.user_name);
 
-      let hasContract = userData.has_contract ? "멤버" : "회원";
-      dataSheet.push(hasContract);
+  //     let hasContract = userData.has_contract ? "멤버" : "회원";
+  //     dataSheet.push(hasContract);
 
-      let userRoleExt = "";
+  //     let userRoleExt = "";
 
-      switch (userData.user_role_ext) {
-        case "ffadmin":
-          userRoleExt = "파이브스팟 어드민";
-          break;
-        case "member":
-          userRoleExt = "일반";
-          break;
-        default:
-          break;
-      }
-      dataSheet.push(userRoleExt);
+  //     switch (userData.user_role_ext) {
+  //       case "ffadmin":
+  //         userRoleExt = "파이브스팟 어드민";
+  //         break;
+  //       case "member":
+  //         userRoleExt = "일반";
+  //         break;
+  //       default:
+  //         break;
+  //     }
+  //     dataSheet.push(userRoleExt);
 
-      excelData.push(dataSheet);
-    });
+  //     excelData.push(dataSheet);
+  //   });
 
-    // 합치고
+  //   // 합치고
 
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.aoa_to_sheet(excelData);
-    XLSX.utils.book_append_sheet(workbook, worksheet);
+  //   const workbook = XLSX.utils.book_new();
+  //   const worksheet = XLSX.utils.aoa_to_sheet(excelData);
+  //   XLSX.utils.book_append_sheet(workbook, worksheet);
 
-    // 제목에 넣을 날짜 변환해서
-    const nowDate = moment(new Date()).format("YYYY-MM-DD");
+  //   // 제목에 넣을 날짜 변환해서
+  //   const nowDate = moment(new Date()).format("YYYY-MM-DD");
 
-    // export
-    XLSX.writeFile(workbook, `회원 목록 ${nowDate}.xlsx`);
-  };
+  //   // export
+  //   XLSX.writeFile(workbook, `회원 목록 ${nowDate}.xlsx`);
+  // };
 
   return (
     <>
-      <h3>회원 관리</h3>
-
-      <Row type="flex" align="middle" className="py-3">
-        <Button
-          type="primary"
-          onClick={() => {
-            setFilterModalOpen(true);
-          }}
-        >
-          <SlidersOutlined />
-          <span>필터</span>
-        </Button>
-        <span className="px-2 w-10"></span>
-      </Row>
-      <Card
+      {/* <Card
         title="엑셀 테스트 카드"
         extra={
           <>
@@ -272,15 +257,7 @@ const User = (props) => {
           </>
         }
       >
-        <Table
-          size="middle"
-          columns={userListColumns}
-          rowKey={(record) => record.uid}
-          dataSource={userList}
-          pagination={pagination}
-          loading={loading}
-          onChange={handleTableChange}
-        />
+
         <Modal
           visible={excelUploadModalVisible}
           onCancel={() => {
@@ -291,7 +268,31 @@ const User = (props) => {
             <Button icon={<UploadOutlined />}>엑셀 업로드</Button>
           </Upload>
         </Modal>
-      </Card>
+      </Card> */}
+
+      <h3>회원 관리</h3>
+
+      <Row type="flex" align="middle" className="py-3">
+        <Button
+          type="primary"
+          onClick={() => {
+            setFilterModalOpen(true);
+          }}
+        >
+          <SlidersOutlined />
+          <span>필터</span>
+        </Button>
+        <span className="px-2 w-10"></span>
+      </Row>
+      <Table
+        size="middle"
+        columns={userListColumns}
+        rowKey={(record) => record.uid}
+        dataSource={userList}
+        pagination={pagination}
+        loading={loading}
+        onChange={handleTableChange}
+      />
       {/* 필터 */}
       <Filter
         visible={filterModalOpen}

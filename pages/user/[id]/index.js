@@ -62,13 +62,134 @@ const UserDetail = (props) => {
   const [userOrderPagination, setUserOrderPagination] = useState({});
   const [userOrderLoading, setUserOrderLoading] = useState(false);
 
+  // 회원 메모 페이징 관련 state
+  const [userMemoMinPage, setUserMemoMinPage] = useState(0);
+  const [userMemoMaxPage, setUserMemoMaxPage] = useState(1);
+
+  // 회원 메모 테이블 관련 state
+  const [userMemoHistoryTotal, setUserMemoHistoryTotal] = useState(1);
+  const [userMemoHistoryList, setUserMemoHistoryList] = useState([]);
+
   // 회원 상태
   const [userStatusForm] = Form.useForm();
   // 회원 정보
   const [userForm] = Form.useForm();
+  // 회원 메모
+  const [userMemoForm] = Form.useForm();
 
   // 멤버십 이용 내역 / 청구 내역 Grid Page Size
   const PAGE_SIZE = 5;
+
+  // 로그인 체크
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Router.push("/");
+    }
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    // 유저 상세 정보 조회
+    const config = {
+      headers: {
+        Authorization: decodeURIComponent(token),
+      },
+    };
+    axios
+      .get(`${process.env.BACKEND_API}/admin/user/get/${id}`, config)
+      .then(function (response) {
+        const userDetail = response.data.item;
+        setUserDetail(userDetail);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+
+    // 유저 계약 내역 조회
+    getUserContractList({
+      page: 1,
+      size: PAGE_SIZE,
+      uid: [Number(id)],
+      contract_type: "membership",
+    });
+    // 유저 청구 내역 조회
+    getUserOrderList({ page: 1, size: PAGE_SIZE, uid: id });
+
+    // 유저 카드리스트 조회
+    getUserCardList({ uid: id });
+
+    // 유저 회원 메모 조회
+    // getUserMemoHistoryList({ uid: id });
+  }, []);
+
+  useEffect(() => {
+    // 유저 정보 세팅되면
+    if (userDetail) {
+      console.log(`userDetail`, userDetail);
+
+      // 회원 상태
+      userStatusForm.setFieldsValue({
+        // 회원 구분
+        has_contract: userDetail.has_contract,
+        // 회원 상태
+        status: userDetail.user_status,
+        // 회원 역할
+        user_role_ext: userDetail.user_role_ext,
+      });
+
+      let userRoelExt = "";
+
+      switch (userDetail.user_role_ext) {
+        case "ffadmin":
+          userRoelExt = "파이브스팟 어드민";
+          break;
+        case "member":
+          userRoelExt = "일반";
+          break;
+        default:
+          break;
+      }
+
+      // 회원 정보
+      userForm.setFieldsValue({
+        // 회원 ID
+        uid: userDetail.uid,
+        // 멤버 이름
+        user_name: userDetail.user_name,
+        // 회원 구분
+        has_contract: userDetail.has_contract ? "멤버" : "회원",
+        // 회원 역할
+        user_role_ext: userRoelExt,
+        // 아이디
+        user_login: userDetail.user_login,
+        // 핸드폰 번호
+        phone: userDetail.phone,
+        // 생년 월일
+        user_birthday: userDetail.user_profile[0].user_birthday,
+        // 직무
+        job: userDetail.user_profile[0].job,
+        // 주소지
+        address: userDetail.user_profile[0].address,
+        // 상세 주소
+        address_etc: userDetail.user_profile[0].address_etc,
+      });
+
+      // 선호 지점 옵션으로 사용할 활성화 된 스팟 조회
+      getActiveSpotList({ page: 1, size: 100, status: "active" });
+
+      // 3차
+      // 회원 메모
+    }
+  }, [userDetail]);
+
+  // activeSpotList 불러오면
+  useEffect(() => {
+    if (activeSpotList) {
+      if (userDetail.fav_spot) {
+        // 옵션중 세팅된 spot을 선호 스팟으로 세팅
+        setSelectedSpot(userDetail.fav_spot.spot_id);
+      }
+    }
+  }, [activeSpotList]);
 
   // 유저 멤버십 이용 내역 리스트 조회
   const getUserContractList = (params) => {
@@ -292,7 +413,7 @@ const UserDetail = (props) => {
     getUserContractList({
       page: pagination.current,
       size: PAGE_SIZE,
-      uid: id,
+      uid: [Number(id)],
       contract_type: "membership",
     });
   };
@@ -304,119 +425,8 @@ const UserDetail = (props) => {
     // 호출
     getUserOrderList({ page: pagination.current, size: PAGE_SIZE, uid: id });
   };
-  // 로그인 체크
-  useEffect(() => {
-    if (!isLoggedIn) {
-      Router.push("/");
-    }
-  }, [isLoggedIn]);
 
-  useEffect(() => {
-    // 유저 상세 정보 조회
-    const config = {
-      headers: {
-        Authorization: decodeURIComponent(token),
-      },
-    };
-    axios
-      .get(`${process.env.BACKEND_API}/admin/user/get/${id}`, config)
-      .then(function (response) {
-        const userDetail = response.data.item;
-        setUserDetail(userDetail);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-
-    // 유저 계약 내역 조회
-    getUserContractList({
-      page: 1,
-      size: PAGE_SIZE,
-      uid: id,
-      contract_type: "membership",
-    });
-    // 유저 청구 내역 조회
-    getUserOrderList({ page: 1, size: PAGE_SIZE, uid: id });
-
-    // 유저 카드리스트 조회
-    getUserCardList({ uid: id });
-
-    // 유저 회원 메모 조회
-    // getUserMemoHistoryList({ uid: id });
-  }, []);
-
-  useEffect(() => {
-    // 유저 정보 세팅되면
-    if (userDetail) {
-      console.log(`userDetail`, userDetail);
-
-      // 회원 상태
-      userStatusForm.setFieldsValue({
-        // 회원 구분
-        has_contract: userDetail.has_contract,
-        // 회원 상태
-        status: userDetail.user_status,
-        // 회원 역할
-        user_role_ext: userDetail.user_role_ext,
-      });
-
-      let userRoelExt = "";
-
-      switch (userDetail.user_role_ext) {
-        case "ffadmin":
-          userRoelExt = "파이브스팟 어드민";
-          break;
-        case "member":
-          userRoelExt = "일반";
-          break;
-        default:
-          break;
-      }
-
-      // 회원 정보
-      userForm.setFieldsValue({
-        // 회원 ID
-        uid: userDetail.uid,
-        // 멤버 이름
-        user_name: userDetail.user_name,
-        // 회원 구분
-        has_contract: userDetail.has_contract ? "멤버" : "회원",
-        // 회원 역할
-        user_role_ext: userRoelExt,
-        // 아이디
-        user_login: userDetail.user_login,
-        // 핸드폰 번호
-        phone: userDetail.phone,
-        // 생년 월일
-        user_birthday: userDetail.user_profile[0].user_birthday,
-        // 직무
-        job: userDetail.user_profile[0].job,
-        // 주소지
-        address: userDetail.user_profile[0].address,
-        // 상세 주소
-        address_etc: userDetail.user_profile[0].address_etc,
-      });
-
-      // 선호 지점 옵션으로 사용할 활성화 된 스팟 조회
-      getActiveSpotList({ page: 1, size: 100, status: "active" });
-
-      // 3차
-      // 회원 메모
-    }
-  }, [userDetail]);
-
-  // activeSpotList 불러오면
-  useEffect(() => {
-    if (activeSpotList) {
-      if (userDetail.fav_spot) {
-        // 옵션중 세팅된 spot을 선호 스팟으로 세팅
-        setSelectedSpot(userDetail.fav_spot.spot_id);
-      }
-    }
-  }, [activeSpotList]);
-
-  /* 3차 회원 메모 관련 
-
+  // 회원 메모 추가
   const handleUserMemoSubmit = (values) => {
     axios
       .post(
@@ -443,6 +453,7 @@ const UserDetail = (props) => {
       });
   };
 
+  // 회원 메모 히스토리 조회
   const getUserMemoHistoryList = (params) => {
     axios
       .post(
@@ -468,21 +479,11 @@ const UserDetail = (props) => {
       });
   };
 
-  회원 메모
-  const [userMemoForm] = Form.useForm();
-
-  const [userMemoMinPage, setUserMemoMinPage] = useState(0);
-  const [userMemoMaxPage, setUserMemoMaxPage] = useState(1);
-
-  const [userMemoHistoryTotal, setUserMemoHistoryTotal] = useState(1);
-  const [userMemoHistoryList, setUserMemoHistoryList] = useState([]);
-
+  // 회원 메모 페이징
   const handleUserMemoHistoryChange = (value) => {
     setUserMemoMinPage(value - 1);
     setUserMemoMaxPage(value);
   };
-  
-  */
 
   return (
     <>
@@ -642,8 +643,8 @@ const UserDetail = (props) => {
             onChange={handleUserOrderTableChange}
           />
         </Card>
-        {/* 3차 */}
-        {/* <Col>
+
+        <Col>
           <Card
             title={`회원 메모`}
             bodyStyle={{ padding: "1rem" }}
@@ -681,7 +682,7 @@ const UserDetail = (props) => {
             defaultPageSize={1}
             total={userMemoHistoryTotal}
           />
-        </Col>*/}
+        </Col>
       </Card>
       <Row type="flex" align="middle" className="py-4">
         <span className="px-2 w-10"></span>
