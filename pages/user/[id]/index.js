@@ -70,6 +70,9 @@ const UserDetail = (props) => {
   const [userMemoHistoryTotal, setUserMemoHistoryTotal] = useState(1);
   const [userMemoHistoryList, setUserMemoHistoryList] = useState([]);
 
+  // modal 표시 구분 state
+  const [okModalVisible, setOkModalVisible] = useState(false);
+
   // 회원 상태
   const [userStatusForm] = Form.useForm();
   // 회원 정보
@@ -329,6 +332,33 @@ const UserDetail = (props) => {
       });
   };
 
+  // 회원 역할 변경 저장 버튼 클릭
+  const handleUserRoleExtSubmit = () => {
+    const { user_role_ext } = userStatusForm.getFieldValue();
+    userDetail.uid;
+
+    axios
+      .post(
+        `${process.env.BACKEND_API}/user/update`,
+        { uid: Number(id), user_role: user_role_ext },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        if (response.status === 200) {
+          setOkModalVisible(true);
+        }
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
+
   // 대표 결제 카드 변경 버튼 클릭
   const handleCardChange = (value) => {
     setSelectedCard(value);
@@ -494,7 +524,7 @@ const UserDetail = (props) => {
         className="mb-4"
       >
         <Card>
-          <Form form={userStatusForm}>
+          <Form form={userStatusForm} onFinish={handleUserRoleExtSubmit}>
             <Form.Item name="has_contract" label="회원 구분">
               <Radio.Group disabled>
                 <Radio style={radioStyle} value={true}>
@@ -519,7 +549,7 @@ const UserDetail = (props) => {
               </Radio.Group>
             </Form.Item>
             <Form.Item name="user_role_ext" label="회원 역할">
-              <Radio.Group disabled>
+              <Radio.Group>
                 <Radio style={radioStyle} value={"member"}>
                   일반
                 </Radio>
@@ -528,6 +558,19 @@ const UserDetail = (props) => {
                 </Radio>
               </Radio.Group>
             </Form.Item>
+            <Button type="primary" htmlType="submit">
+              저장
+            </Button>
+            <Modal
+              visible={okModalVisible}
+              okText="확인"
+              onOk={() => {
+                setOkModalVisible(false);
+              }}
+              cancelButtonProps={{ style: { display: "none" } }}
+            >
+              {"변경되었습니다"}
+            </Modal>
           </Form>
         </Card>
         <Card title="회원 정보">
