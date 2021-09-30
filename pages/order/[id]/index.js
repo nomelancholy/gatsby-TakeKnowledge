@@ -22,6 +22,7 @@ import {
   orderItmesColumns,
   paymentColumns,
 } from "@utils/columns/order";
+import order from "..";
 
 const OrderDetail = (props) => {
   const radioStyle = {
@@ -35,13 +36,6 @@ const OrderDetail = (props) => {
   // 청구 항목 아이템
 
   const [orderItemList, setOrderItemList] = useState([]);
-
-  // 청구서 테이블 페이징, 로딩
-  const [orderPagination, setOrderPagination] = useState({});
-  const [orderLoading, setOrderLoading] = useState(false);
-
-  // 청구서 리스트
-  const [orderList, setOrderList] = useState([]);
 
   // 상품 이용 내역 테이블 변경
   const handleOrderTableChange = (pagination) => {
@@ -185,42 +179,14 @@ const OrderDetail = (props) => {
     getPaymentList({ page: 1, size: PAGE_SIZE });
   }, []);
 
-  const [userCardList, setUserCardList] = useState([]);
-
-  const getUserCardList = (uid) => {
-    axios
-      .post(
-        `${process.env.BACKEND_API}/user/card/list`,
-        {
-          uid,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json;charset=UTF-8",
-            "Access-Control-Allow-Origin": "*",
-            Authorization: decodeURIComponent(token),
-          },
-        }
-      )
-      .then((response) => {
-        const data = response.data;
-        setUserCardList(data.items);
-      })
-      .catch((error) => {
-        console.log(`error`, error);
-      });
-  };
-
   useEffect(() => {
     // 요금제 정보 세팅되면
     if (orderDetail) {
       console.log(`orderDetail`, orderDetail);
-      // 유저 카드 정보 조회
-      getUserCardList(orderDetail.order.uid);
 
       // 청구 상태
       orderStatusForm.setFieldsValue({
-        status: "active",
+        status: orderDetail.order.status,
       });
 
       // 회원 정보
@@ -228,7 +194,7 @@ const OrderDetail = (props) => {
         uid: orderDetail.contract.user.uid,
         user_name: orderDetail.contract.user.user_name,
         user_login: orderDetail.contract.user.user_login,
-        phone: "",
+        phone: orderDetail.contract.user.phone,
         paymethod: orderDetail.contract.user.paymethod,
       });
 
@@ -317,8 +283,8 @@ const OrderDetail = (props) => {
         <Card title={`청구 번호 ${id}`}>
           <Form form={orderStatusForm}>
             <Form.Item name="status" label="청구 상태">
-              <Radio.Group>
-                <Radio style={radioStyle} value={"purchase"}>
+              <Radio.Group disabled>
+                <Radio style={radioStyle} value={"purchased"}>
                   완료
                 </Radio>
                 <Radio style={radioStyle} value={"unpaid"}>
@@ -343,7 +309,7 @@ const OrderDetail = (props) => {
             <Form.Item name="uid" label="회원 ID">
               <Input disabled />
             </Form.Item>
-            <Form.Item name="user_name" label="멤버 이름">
+            <Form.Item name="user_name" label="회원 이름">
               <Input disabled />
             </Form.Item>
             <Form.Item name="user_login" label="아이디">
@@ -360,25 +326,25 @@ const OrderDetail = (props) => {
         </Card>
         <Card title="계약 정보">
           <Form form={contractForm} layout="vertical">
-            <Form.Item name="product_name" label="멤버십 상품">
+            <Form.Item name="contract_id" label="계약 ID">
               <Input disabled />
             </Form.Item>
             <Form.Item name="status" label="계약 상태">
               <Input disabled />
             </Form.Item>
-            <Form.Item name="contract_id" label="계약 ID">
+            <Form.Item name="regdate" label="계약 신청일">
               <Input disabled />
             </Form.Item>
             <Form.Item name="start_date" label="계약 시작일">
               <Input disabled />
             </Form.Item>
-            <Form.Item name="regdate" label="계약 신청일">
+            <Form.Item name="next_paydate" label="정기 결제일">
               <Input disabled />
             </Form.Item>
             <Form.Item name="extend_count" label="연장 회차">
               <Input disabled />
             </Form.Item>
-            <Form.Item name="next_paydate" label="정기 결제일">
+            <Form.Item name="product_name" label="멤버십 상품">
               <Input disabled />
             </Form.Item>
             <Form.Item name="rateplan_name" label="적용 요금제">
@@ -391,9 +357,6 @@ const OrderDetail = (props) => {
             <Form.Item name="product_type" label="청구 유형">
               <Input disabled />
             </Form.Item>
-            <Form.Item name="pay_method" label="결제 방식">
-              <Input disabled />
-            </Form.Item>
             <Form.Item name="pay_demand" label="결제 유형">
               <Input disabled />
             </Form.Item>
@@ -403,8 +366,35 @@ const OrderDetail = (props) => {
             <Form.Item name="next_paydate" label="정기 결제일자">
               <Input disabled />
             </Form.Item>
-
+            <Form.Item name="pay_method" label="결제 방식">
+              <Input disabled />
+            </Form.Item>
             <Col></Col>
+            <Card
+              title={`청구 상태`}
+              bodyStyle={{ padding: "1rem" }}
+              className="mb-4"
+            >
+              <Form.Item name="status" label="청구 상태">
+                <Radio.Group disabled>
+                  <Radio style={radioStyle} value={"purchased"}>
+                    완료
+                  </Radio>
+                  <Radio style={radioStyle} value={"unpaid"}>
+                    미납
+                  </Radio>
+                  <Radio style={radioStyle} value={"will"}>
+                    예정
+                  </Radio>
+                  <Radio style={radioStyle} value={"refund"}>
+                    환불
+                  </Radio>
+                  <Radio style={radioStyle} value={"canceled"}>
+                    취소
+                  </Radio>
+                </Radio.Group>
+              </Form.Item>
+            </Card>
             <Card
               title={`청구 항목`}
               bodyStyle={{ padding: "1rem" }}
@@ -420,34 +410,17 @@ const OrderDetail = (props) => {
                 // onChange={handlePaymentTableChange}
               />
             </Card>
-            <Form.Item name="total" label="총 금액">
-              <Input disabled style={{ width: 260 }} />
-            </Form.Item>
+            <Card
+              title={`총 금액`}
+              bodyStyle={{ padding: "1rem" }}
+              className="mb-4"
+            >
+              <Form.Item name="total">
+                <Input disabled style={{ width: 260 }} />
+              </Form.Item>
+            </Card>
           </Form>
-          <Select
-            defaultValue={selectedCard}
-            style={{ width: 160 }}
-            onChange={handlePaymentCardChange}
-          >
-            {userCardList.map((card) => (
-              <Select.Option key={card.customer_uid} value={card.customer_uid}>
-                {card.name}
-              </Select.Option>
-            ))}
-          </Select>
-          <Button>결제</Button>
         </Card>
-        {/* <Card title="청구서">
-          <Table
-            size="middle"
-            columns={billingColumns}
-            rowKey={(record) => record.order.order_id}
-            dataSource={orderList}
-            pagination={orderPagination}
-            loading={orderLoading}
-            onChange={handleOrderTableChange}
-          />
-        </Card> */}
 
         <Col>
           <Card

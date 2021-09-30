@@ -7,7 +7,8 @@ export const orderListColumns = [
     dataIndex: "order",
     render: (text, record) => {
       const renderText = `${text.order_id} (${record.contract.contract_id})`;
-      return renderText;
+
+      return <a href={`/order/${record.contract.contract_id}`}>{renderText}</a>;
     },
   },
   {
@@ -15,9 +16,7 @@ export const orderListColumns = [
     dataIndex: "user",
     render: (text, record) => {
       return (
-        <a href={`/order/${record.contract.contract_id}`}>
-          {`${text.user_name}(${text.uid})`}
-        </a>
+        <a href={`/user/${text.uid}`}>{`${text.user_name}(${text.uid})`}</a>
       );
     },
   },
@@ -64,7 +63,14 @@ export const orderListColumns = [
     },
   },
   {
-    title: "상품 구분",
+    title: "청구명",
+    dataIndex: "",
+    render: (text, record) => {
+      return "-";
+    },
+  },
+  {
+    title: "구분",
     dataIndex: "contract",
     render: (text, record) => {
       let renderText = "";
@@ -157,7 +163,7 @@ export const orderListColumns = [
           renderText = "완료";
           break;
         case "unpaid":
-          renderText = "미납";
+          renderText = <p style={{ color: red }}>미납</p>;
           break;
         case "wait":
           renderText = "예정";
@@ -208,6 +214,9 @@ export const orderListColumns = [
         case "refund":
           renderText = "환불";
           break;
+        case "unpaid":
+          renderText = <p style={{ color: red }}>미납</p>;
+          break;
         default:
           break;
       }
@@ -235,14 +244,6 @@ export const orderItmesColumns = [
     // },
   },
   {
-    title: "할인쿠폰",
-    dataIndex: "coupon",
-    // render: (text, record) => {
-    //   const renderText = `${text.order_id}`;
-    //   return renderText;
-    // },
-  },
-  {
     title: "금액",
     dataIndex: "amount",
     // render: (text, record) => {
@@ -257,13 +258,6 @@ export const orderItmesColumns = [
     //   const renderText = `${text.order_id}`;
     //   return renderText;
     // },
-  },
-  {
-    title: "청구 사유",
-    dataIndex: "reason",
-    render: (text, record) => {
-      return <Input style={{ width: 160 }}></Input>;
-    },
   },
 ];
 
@@ -370,24 +364,33 @@ export const paymentColumns = [
     },
   },
   {
-    title: "결제 유형",
-    dataIndex: "user_paymethod",
+    title: "결제 방식",
+    dataIndex: "product",
     render: (text, record) => {
+      console.log(`text`, text);
+      console.log(`record`, record);
       let renderText = "";
 
-      if (text.type == "personal") {
-        renderText = "개인 카드 결제";
-      } else {
-        renderText = "법인 카드 결제";
+      switch (text.pay_method) {
+        case "credit_card":
+          renderText = "카드 결제";
+          break;
+        case "bank_transfer ":
+          renderText = "계좌 이체";
+          break;
+        default:
+          break;
       }
 
       return renderText;
     },
   },
   {
-    title: "결제 방식",
+    title: "결제 유형",
     dataIndex: "product",
     render: (text, record) => {
+      console.log(`text`, text);
+      console.log(`record`, record);
       let renderText = "";
 
       if (text.pay_demand == "pre") {
@@ -441,7 +444,11 @@ export const paymentColumns = [
     dataIndex: "regdate",
   },
   {
-    title: "환불",
+    title: "결제 일시",
+    dataIndex: "",
+  },
+  {
+    title: "변경 일시",
     dataIndex: "",
     render: (text, record) => {
       return <Button>환불</Button>;

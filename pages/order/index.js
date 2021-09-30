@@ -33,9 +33,6 @@ const Order = (props) => {
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
-  const [orderDateStart, setOrderDateStart] = useState(undefined);
-  const [orderDateEnd, setOrderDateEnd] = useState(undefined);
-
   const [searchForm] = useForm();
 
   const [params, setParams] = useState({
@@ -112,7 +109,17 @@ const Order = (props) => {
   };
 
   const handleSearch = () => {
-    const searchFormValues = searchForm.getFieldsValue();
+    const {
+      order_id,
+      contract_id,
+      uid,
+      user_name,
+      payment_status,
+      payment_method,
+      pay_demand,
+      order_date_start,
+      order_date_end,
+    } = searchForm.getFieldsValue();
 
     setPagination({
       page: 1,
@@ -121,16 +128,17 @@ const Order = (props) => {
     });
 
     const searchParams = {
-      order_id: searchFormValues.order_id,
-      contract_id: searchFormValues.contract_id,
-      uid: searchFormValues.uid,
-      group_id: undefined,
-      user_name: searchFormValues.user_name,
-      payment_status: searchFormValues.payment_status,
-      payment_method: searchFormValues.payment_method,
-      pay_demand: searchFormValues.pay_demand,
-      order_date_start: orderDateStart,
-      order_date_end: orderDateEnd,
+      order_id: order_id,
+      contract_id: contract_id,
+      uid: uid,
+      user_name: user_name,
+      payment_status: payment_status,
+      payment_method: payment_method,
+      pay_demand: pay_demand,
+      order_date_start:
+        order_date_start && moment(order_date_start).format("YYYY-MM-DD"),
+      order_date_end:
+        order_date_end && moment(order_date_end).format("YYYY-MM-DD"),
       page: 1,
       size: 20,
     };
@@ -141,9 +149,6 @@ const Order = (props) => {
   const handleReset = () => {
     // form Item reset
     searchForm.resetFields();
-
-    setOrderDateStart(undefined);
-    setOrderDateEnd(undefined);
 
     setPagination({
       page: 1,
@@ -156,7 +161,6 @@ const Order = (props) => {
       order_id: undefined,
       contract_id: undefined,
       uid: undefined,
-      group_id: undefined,
       user_name: undefined,
       payment_status: undefined,
       payment_method: undefined,
@@ -208,6 +212,11 @@ const Order = (props) => {
           layout="vertical"
           name="form_in_modal"
           initialValues={{ modifier: "public" }}
+          onKeyUp={(e) => {
+            if (e.key === "Enter") {
+              handleSearch();
+            }
+          }}
         >
           <Form.Item name="order_id" label="청구 ID">
             <Input />
@@ -244,17 +253,29 @@ const Order = (props) => {
             </Select>
           </Form.Item>
 
-          <Form.Item name="next_paydate" label="정기 결제 일자">
-            <>
-              <DatePicker
-                placeholder="시작"
-                onChange={(date, dateString) => setOrderDateStart(dateString)}
-              />
-              <DatePicker
-                placeholder="종료"
-                onChange={(date, dateString) => setOrderDateEnd(dateString)}
-              />
-            </>
+          <Form.Item name="order_date" label="정기 결제 일자">
+            <Form.Item
+              name="order_date_start"
+              style={{ display: "inline-block" }}
+            >
+              <DatePicker placeholder="시작일자" style={{ width: "100px" }} />
+            </Form.Item>
+            <span
+              style={{
+                display: "inline-block",
+                width: "24px",
+                lineHeight: "32px",
+                textAlign: "center",
+              }}
+            >
+              -
+            </span>
+            <Form.Item
+              name="order_date_end"
+              style={{ display: "inline-block" }}
+            >
+              <DatePicker placeholder="종료일자" style={{ width: "100px" }} />
+            </Form.Item>
           </Form.Item>
         </Form>
       </Filter>
