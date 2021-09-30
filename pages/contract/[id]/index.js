@@ -591,30 +591,30 @@ const ContractDetail = (props) => {
           break;
       }
 
-      let timeUnit = "";
+      let serviceUnit = "";
 
-      switch (contractDetail.rateplan.product.time_unit) {
+      switch (contractDetail.rateplan.product.service_unit) {
         case "day":
-          timeUnit = "일";
+          serviceUnit = "일";
           break;
         case "hour":
-          timeUnit = "시간";
+          serviceUnit = "시간";
           break;
         default:
           break;
       }
 
-      let periodUnit = "";
+      let timeUnit = "";
 
-      switch (contractDetail.rateplan.product.period_unit) {
+      switch (contractDetail.rateplan.product.time_unit) {
         case "hour":
-          periodUnit = "시간";
+          timeUnit = "시간";
           break;
         case "day":
-          periodUnit = "일";
+          timeUnit = "일";
           break;
         case "month":
-          periodUnit = "월";
+          timeUnit = "월";
           break;
         default:
           break;
@@ -637,9 +637,9 @@ const ContractDetail = (props) => {
         // 권한 제공 기간
         period_amount: contractDetail.rateplan.product.period_amount,
         // 차감 단위
-        time_unit: timeUnit,
+        service_unit: serviceUnit,
         // 권한 제공 기간 단위
-        period_unit: periodUnit,
+        time_unit: timeUnit,
         // 자동 결제
         pay_extend: contractDetail.rateplan.product.pay_extend
           ? contractDetail.rateplan.product.pay_extend
@@ -897,10 +897,10 @@ const ContractDetail = (props) => {
                 <Form.Item name="period_amount" label="권한 제공 기간">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="time_unit" label="차감 단위">
+                <Form.Item name="service_unit" label="차감 단위">
                   <Input disabled />
                 </Form.Item>
-                <Form.Item name="period_unit" label="권한 제공 기간 단위">
+                <Form.Item name="time_unit" label="권한 제공 기간 단위">
                   <Input disabled />
                 </Form.Item>
                 <Form.Item name="pay_extend" label="자동 결제">

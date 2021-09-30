@@ -120,27 +120,14 @@ export const productListColumns = [
   },
   {
     title: "포함된 스팟 수",
-    dataIndex: "-",
+    dataIndex: "spaces",
     render: (text, record) => {
-      let renderText = "";
-
-      // switch (text) {
-      //   case "many":
-      //     renderText = "전체";
-      //     break;
-      //   case "single":
-      //     renderText = "택 1";
-      //     break;
-      //   default:
-      //     break;
-      // }
-
-      return renderText;
+      return text.length;
     },
   },
   {
     title: "차감 단위",
-    dataIndex: "time_unit",
+    dataIndex: "service_unit",
     render: (text, record) => {
       let renderText = "";
 
@@ -164,7 +151,7 @@ export const productListColumns = [
   },
   {
     title: "권한 제공 기간 단위",
-    dataIndex: "period_unit",
+    dataIndex: "time_unit",
     render: (text, record) => {
       let renderText = "";
 
