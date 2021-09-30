@@ -19,6 +19,7 @@ import Router, { useRouter } from "next/router";
 import moment from "moment";
 
 import FormItem from "antd/lib/form/FormItem";
+import CouponDetail from "./CouponDetail";
 
 const CouponAuto = (props) => {
   const { couponAutoId, token } = props;
@@ -37,13 +38,6 @@ const CouponAuto = (props) => {
   const [autoCouponInfo, setAutoCouponInfo] = useState(undefined);
   const [couponInfo, setCouponInfo] = useState(undefined);
 
-  const [isRate, setIsRate] = useState(undefined);
-  const [isFlat, setIsFlat] = useState(undefined);
-
-  const [isAllAply, setIsAllAply] = useState(undefined);
-
-  const [issueDate, setIssueDate] = useState("");
-
   const [okModalVisible, setOkModalVisible] = useState(false);
 
   const [couponOptions, setCouponOptions] = useState([]);
@@ -52,44 +46,10 @@ const CouponAuto = (props) => {
 
   const [isIssueDay, setIsIssueDay] = useState(undefined);
 
+  const [targetOptions, setTargetOptions] = useState([]);
+
   // 쿠폰 Form
   const [autoCouponForm] = Form.useForm();
-  const [couponForm] = Form.useForm();
-
-  const getCouponOptions = () => {
-    axios
-      .post(
-        `${process.env.BACKEND_API}/admin/user/coupon/list`,
-        {},
-        {
-          headers: {
-            "Content-Type": "application/json;charset=UTF-8",
-            "Access-Control-Allow-Origin": "*",
-            Authorization: decodeURIComponent(token),
-          },
-        }
-      )
-      .then((response) => {
-        const data = response.data;
-
-        // auto complete option 형태로 가공
-        const optionList = data.items.map((coupon) => {
-          const optionObj = {
-            value: coupon.name,
-            label: coupon.name,
-            id: coupon.coupon_id,
-          };
-
-          return optionObj;
-        });
-
-        console.log(`optionList`, optionList);
-        setCouponOptions(optionList);
-      })
-      .catch((error) => {
-        console.log(`error`, error);
-      });
-  };
 
   useEffect(() => {
     // 쿠폰 리스트 로드
@@ -174,6 +134,49 @@ const CouponAuto = (props) => {
     }
   }, [autoCouponInfo]);
 
+  useEffect(() => {
+    if (couponInfo) {
+      autoCouponForm.setFieldsValue({
+        coupon_id: couponInfo.name,
+      });
+    }
+  }, [couponInfo]);
+
+  const getCouponOptions = () => {
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/user/coupon/list`,
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        const data = response.data;
+
+        // auto complete option 형태로 가공
+        const optionList = data.items.map((coupon) => {
+          const optionObj = {
+            value: coupon.name,
+            label: coupon.name,
+            id: coupon.coupon_id,
+          };
+
+          return optionObj;
+        });
+
+        console.log(`optionList`, optionList);
+        setCouponOptions(optionList);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
+
   // 저장 버튼 클릭
   const handleAutoCouponRegisterSubmit = () => {
     const { status, coupon_id, issue_category, target, issue_date } =
@@ -237,78 +240,11 @@ const CouponAuto = (props) => {
       });
   };
 
-  useEffect(() => {
-    if (couponInfo) {
-      autoCouponForm.setFieldsValue({
-        coupon_id: couponInfo.name,
-      });
-
-      couponForm.setFieldsValue({
-        coupon_id: couponInfo.coupon_id,
-        name: couponInfo.name,
-        desc: couponInfo.desc,
-        coupon_type: couponInfo.coupon_type,
-        code: couponInfo.code,
-        total: couponInfo.total,
-        coupon_category: couponInfo.coupon_category,
-        pub_date_start: moment(couponInfo.pub_date_start),
-        pub_date_end: moment(couponInfo.pub_date_end),
-        useable_date_start: moment(couponInfo.useable_date_start),
-        useable_date_end: moment(couponInfo.useable_date_end),
-      });
-
-      if (couponInfo.products && couponInfo.products.length > 0) {
-        let productNameArray = [];
-
-        couponInfo.products.map((product) => {
-          productNameArray.push(product.name);
-        });
-
-        couponForm.setFieldsValue({
-          products: productNameArray.join(", "),
-        });
-      }
-
-      if (couponInfo.spots && couponInfo.spots.length > 0) {
-        let spotNameArray = [];
-
-        couponInfo.spots.map((spot) => {
-          spotNameArray.push(spot.name);
-        });
-
-        couponForm.setFieldsValue({
-          spots: spotNameArray.join(", "),
-        });
-      }
-
-      if (couponInfo.coupon_category === "membership") {
-        setIsAllAply(false);
-      } else {
-        setIsAllAply(true);
-      }
-
-      if (couponInfo.coupon_type === "flat") {
-        setIsFlat(true);
-        couponForm.setFieldsValue({
-          discount_amount: couponInfo.discount,
-        });
-      } else if (couponInfo.coupon_type === "ratio") {
-        setIsRate(true);
-        couponForm.setFieldsValue({
-          discount_rate: couponInfo.discount,
-        });
-      }
-      console.log(`couponInfo`, couponInfo);
-    }
-  }, [couponInfo]);
-
   const handleSelect = (data, option) => {
     setApplyCoupon(option.id);
     // 선택한 쿠폰 정보 조회
     getCouponInfo(option.id);
   };
-
-  const [targetOptions, setTargetOptions] = useState([]);
 
   const handleIssueCategoryChange = (value) => {
     if (value === "issue_day") {
@@ -394,111 +330,8 @@ const CouponAuto = (props) => {
               />
             </Form.Item>
           </Card>
-          <Card
-            title="상세 정보"
-            bodyStyle={{ padding: "1rem" }}
-            className="mb-2"
-          >
-            <Form form={couponForm}>
-              <FormItem name="coupon_id" label="쿠폰 ID">
-                <Input maxLength="15" disabled />
-              </FormItem>
-              <FormItem name="name" label="쿠폰명">
-                <Input maxLength="15" disabled />
-              </FormItem>
-              <FormItem name="desc" label="쿠폰 설명">
-                <Input maxLength="50" disabled />
-              </FormItem>
-              <Form.Item name="coupon_type" label="쿠폰 유형">
-                <Select style={{ width: 120 }} disabled>
-                  <Select.Option value="flat">정액 할인</Select.Option>
-                  <Select.Option value="ratio">비율 할인</Select.Option>
-                </Select>
-              </Form.Item>
-              <FormItem name="code" label="공통 발급 코드">
-                <Input disabled />
-              </FormItem>
-              <FormItem name="total" label="발행량">
-                <InputNumber disabled formatter={(value) => `${value} 장`} />
-              </FormItem>
-              {isFlat && (
-                <FormItem name="name" label="할인 액">
-                  <InputNumber disabled />
-                </FormItem>
-              )}
-              {isRate && (
-                <FormItem name="name" label="할인 비율">
-                  <InputNumber disabled />
-                </FormItem>
-              )}
+          {couponInfo && <CouponDetail couponInfo={couponInfo} />}
 
-              <Form.Item name="coupon_category" label="쿠폰 구분">
-                <Select style={{ width: 120 }} disabled>
-                  <Select.Option value="membership">멤버십</Select.Option>
-                  <Select.Option value="meeting">미팅룸</Select.Option>
-                  <Select.Option value="coworking">코워킹룸</Select.Option>
-                  <Select.Option value="locker">락커</Select.Option>
-                  <Select.Option value="lounge">라운지</Select.Option>
-                </Select>
-              </Form.Item>
-              {!isAllAply && (
-                <Form.Item name="products" label="적용 상품">
-                  <Input disabled />
-                </Form.Item>
-              )}
-              <Form.Item name="spots" label="적용 스팟">
-                <Input disabled />
-              </Form.Item>
-              <Form.Item name="pub_date" label="발행 기간">
-                <Form.Item
-                  name="pub_date_start"
-                  style={{ display: "inline-block" }}
-                >
-                  <DatePicker disabled placeholder="시작일" />
-                </Form.Item>
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: "24px",
-                    lineHeight: "32px",
-                    textAlign: "center",
-                  }}
-                >
-                  -
-                </span>
-                <Form.Item
-                  name="pub_date_end"
-                  style={{ display: "inline-block" }}
-                >
-                  <DatePicker disabled placeholder="종료일" />
-                </Form.Item>
-              </Form.Item>
-              <Form.Item name="useable_date" label="유효 기간">
-                <Form.Item
-                  name="useable_date_start"
-                  style={{ display: "inline-block" }}
-                >
-                  <DatePicker disabled placeholder="시작일" />
-                </Form.Item>
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: "24px",
-                    lineHeight: "32px",
-                    textAlign: "center",
-                  }}
-                >
-                  -
-                </span>
-                <Form.Item
-                  name="useable_date_end"
-                  style={{ display: "inline-block" }}
-                >
-                  <DatePicker disabled placeholder="종료일" />
-                </Form.Item>
-              </Form.Item>
-            </Form>
-          </Card>
           <Card>
             <Form.Item
               name="issue_category"
@@ -559,9 +392,6 @@ const CouponAuto = (props) => {
                   format="YYYY-MM-DD HH:mm"
                   name="reserved_datetime"
                   disabled={registerMode ? false : true}
-                  onChange={(date, dateString) => {
-                    setIssueDate(dateString);
-                  }}
                 />
               </Form.Item>
             )}

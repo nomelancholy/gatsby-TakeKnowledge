@@ -45,11 +45,14 @@ const CouponResult = (props) => {
   const [searchForm] = useForm();
 
   const [params, setParams] = useState({
-    notice_id: undefined,
-    status: undefined,
-    type: undefined,
-    sticky: undefined,
-    title: undefined,
+    ci_id: undefined,
+    name: undefined,
+    email: undefined,
+    user_status: undefined,
+    issue_type: undefined,
+    regdate_start: undefined,
+    regdate_end: undefined,
+    issued_by: "manual",
   });
 
   const getCouponList = (params) => {
@@ -107,7 +110,15 @@ const CouponResult = (props) => {
   };
 
   const handleSearch = () => {
-    const searchFormValues = searchForm.getFieldsValue();
+    const {
+      ci_id,
+      name,
+      email,
+      user_status,
+      issue_type,
+      regdate_start,
+      regdate_end,
+    } = searchForm.getFieldsValue();
 
     setPagination({
       page: 1,
@@ -116,11 +127,15 @@ const CouponResult = (props) => {
     });
 
     const searchParams = {
-      notice_id: searchFormValues.notice_id,
-      status: searchFormValues.status,
-      type: searchFormValues.type,
-      sticky: searchFormValues.sticky,
-      title: searchFormValues.title,
+      ci_id,
+      name,
+      email,
+      user_status,
+      issue_type,
+      regdate_start:
+        regdate_start && moment(regdate_start).format("YYYY-MM-DD"),
+      regdate_end: regdate_end && moment(regdate_end).format("YYYY-MM-DD"),
+      issued_by: "manual",
       page: 1,
       size: 20,
     };
@@ -140,23 +155,19 @@ const CouponResult = (props) => {
 
     // params state reset
     const searchParams = {
-      notice_id: undefined,
-      status: undefined,
-      type: undefined,
-      sticky: undefined,
-      title: undefined,
+      ci_id: undefined,
+      name: undefined,
+      email: undefined,
+      user_status: undefined,
+      issue_type: undefined,
+      regdate_start: undefined,
+      regdate_end: undefined,
       page: 1,
       size: 20,
     };
 
     getCouponList({ ...params, ...searchParams });
   };
-
-  const [couponStartDateStart, setCouponStartDateStart] = useState("");
-  const [couponStartDateEnd, setCouponStartDateEnd] = useState("");
-
-  const [couponEndDateStart, setCouponEndDateStart] = useState("");
-  const [couponEndDateEnd, setCouponEndDateEnd] = useState("");
 
   return (
     <>
@@ -210,53 +221,44 @@ const CouponResult = (props) => {
             }
           }}
         >
-          <Form.Item name="notice_id" label="쿠폰 ID">
+          <Form.Item name="ci_id" label="직접발급 ID">
             <InputNumber />
           </Form.Item>
-          <Form.Item name="type" label="쿠폰 유형">
-            <Select style={{ width: 160 }}>
-              <Select.Option value="normal">일반 공지</Select.Option>
-              <Select.Option value="spot">지점 공지</Select.Option>
-            </Select>
-          </Form.Item>
-          <Form.Item name="title" label="쿠폰 명">
+          <Form.Item name="name" label="쿠폰 명">
             <Input />
           </Form.Item>
-          <Form.Item name="status" label="쿠폰 구분">
-            <Select style={{ width: 120 }}>
-              <Select.Option value="publish">발행</Select.Option>
-              <Select.Option value="private">미발행</Select.Option>
+          <Form.Item name="email" label="이메일">
+            <Input />
+          </Form.Item>
+          <Form.Item name="user_status" label="사용자 상태">
+            <Select style={{ width: 160 }}>
+              <Select.Option value="user">회원</Select.Option>
+              <Select.Option value="guest">비회원</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item name="start_date" label="쿠폰 시작 일자">
-            <>
-              <DatePicker
-                placeholder="시작"
-                onChange={(date, dateString) =>
-                  setCouponStartDateStart(dateString)
-                }
-              />
-              <DatePicker
-                placeholder="종료"
-                onChange={(date, dateString) =>
-                  setCouponStartDateEnd(dateString)
-                }
-              />
-            </>
+          <Form.Item name="issue_type" label="발급 방식">
+            <Select style={{ width: 160 }}>
+              <Select.Option value="bundle">대량</Select.Option>
+              <Select.Option value="each">개별</Select.Option>
+            </Select>
           </Form.Item>
-          <Form.Item name="end_date" label="쿠폰 종료 일자">
-            <>
-              <DatePicker
-                placeholder="시작"
-                onChange={(date, dateString) =>
-                  setCouponEndDateStart(dateString)
-                }
-              />
-              <DatePicker
-                placeholder="종료"
-                onChange={(date, dateString) => setCouponEndDateEnd(dateString)}
-              />
-            </>
+          <Form.Item name="regdate" label="직접 발급 일자">
+            <Form.Item name="regdate_start" style={{ display: "inline-block" }}>
+              <DatePicker placeholder="시작" style={{ width: "100px" }} />
+            </Form.Item>
+            <span
+              style={{
+                display: "inline-block",
+                width: "24px",
+                lineHeight: "32px",
+                textAlign: "center",
+              }}
+            >
+              -
+            </span>
+            <Form.Item name="regdate_end" style={{ display: "inline-block" }}>
+              <DatePicker placeholder="종료" style={{ width: "100px" }} />
+            </Form.Item>
           </Form.Item>
         </Form>
       </Filter>

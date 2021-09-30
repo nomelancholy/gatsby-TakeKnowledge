@@ -19,6 +19,7 @@ import initialize from "@utils/initialize";
 import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
 import { couponListcolumns } from "@utils/columns/coupon";
+import moment from "moment";
 
 // 쿠폰 관리
 const Coupon = (props) => {
@@ -107,7 +108,16 @@ const Coupon = (props) => {
   };
 
   const handleSearch = () => {
-    const searchFormValues = searchForm.getFieldsValue();
+    const {
+      coupon_id,
+      name,
+      coupon_type,
+      coupon_category,
+      pub_date_start_start,
+      pub_date_start_end,
+      pub_date_end_start,
+      pub_date_end_end,
+    } = searchForm.getFieldsValue();
 
     setPagination({
       page: 1,
@@ -116,14 +126,19 @@ const Coupon = (props) => {
     });
 
     const searchParams = {
-      coupon_id: searchFormValues.coupon_id,
-      name: searchFormValues.name,
-      coupon_type: searchFormValues.coupon_type,
-      coupon_category: searchFormValues.coupon_category,
-      pub_date_start_start: couponStartDateStart,
-      pub_date_start_end: couponStartDateEnd,
-      pub_date_end_start: couponEndDateStart,
-      pub_date_end_end: couponEndDateEnd,
+      coupon_id: coupon_id,
+      name: name,
+      coupon_type: coupon_type,
+      coupon_category: coupon_category,
+      pub_date_start_start:
+        pub_date_start_start &&
+        moment(pub_date_start_start).format("YYYY-MM-DD"),
+      pub_date_start_end:
+        pub_date_start_end && moment(pub_date_start_end).format("YYYY-MM-DD"),
+      pub_date_end_start:
+        pub_date_end_start && moment(pub_date_end_start).format("YYYY-MM-DD"),
+      pub_date_end_end:
+        pub_date_end_end && moment(pub_date_end_end).format("YYYY-MM-DD"),
       page: 1,
       size: 20,
     };
@@ -143,23 +158,18 @@ const Coupon = (props) => {
 
     // params state reset
     const searchParams = {
-      notice_id: undefined,
-      status: undefined,
-      type: undefined,
-      sticky: undefined,
-      title: undefined,
+      coupon_id: undefined,
+      name: undefined,
+      coupon_type: undefined,
+      coupon_category: undefined,
+      pub_date_start: undefined,
+      pub_date_end: undefined,
       page: 1,
       size: 20,
     };
 
     getCouponList({ ...params, ...searchParams });
   };
-
-  const [couponStartDateStart, setCouponStartDateStart] = useState("");
-  const [couponStartDateEnd, setCouponStartDateEnd] = useState("");
-
-  const [couponEndDateStart, setCouponEndDateStart] = useState("");
-  const [couponEndDateEnd, setCouponEndDateEnd] = useState("");
 
   return (
     <>
@@ -236,34 +246,52 @@ const Coupon = (props) => {
             </Select>
           </Form.Item>
           <Form.Item name="pub_date_start" label="쿠폰 시작 일자">
-            <>
-              <DatePicker
-                placeholder="시작"
-                onChange={(date, dateString) =>
-                  setCouponStartDateStart(dateString)
-                }
-              />
-              <DatePicker
-                placeholder="종료"
-                onChange={(date, dateString) =>
-                  setCouponStartDateEnd(dateString)
-                }
-              />
-            </>
+            <Form.Item
+              name="pub_date_start_start"
+              style={{ display: "inline-block" }}
+            >
+              <DatePicker placeholder="시작" style={{ width: "100px" }} />
+            </Form.Item>
+            <span
+              style={{
+                display: "inline-block",
+                width: "24px",
+                lineHeight: "32px",
+                textAlign: "center",
+              }}
+            >
+              -
+            </span>
+            <Form.Item
+              name="pub_date_start_end"
+              style={{ display: "inline-block" }}
+            >
+              <DatePicker placeholder="종료" style={{ width: "100px" }} />
+            </Form.Item>
           </Form.Item>
           <Form.Item name="pub_date_end" label="쿠폰 종료 일자">
-            <>
-              <DatePicker
-                placeholder="시작"
-                onChange={(date, dateString) =>
-                  setCouponEndDateStart(dateString)
-                }
-              />
-              <DatePicker
-                placeholder="종료"
-                onChange={(date, dateString) => setCouponEndDateEnd(dateString)}
-              />
-            </>
+            <Form.Item
+              name="pub_date_start_start"
+              style={{ display: "inline-block" }}
+            >
+              <DatePicker placeholder="시작" style={{ width: "100px" }} />
+            </Form.Item>
+            <span
+              style={{
+                display: "inline-block",
+                width: "24px",
+                lineHeight: "32px",
+                textAlign: "center",
+              }}
+            >
+              -
+            </span>
+            <Form.Item
+              name="pub_date_start_end"
+              style={{ display: "inline-block" }}
+            >
+              <DatePicker placeholder="종료" style={{ width: "100px" }} />
+            </Form.Item>
           </Form.Item>
         </Form>
       </Filter>

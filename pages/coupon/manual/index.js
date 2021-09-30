@@ -37,7 +37,7 @@ const CouponManual = (props) => {
       title: "쿠폰 명",
       dataIndex: "coupon",
       render: (text, record) => {
-        return text.name;
+        return <a href={`/coupon/${text.coupon_id}`}>{text.name}</a>;
       },
     },
     {
@@ -219,11 +219,6 @@ const CouponManual = (props) => {
     XLSX.writeFile(workbook, `${name} 발급리스트.xlsx`);
   };
 
-  const [couponStartDateStart, setCouponStartDateStart] = useState(undefined);
-  const [couponStartDateEnd, setCouponStartDateEnd] = useState(undefined);
-  const [couponEndDateStart, setCouponEndDateStart] = useState(undefined);
-  const [couponEndDateEnd, setCouponEndDateEnd] = useState(undefined);
-
   useEffect(() => {
     if (!isLoggedIn) {
       Router.push("/");
@@ -249,10 +244,8 @@ const CouponManual = (props) => {
     issue_type: undefined,
     coupon_category: undefined,
     coupon_type: undefined,
-    coupon_start_date_start: undefined,
-    coupon_start_date_end: undefined,
-    coupon_end_date_start: undefined,
-    coupon_end_date_end: undefined,
+    regdate_start: undefined,
+    regdate_end: undefined,
   });
 
   const getCouponList = (params) => {
@@ -316,7 +309,15 @@ const CouponManual = (props) => {
   };
 
   const handleSearch = () => {
-    const searchFormValues = searchForm.getFieldsValue();
+    const {
+      cmi_id,
+      name,
+      issue_type,
+      coupon_category,
+      coupon_type,
+      regdate_start,
+      regdate_end,
+    } = searchForm.getFieldsValue();
 
     setPagination({
       page: 1,
@@ -325,15 +326,14 @@ const CouponManual = (props) => {
     });
 
     const searchParams = {
-      cmi_id: searchFormValues.cmi_id,
-      name: searchFormValues.name,
-      issue_type: searchFormValues.issue_type,
-      coupon_category: searchFormValues.coupon_category,
-      coupon_type: searchFormValues.coupon_type,
-      coupon_start_date_start: couponStartDateStart,
-      coupon_start_date_end: couponStartDateEnd,
-      coupon_end_date_start: couponEndDateStart,
-      coupon_end_date_end: couponEndDateEnd,
+      cmi_id: cmi_id,
+      name: name,
+      issue_type: issue_type,
+      coupon_category: coupon_category,
+      coupon_type: coupon_type,
+      regdate_start:
+        regdate_start && moment(regdate_start).format("YYYY-MM-DD"),
+      regdate_end: regdate_end && moment(regdate_end).format("YYYY-MM-DD"),
       page: 1,
       size: 20,
     };
@@ -358,10 +358,8 @@ const CouponManual = (props) => {
       issue_type: undefined,
       coupon_category: undefined,
       coupon_type: undefined,
-      coupon_start_date_start: undefined,
-      coupon_start_date_end: undefined,
-      coupon_end_date_start: undefined,
-      coupon_end_date_end: undefined,
+      regdate_start: undefined,
+      regdate_end: undefined,
       page: 1,
       size: 20,
     };
@@ -458,35 +456,23 @@ const CouponManual = (props) => {
               <Select.Option value="ratio">비율 할인</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item name="start_date" label="시작 일자">
-            <>
-              <DatePicker
-                placeholder="시작"
-                onChange={(date, dateString) =>
-                  setCouponStartDateStart(dateString)
-                }
-              />
-              <DatePicker
-                placeholder="종료"
-                onChange={(date, dateString) =>
-                  setCouponStartDateEnd(dateString)
-                }
-              />
-            </>
-          </Form.Item>
-          <Form.Item name="end_date" label="종료 일자">
-            <>
-              <DatePicker
-                placeholder="시작"
-                onChange={(date, dateString) =>
-                  setCouponEndDateStart(dateString)
-                }
-              />
-              <DatePicker
-                placeholder="종료"
-                onChange={(date, dateString) => setCouponEndDateEnd(dateString)}
-              />
-            </>
+          <Form.Item name="regdate" label="직접 발급 일자">
+            <Form.Item name="regdate_start" style={{ display: "inline-block" }}>
+              <DatePicker placeholder="시작" style={{ width: "100px" }} />
+            </Form.Item>
+            <span
+              style={{
+                display: "inline-block",
+                width: "24px",
+                lineHeight: "32px",
+                textAlign: "center",
+              }}
+            >
+              -
+            </span>
+            <Form.Item name="regdate_end" style={{ display: "inline-block" }}>
+              <DatePicker placeholder="종료" style={{ width: "100px" }} />
+            </Form.Item>
           </Form.Item>
         </Form>
       </Filter>

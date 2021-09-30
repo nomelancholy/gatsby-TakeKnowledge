@@ -32,30 +32,16 @@ const CouponManage = (props) => {
   // new / detial 구분 state
   const [registerMode, setRegisterMode] = useState(true);
 
+  // 쿠폰 정보 저장 state
   const [couponInfo, setCouponInfo] = useState(undefined);
 
-  const [okModalVisible, setOkModalVisible] = useState(false);
-
-  // 발행 기간 관련 state
+  // datepicker disabled 를 위한 시작일자 저장  state
   const [pubDateStart, setPubDateStart] = useState(
     moment(new Date()).format("YYYY-MM-DD")
   );
-  const [pubDateEnd, setPubDateEnd] = useState(
-    moment(
-      new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
-    ).format("YYYY-MM-DD")
-  );
-
-  // 유효 기간 시작, 종료 관련 state
   const [useableDateStart, setUseableDateStart] = useState(
     moment(new Date()).format("YYYY-MM-DD")
   );
-  const [useableDateEnd, setUseableDateEnd] = useState(
-    moment(
-      new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
-    ).format("YYYY-MM-DD")
-  );
-
   // 적용 스팟 관련 state
   const [spotOptions, setSpotOptions] = useState([]);
   const [targetSpots, setTargetSpots] = useState([]);
@@ -70,79 +56,19 @@ const CouponManage = (props) => {
   const [isRate, setIsRate] = useState(undefined);
 
   // 적용 상품, 적용 스팟 필요한지 구분 flag
-  const [isAllAply, setIsAllAply] = useState(false);
+  const [isMembership, setIsMembership] = useState(true);
+
+  // 전 상품 여부 저장 state (transfer 표시를 위해 사용)
+  const [isAllProduct, setIsAllProduct] = useState(true);
+
+  // 전 지점 여부 저장 state (transfer 표시를 위해 사용)
+  const [isAllSpot, setIsAllSpot] = useState(true);
+
+  // modal 표시 구분 state
+  const [okModalVisible, setOkModalVisible] = useState(false);
 
   // 쿠폰 Form
   const [couponForm] = Form.useForm();
-
-  const getSpotOptions = () => {
-    axios
-      .post(
-        `${process.env.BACKEND_API}/admin/spot/list`,
-        {},
-        {
-          headers: {
-            "Content-Type": "application/json;charset=UTF-8",
-            "Access-Control-Allow-Origin": "*",
-            Authorization: decodeURIComponent(token),
-          },
-        }
-      )
-      .then((response) => {
-        const data = response.data.items;
-
-        const options = [];
-
-        data.map((spot) => {
-          const spotOption = {
-            key: spot.spot_id.toString(),
-            title: spot.name,
-          };
-
-          options.push(spotOption);
-        });
-
-        setSpotOptions(options);
-      })
-      .catch((error) => {
-        console.log(`error`, error);
-      });
-  };
-
-  const getProductOptions = () => {
-    axios
-      .post(
-        `${process.env.BACKEND_API}/admin/product/list`,
-        { type: "membership" },
-        {
-          headers: {
-            "Content-Type": "application/json;charset=UTF-8",
-            "Access-Control-Allow-Origin": "*",
-            Authorization: decodeURIComponent(token),
-          },
-        }
-      )
-      .then((response) => {
-        const data = response.data.items;
-
-        const options = [];
-
-        // 적용 상품 옵션 가공 후 세팅
-        data.map((product) => {
-          const productOption = {
-            key: product.product_id.toString(),
-            title: product.name,
-          };
-
-          options.push(productOption);
-        });
-
-        setProductOptions(options);
-      })
-      .catch((error) => {
-        console.log(`error`, error);
-      });
-  };
 
   useEffect(() => {
     // 스팟 리스트 불러서 spotOptions에 세팅
@@ -210,34 +136,132 @@ const CouponManage = (props) => {
         });
       }
 
-      // 적용 상품이 존재하는 경우
-      if (couponInfo.product_ids) {
-        // 세팅
-        const targetProducts = couponInfo.product_ids.split("|");
-        setTargetProducts(targetProducts);
-        couponForm.setFieldsValue({
-          product_ids: couponInfo.product_ids.split("|"),
-        });
+      if (couponInfo.coupon_category === "membership") {
+        setIsMembership(true);
+
+        if (couponInfo.is_all_product) {
+          setIsAllProduct(true);
+          couponForm.setFieldsValue({
+            is_all_product: true,
+          });
+        } else {
+          // 세팅
+          setIsAllProduct(false);
+          const targetProducts = couponInfo.product_ids.split("|");
+          setTargetProducts(targetProducts);
+
+          // validation 체크를 위해 form에도 세팅
+          couponForm.setFieldsValue({
+            is_all_product: false,
+            product_ids: couponInfo.product_ids.split("|"),
+          });
+        }
+      } else {
+        setIsMembership(false);
       }
 
       // 적용 스팟이 존재하는 경우
-      if (couponInfo.spot_ids) {
+      if (couponInfo.is_all_spot) {
+        setIsAllSpot(true);
+        couponForm.setFieldsValue({
+          is_all_spot: couponInfo.is_all_spot,
+        });
+      } else {
         // 세팅
+        setIsAllSpot(false);
         const targetSpots = couponInfo.spot_ids.split("|");
         setTargetSpots(targetSpots);
+
+        // validation 체크를 위해 form에도 세팅
         couponForm.setFieldsValue({
+          is_all_spot: false,
           spot_ids: couponInfo.spot_ids.split("|"),
         });
       }
 
-      // 발행기간
+      // disabled 처리를 위한 발행기간 시작일
       setPubDateStart(couponInfo.pub_date_start.replace(/\./gi, "-"));
-      setPubDateEnd(couponInfo.pub_date_end.replace(/\./gi, "-"));
-      // 유효기간
+      // disabled 처리를 위한 유효기간 시작일
       setUseableDateStart(couponInfo.useable_date_start.replace(/\./gi, "-"));
-      setUseableDateEnd(couponInfo.useable_date_end.replace(/\./gi, "-"));
     }
   }, [couponInfo]);
+
+  // 스팟 옵션 조회
+  const getSpotOptions = (param) => {
+    console.log(`param`, param);
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/spot/list`,
+        { page: 1, size: 100 },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        const data = response.data.items;
+
+        const options = [];
+        // 비활성, 삭제 표시해서 옵션으로 세팅
+        data.map((spot) => {
+          const spotOption = {
+            key: spot.spot_id.toString(),
+            title:
+              spot.status === "active"
+                ? spot.name
+                : spot.status === "inactive"
+                ? `${spot.name} (비활성)`
+                : `${spot.name} (삭제)`,
+          };
+
+          options.push(spotOption);
+        });
+
+        setSpotOptions(options);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
+
+  // 상품 옵션 조회
+  const getProductOptions = () => {
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/product/list`,
+        { page: 1, size: 100, type: "membership" },
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        const data = response.data.items;
+
+        const options = [];
+
+        // 적용 상품 옵션 가공 후 세팅
+        data.map((product) => {
+          const productOption = {
+            key: product.product_id.toString(),
+            title: product.name,
+          };
+
+          options.push(productOption);
+        });
+
+        setProductOptions(options);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
 
   // 저장 버튼 클릭
   const handleCouponRegisterSubmit = () => {
@@ -253,13 +277,17 @@ const CouponManage = (props) => {
       discount_amount,
       discount_rate,
       coupon_category,
+      is_all_product,
       product_ids,
+      is_all_spot,
       spot_ids,
       pub_date_start,
       pub_date_end,
       useable_date_start,
       useable_date_end,
     } = couponForm.getFieldValue();
+
+    console.log(`status`, status);
 
     let data = {
       status,
@@ -277,14 +305,33 @@ const CouponManage = (props) => {
       useable_date_end: moment(useable_date_end).format("YYYY-MM-DD"),
     };
 
-    if (!isAllAply) {
-      data.product_ids = product_ids.join("|");
+    if (isMembership) {
+      if (is_all_product) {
+        // 적용 상품이 전 상품일 경우
+        data.is_all_product = true;
+      } else {
+        // 상품을 선택한 경우
+        data.is_all_product = false;
+        data.product_ids = product_ids.join("|");
+      }
+    } else {
+      // 서버 null 체크 때문에 else인 경우도 is_all_product false로 추가
+      data.is_all_product = false;
+    }
+
+    if (is_all_spot) {
+      // 적용 스팟이 전 스팟일 경우
+      data.is_all_spot = true;
+    } else {
+      data.is_all_spot = false;
       data.spot_ids = spot_ids.join("|");
     }
 
     if (isFlat) {
+      // 금액 할인일 경우
       data.discount = discount_amount;
     } else {
+      // 비율 할인일 경우
       data.discount = discount_rate;
     }
 
@@ -296,6 +343,8 @@ const CouponManage = (props) => {
       url = `${process.env.BACKEND_API}/admin/user/coupon/update`;
       data.coupon_id = Number(couponId);
     }
+
+    console.log(`data`, data);
 
     const config = {
       method: "post",
@@ -317,20 +366,22 @@ const CouponManage = (props) => {
       });
   };
 
+  // 적용 스팟 변경
   const handleSpotOptionsChange = (targetKeys) => {
     setTargetSpots(targetKeys);
   };
 
+  // 적용 상품 변경
   const handleProductOptionsChange = (targetKeys) => {
     setTargetProducts(targetKeys);
   };
 
+  // 쿠폰 구분 변경
   const handleCouponCategoryChange = (value) => {
-    // 이용권 추가시 이용권도 추가
     if (value === "membership") {
-      setIsAllAply(false);
+      setIsMembership(true);
     } else {
-      setIsAllAply(true);
+      setIsMembership(false);
     }
   };
 
@@ -355,6 +406,8 @@ const CouponManage = (props) => {
             total: 0,
             dup_count: 1,
             coupon_category: "membership",
+            is_all_product: true,
+            is_all_spot: true,
           }}
         >
           <Card
@@ -460,6 +513,7 @@ const CouponManage = (props) => {
               rules={[
                 {
                   required: true,
+                  whitespace: false,
                   message: "공통 발급 코드를 입력해주세요",
                 },
               ]}
@@ -501,7 +555,14 @@ const CouponManage = (props) => {
                   },
                 ]}
               >
-                <InputNumber step={1000} formatter={(value) => `${value} 원`} />
+                <InputNumber
+                  step={1000}
+                  // formatter={(value) => {
+                  //   console.log(`value`, value);
+                  //   `${String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ",")} 원`;
+                  // }}
+                  // parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                />
               </FormItem>
             )}
 
@@ -546,43 +607,77 @@ const CouponManage = (props) => {
               </Select>
             </Form.Item>
 
-            {!isAllAply && (
-              <Form.Item
-                name="product_ids"
-                label="적용 상품"
-                rules={[
-                  {
-                    required: true,
-                    message: "적용 상품을 선택해주세요",
-                  },
-                ]}
-              >
-                <Transfer
-                  dataSource={productOptions}
-                  showSearch
-                  targetKeys={targetProducts}
-                  render={(item) => item.title}
-                  onChange={handleProductOptionsChange}
-                />
+            {isMembership && (
+              <Form.Item name="products" label="적용 상품">
+                <Form.Item name="is_all_product">
+                  <Radio.Group
+                    onChange={(e) => {
+                      setIsAllProduct(e.target.value);
+                    }}
+                  >
+                    <Radio style={radioStyle} value={true}>
+                      전 상품
+                    </Radio>
+                    <Radio style={radioStyle} value={false}>
+                      상품 선택
+                    </Radio>
+                  </Radio.Group>
+                </Form.Item>
+                {!isAllProduct && (
+                  <Form.Item
+                    name="product_ids"
+                    rules={[
+                      {
+                        required: isAllProduct ? false : true,
+                        message: "적용 상품을 선택해주세요",
+                      },
+                    ]}
+                  >
+                    <Transfer
+                      dataSource={productOptions}
+                      showSearch
+                      targetKeys={targetProducts}
+                      render={(item) => item.title}
+                      onChange={handleProductOptionsChange}
+                    />
+                  </Form.Item>
+                )}
               </Form.Item>
             )}
-            <Form.Item
-              name="spot_ids"
-              label="적용 스팟"
-              rules={[
-                {
-                  required: true,
-                  message: "적용 스팟을 선택해주세요",
-                },
-              ]}
-            >
-              <Transfer
-                dataSource={spotOptions}
-                showSearch
-                targetKeys={targetSpots}
-                render={(item) => item.title}
-                onChange={handleSpotOptionsChange}
-              />
+            <Form.Item name="spots" label="적용 스팟">
+              <Form.Item name="is_all_spot">
+                <Radio.Group
+                  onChange={(e) => {
+                    setIsAllSpot(e.target.value);
+                  }}
+                >
+                  <Radio style={radioStyle} value={true}>
+                    전 지점
+                  </Radio>
+                  <Radio style={radioStyle} value={false}>
+                    지점 선택
+                  </Radio>
+                </Radio.Group>
+              </Form.Item>
+              {!isAllSpot && (
+                <Form.Item
+                  name="spot_ids"
+                  rules={[
+                    {
+                      required: isAllSpot ? false : true,
+                      message: "적용 스팟을 선택해주세요",
+                    },
+                  ]}
+                >
+                  <Transfer
+                    dataSource={spotOptions}
+                    showSearch
+                    targetKeys={targetSpots}
+                    render={(item) => item.title}
+                    onChange={handleSpotOptionsChange}
+                  />
+                </Form.Item>
+              )}
             </Form.Item>
 
             <Form.Item name="pub_date" label="발행 기간">
@@ -596,7 +691,6 @@ const CouponManage = (props) => {
                 <DatePicker
                   name="pub_date_start"
                   placeholder="시작일"
-                  // value={moment(pubDateStart)}
                   disabledDate={(current) => {
                     return current && current < moment().subtract("1", "d");
                   }}
@@ -625,12 +719,8 @@ const CouponManage = (props) => {
                 <DatePicker
                   name="pub_date_end"
                   placeholder="종료일"
-                  // value={moment(pubDateEnd)}
                   disabledDate={(current) => {
                     return current && current < moment(pubDateStart);
-                  }}
-                  onChange={(date, dateString) => {
-                    setPubDateEnd(dateString);
                   }}
                 />
               </Form.Item>
@@ -646,7 +736,6 @@ const CouponManage = (props) => {
                 <DatePicker
                   name="useable_date_start"
                   placeholder="시작일"
-                  // value={moment(useableDateStart)}
                   disabledDate={(current) => {
                     return current && current < moment().subtract("1", "d");
                   }}
@@ -675,12 +764,8 @@ const CouponManage = (props) => {
                 <DatePicker
                   name="useable_date_end"
                   placeholder="종료일"
-                  // value={moment(useableDateEnd)}
                   disabledDate={(current) => {
                     return current && current < moment(useableDateStart);
-                  }}
-                  onChange={(date, dateString) => {
-                    setUseableDateEnd(dateString);
                   }}
                 />
               </Form.Item>

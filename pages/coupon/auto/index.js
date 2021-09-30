@@ -19,6 +19,7 @@ import initialize from "@utils/initialize";
 import { Filter } from "@components/elements";
 import { useForm } from "antd/lib/form/Form";
 import { couponAutoListcolumns } from "@utils/columns/coupon";
+import moment from "moment";
 
 // 쿠폰 자동 발급
 const CouponAuto = (props) => {
@@ -41,11 +42,6 @@ const CouponAuto = (props) => {
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
-  const [couponStartDateStart, setCouponStartDateStart] = useState(undefined);
-  const [couponStartDateEnd, setCouponStartDateEnd] = useState(undefined);
-  const [couponEndDateStart, setCouponEndDateStart] = useState(undefined);
-  const [couponEndDateEnd, setCouponEndDateEnd] = useState(undefined);
-
   const [searchForm] = useForm();
 
   const [params, setParams] = useState({
@@ -55,10 +51,10 @@ const CouponAuto = (props) => {
     issue_category: undefined,
     coupon_category: undefined,
     coupon_type: undefined,
-    coupon_start_date_start: undefined,
-    coupon_start_date_end: undefined,
-    coupon_end_date_start: undefined,
-    coupon_end_date_end: undefined,
+    start_pub_date_start: undefined,
+    start_pub_date_end: undefined,
+    end_pub_date_start: undefined,
+    end_pub_date_end: undefined,
   });
 
   const getCouponList = (params) => {
@@ -122,7 +118,18 @@ const CouponAuto = (props) => {
   };
 
   const handleSearch = () => {
-    const searchFormValues = searchForm.getFieldsValue();
+    const {
+      cai_id,
+      name,
+      target,
+      issue_category,
+      coupon_category,
+      coupon_type,
+      start_pub_date_start,
+      start_pub_date_end,
+      end_pub_date_start,
+      end_pub_date_end,
+    } = searchForm.getFieldsValue();
 
     setPagination({
       page: 1,
@@ -131,16 +138,21 @@ const CouponAuto = (props) => {
     });
 
     const searchParams = {
-      cai_id: searchFormValues.cai_id,
-      name: searchFormValues.name,
-      target: searchFormValues.target,
-      issue_category: searchFormValues.issue_category,
-      coupon_category: searchFormValues.coupon_category,
-      coupon_type: searchFormValues.coupon_type,
-      coupon_start_date_start: couponStartDateStart,
-      coupon_start_date_end: couponStartDateEnd,
-      coupon_end_date_start: couponEndDateStart,
-      coupon_end_date_end: couponEndDateEnd,
+      cai_id: cai_id,
+      name: name,
+      target: target,
+      issue_category: issue_category,
+      coupon_category: coupon_category,
+      coupon_type: coupon_type,
+      start_pub_date_start:
+        start_pub_date_start &&
+        moment(start_pub_date_start).format("YYYY-MM-DD"),
+      start_pub_date_end:
+        start_pub_date_end && moment(start_pub_date_end).format("YYYY-MM-DD"),
+      end_pub_date_start:
+        end_pub_date_start && moment(end_pub_date_start).format("YYYY-MM-DD"),
+      end_pub_date_end:
+        end_pub_date_end && moment(end_pub_date_end).format("YYYY-MM-DD"),
       page: 1,
       size: 20,
     };
@@ -166,10 +178,10 @@ const CouponAuto = (props) => {
       issue_category: undefined,
       coupon_category: undefined,
       coupon_type: undefined,
-      coupon_start_date_start: undefined,
-      coupon_start_date_end: undefined,
-      coupon_end_date_start: undefined,
-      coupon_end_date_end: undefined,
+      start_pub_date_start: undefined,
+      start_pub_date_end: undefined,
+      end_pub_date_start: undefined,
+      end_pub_date_end: undefined,
       page: 1,
       size: 20,
     };
@@ -274,35 +286,53 @@ const CouponAuto = (props) => {
               <Select.Option value="ratio">비율 할인</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item name="start_date" label="이벤트 시작 일자">
-            <>
-              <DatePicker
-                placeholder="시작"
-                onChange={(date, dateString) =>
-                  setCouponStartDateStart(dateString)
-                }
-              />
-              <DatePicker
-                placeholder="종료"
-                onChange={(date, dateString) =>
-                  setCouponStartDateEnd(dateString)
-                }
-              />
-            </>
+          <Form.Item name="start_pub_date" label="자동 발급 시작 일자">
+            <Form.Item
+              name="start_pub_date_start"
+              style={{ display: "inline-block" }}
+            >
+              <DatePicker placeholder="시작" style={{ width: "100px" }} />
+            </Form.Item>
+            <span
+              style={{
+                display: "inline-block",
+                width: "24px",
+                lineHeight: "32px",
+                textAlign: "center",
+              }}
+            >
+              -
+            </span>
+            <Form.Item
+              name="start_pub_date_end"
+              style={{ display: "inline-block" }}
+            >
+              <DatePicker placeholder="종료" style={{ width: "100px" }} />
+            </Form.Item>
           </Form.Item>
-          <Form.Item name="end_date" label="이벤트 종료 일자">
-            <>
-              <DatePicker
-                placeholder="시작"
-                onChange={(date, dateString) =>
-                  setCouponEndDateStart(dateString)
-                }
-              />
-              <DatePicker
-                placeholder="종료"
-                onChange={(date, dateString) => setCouponEndDateEnd(dateString)}
-              />
-            </>
+          <Form.Item name="end_pub_date" label="자동 발급 종료 일자">
+            <Form.Item
+              name="end_pub_date_start"
+              style={{ display: "inline-block" }}
+            >
+              <DatePicker placeholder="시작" style={{ width: "100px" }} />
+            </Form.Item>
+            <span
+              style={{
+                display: "inline-block",
+                width: "24px",
+                lineHeight: "32px",
+                textAlign: "center",
+              }}
+            >
+              -
+            </span>
+            <Form.Item
+              name="end_pub_date_end"
+              style={{ display: "inline-block" }}
+            >
+              <DatePicker placeholder="종료" style={{ width: "100px" }} />
+            </Form.Item>
           </Form.Item>
         </Form>
       </Filter>

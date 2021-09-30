@@ -1,6 +1,3 @@
-import { Button } from "antd";
-import axios from "axios";
-
 // 쿠폰 관리 리스트
 // api 주소
 export const couponListcolumns = [
@@ -484,12 +481,14 @@ export const couponAutoListcolumns = [
 //   },
 // ];
 
-// 쿠폰 발급 결과
-
+// 직접 쿠폰 발급 결과
 export const couponResultColumns = [
   {
-    title: "직접 발급 ID",
-    dataIndex: "ci_id",
+    title: "쿠폰 ID",
+    dataIndex: "coupon_id",
+    render: (text, record) => {
+      return <a href={`/coupon/${text}`}>{text}</a>;
+    },
   },
   {
     title: "쿠폰 이름",

@@ -8,18 +8,13 @@ import {
   Modal,
   Card,
   Radio,
-  Transfer,
-  Select,
-  DatePicker,
   Tag,
 } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
 import React, { useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 import Router, { useRouter } from "next/router";
-import FormItem from "antd/lib/form/FormItem";
-import moment from "moment";
+import CouponDetail from "./CouponDetail";
 
 const CouponManual = (props) => {
   const { couponManualId, token } = props;
@@ -35,63 +30,32 @@ const CouponManual = (props) => {
   // new / detial 구분 state
   const [registerMode, setRegisterMode] = useState(true);
 
+  // 직접 발급 쿠폰 정보 저장 state
   const [manualCouponInfo, setManualCouponInfo] = useState(undefined);
+
+  // 적용 쿠폰 상세 저장 state
   const [couponInfo, setCouponInfo] = useState(undefined);
 
-  const [isRate, setIsRate] = useState(undefined);
-  const [isFlat, setIsFlat] = useState(undefined);
-
-  const [isAllAply, setIsAllAply] = useState(undefined);
-
-  const [issueDate, setIssueDate] = useState("");
-
-  const [okModalVisible, setOkModalVisible] = useState(false);
-
+  // 적용 쿠폰 auto complete에 옵션으로 넣을 모든 쿠폰 리스트 저장 state
   const [couponOptions, setCouponOptions] = useState([]);
 
+  // 적용 쿠폰으로 선택된 쿠폰 ID 저장 state
   const [applyCoupon, setApplyCoupon] = useState(undefined);
 
+  // 대량 발급 / 개별 발급 저장 state
   const [isBundle, setIsBundle] = useState(undefined);
   const [isEach, setIsEach] = useState(undefined);
 
-  // 쿠폰 Form
+  // 개별 발급시 메일 입력할 input 표시 구분 state
+  const [isInputVisible, setIsInputVisible] = useState(true);
+  // 개별 발급시 input에 입력한 email list 저장 state
+  const [tags, setTags] = useState([]);
+
+  // modal 표시 구분 state
+  const [okModalVisible, setOkModalVisible] = useState(false);
+
+  // 직접 발급 쿠폰 Form
   const [manualCouponForm] = Form.useForm();
-  const [couponForm] = Form.useForm();
-
-  const getCouponOptions = () => {
-    axios
-      .post(
-        `${process.env.BACKEND_API}/admin/user/coupon/list`,
-        {},
-        {
-          headers: {
-            "Content-Type": "application/json;charset=UTF-8",
-            "Access-Control-Allow-Origin": "*",
-            Authorization: decodeURIComponent(token),
-          },
-        }
-      )
-      .then((response) => {
-        const data = response.data;
-
-        // auto complete option 형태로 가공
-        const optionList = data.items.map((coupon) => {
-          const optionObj = {
-            value: coupon.name,
-            label: coupon.name,
-            id: coupon.coupon_id,
-          };
-
-          return optionObj;
-        });
-
-        console.log(`optionList`, optionList);
-        setCouponOptions(optionList);
-      })
-      .catch((error) => {
-        console.log(`error`, error);
-      });
-  };
 
   useEffect(() => {
     // 쿠폰 리스트 로드
@@ -138,10 +102,6 @@ const CouponManual = (props) => {
       manualCouponForm.setFieldsValue({
         status: manualCouponInfo.status,
         issue_type: manualCouponInfo.issue_type,
-        // status: couponInfo.status,
-        // type: couponInfo.type,
-        // sticky: couponInfo.sticky,
-        // title: couponInfo.title,
       });
 
       if (manualCouponInfo.issue_type === "bundle") {
@@ -160,6 +120,83 @@ const CouponManual = (props) => {
     }
   }, [manualCouponInfo]);
 
+  // 적용 쿠폰 선택 -> 쿠폰 조회 후
+  useEffect(() => {
+    if (couponInfo) {
+      manualCouponForm.setFieldsValue({
+        coupon_id: couponInfo.name,
+      });
+    }
+  }, [couponInfo]);
+
+  // tags 변경시 length 체크해 input visible on off
+  useEffect(() => {
+    // 10개 까지만 입력
+    if (tags.length >= 10) {
+      setIsInputVisible(false);
+    } else {
+      setIsInputVisible(true);
+    }
+  }, [tags]);
+
+  // 적용 쿠폰에 옵션으로 넣을 쿠폰 리스트 조회
+  const getCouponOptions = () => {
+    axios
+      .post(
+        `${process.env.BACKEND_API}/admin/user/coupon/list`,
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: decodeURIComponent(token),
+          },
+        }
+      )
+      .then((response) => {
+        const data = response.data;
+
+        // auto complete option 형태로 가공
+        const optionList = data.items.map((coupon) => {
+          const optionObj = {
+            value: coupon.name,
+            label: coupon.name,
+            id: coupon.coupon_id,
+          };
+
+          return optionObj;
+        });
+
+        console.log(`optionList`, optionList);
+        setCouponOptions(optionList);
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
+  };
+
+  // 적용 쿠폰 옵션 중 선택한 쿠폰 정보 조회
+  const getCouponInfo = (couponId) => {
+    const config = {
+      headers: {
+        Authorization: decodeURIComponent(token),
+      },
+    };
+
+    axios
+      .get(
+        `${process.env.BACKEND_API}/admin/user/coupon/get/${couponId}`,
+        config
+      )
+      .then(function (response) {
+        const couponInfo = response.data.item;
+        setCouponInfo(couponInfo);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
+
   // 저장 버튼 클릭
   const handleManualCouponRegisterSubmit = () => {
     const { status, issue_type, issue_count } =
@@ -175,6 +212,7 @@ const CouponManual = (props) => {
       data.coupon_id = applyCoupon;
       data.issue_type = issue_type;
       if (issue_type === "bundle") {
+        // 대량 발행 일 경우 매수
         data.issue_count = issue_count;
       } else {
         // 개별 발급일 경우 이메일 스트링으로 세팅
@@ -206,102 +244,14 @@ const CouponManual = (props) => {
       });
   };
 
-  const getCouponInfo = (couponId) => {
-    const config = {
-      headers: {
-        Authorization: decodeURIComponent(token),
-      },
-    };
-
-    axios
-      .get(
-        `${process.env.BACKEND_API}/admin/user/coupon/get/${couponId}`,
-        config
-      )
-      .then(function (response) {
-        const couponInfo = response.data.item;
-        setCouponInfo(couponInfo);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-  };
-
-  useEffect(() => {
-    if (couponInfo) {
-      manualCouponForm.setFieldsValue({
-        coupon_id: couponInfo.name,
-      });
-
-      couponForm.setFieldsValue({
-        coupon_id: couponInfo.coupon_id,
-        name: couponInfo.name,
-        desc: couponInfo.desc,
-        coupon_type: couponInfo.coupon_type,
-        code: couponInfo.code,
-        total: couponInfo.total,
-        coupon_category: couponInfo.coupon_category,
-
-        pub_date_start: moment(couponInfo.pub_date_start),
-        pub_date_end: moment(couponInfo.pub_date_end),
-        useable_date_start: moment(couponInfo.useable_date_start),
-        useable_date_end: moment(couponInfo.useable_date_end),
-      });
-
-      if (couponInfo.products && couponInfo.products.length > 0) {
-        let productNameArray = [];
-
-        couponInfo.products.map((product) => {
-          productNameArray.push(product.name);
-        });
-
-        couponForm.setFieldsValue({
-          products: productNameArray.join(", "),
-        });
-      }
-
-      if (couponInfo.spots && couponInfo.spots.length > 0) {
-        let spotNameArray = [];
-
-        couponInfo.spots.map((spot) => {
-          spotNameArray.push(spot.name);
-        });
-
-        couponForm.setFieldsValue({
-          spots: spotNameArray.join(", "),
-        });
-      }
-
-      if (couponInfo.coupon_category === "membership") {
-        setIsAllAply(false);
-      } else {
-        setIsAllAply(true);
-      }
-
-      if (couponInfo.coupon_type === "flat") {
-        setIsFlat(true);
-        couponForm.setFieldsValue({
-          discount_amount: couponInfo.discount,
-        });
-      } else if (couponInfo.coupon_type === "ratio") {
-        setIsRate(true);
-        couponForm.setFieldsValue({
-          discount_rate: couponInfo.discount,
-        });
-      }
-      console.log(`couponInfo`, couponInfo);
-    }
-  }, [couponInfo]);
-
+  // 적용 쿠폰 옵션 중 쿠폰 하나 선택
   const handleSelect = (data, option) => {
     setApplyCoupon(option.id);
     // 선택한 쿠폰 정보 조회
     getCouponInfo(option.id);
   };
 
-  const [tags, setTags] = useState([]);
-  const [isInputVisible, setIsInputVisible] = useState(true);
-
+  // 개별 발급시 input에 메일 추가
   const handleInputConfirm = (e) => {
     // form 에 enter가 전달되는 것 방지
     e.preventDefault();
@@ -327,15 +277,7 @@ const CouponManual = (props) => {
       });
   };
 
-  useEffect(() => {
-    // 10개 까지만 입력
-    if (tags.length >= 10) {
-      setIsInputVisible(false);
-    } else {
-      setIsInputVisible(true);
-    }
-  }, [tags]);
-
+  // 태그 삭제
   const handleClose = (removedTag) => {
     const newTags = tags.filter((tag) => tag !== removedTag);
     setTags(newTags);
@@ -402,111 +344,7 @@ const CouponManual = (props) => {
               />
             </Form.Item>
           </Card>
-          <Card
-            title="상세 정보"
-            bodyStyle={{ padding: "1rem" }}
-            className="mb-2"
-          >
-            <Form form={couponForm}>
-              <FormItem name="coupon_id" label="쿠폰 ID">
-                <Input maxLength="15" disabled />
-              </FormItem>
-              <FormItem name="name" label="쿠폰명">
-                <Input maxLength="15" disabled />
-              </FormItem>
-              <FormItem name="desc" label="쿠폰 설명">
-                <Input maxLength="50" disabled />
-              </FormItem>
-              <Form.Item name="coupon_type" label="쿠폰 유형">
-                <Select style={{ width: 120 }} disabled>
-                  <Select.Option value="flat">정액 할인</Select.Option>
-                  <Select.Option value="ratio">비율 할인</Select.Option>
-                </Select>
-              </Form.Item>
-              <FormItem name="code" label="공통 발급 코드">
-                <Input disabled />
-              </FormItem>
-              <FormItem name="total" label="발행량">
-                <InputNumber disabled formatter={(value) => `${value} 장`} />
-              </FormItem>
-              {isFlat && (
-                <FormItem name="name" label="할인 액">
-                  <InputNumber disabled />
-                </FormItem>
-              )}
-              {isRate && (
-                <FormItem name="name" label="할인 비율">
-                  <InputNumber disabled />
-                </FormItem>
-              )}
-
-              <Form.Item name="coupon_category" label="쿠폰 구분">
-                <Select style={{ width: 120 }} disabled>
-                  <Select.Option value="membership">멤버십</Select.Option>
-                  <Select.Option value="meeting">미팅룸</Select.Option>
-                  <Select.Option value="coworking">코워킹룸</Select.Option>
-                  <Select.Option value="locker">락커</Select.Option>
-                  <Select.Option value="lounge">라운지</Select.Option>
-                </Select>
-              </Form.Item>
-              {!isAllAply && (
-                <Form.Item name="products" label="적용 상품">
-                  <Input disabled />
-                </Form.Item>
-              )}
-              <Form.Item name="spots" label="적용 스팟">
-                <Input disabled />
-              </Form.Item>
-              <Form.Item name="pub_date" label="발행 기간">
-                <Form.Item
-                  name="pub_date_start"
-                  style={{ display: "inline-block" }}
-                >
-                  <DatePicker disabled placeholder="시작일" />
-                </Form.Item>
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: "24px",
-                    lineHeight: "32px",
-                    textAlign: "center",
-                  }}
-                >
-                  -
-                </span>
-                <Form.Item
-                  name="pub_date_end"
-                  style={{ display: "inline-block" }}
-                >
-                  <DatePicker disabled placeholder="종료일" />
-                </Form.Item>
-              </Form.Item>
-              <Form.Item name="useable_date" label="유효 기간">
-                <Form.Item
-                  name="useable_date_start"
-                  style={{ display: "inline-block" }}
-                >
-                  <DatePicker disabled placeholder="시작일" />
-                </Form.Item>
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: "24px",
-                    lineHeight: "32px",
-                    textAlign: "center",
-                  }}
-                >
-                  -
-                </span>
-                <Form.Item
-                  name="useable_date_end"
-                  style={{ display: "inline-block" }}
-                >
-                  <DatePicker disabled placeholder="종료일" />
-                </Form.Item>
-              </Form.Item>
-            </Form>
-          </Card>
+          {couponInfo && <CouponDetail couponInfo={couponInfo} />}
           <Card
             bodyStyle={{ padding: "1rem" }}
             className="mb-2"
