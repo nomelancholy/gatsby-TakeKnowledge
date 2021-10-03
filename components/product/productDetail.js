@@ -10,15 +10,16 @@ import {
   Upload,
   Checkbox,
   Select,
+  InputNumber,
 } from "antd";
-import { UploadOutlined, PlusCircleOutlined } from "@ant-design/icons";
+import { UploadOutlined } from "@ant-design/icons";
 
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
-import ProductSpot from "./productSpot";
+import ProductSpotContainer from "./ProductSpotContainer";
 
 const PostEditor = dynamic(() => import("@utils/Editor"), {
   ssr: false,
@@ -26,14 +27,6 @@ const PostEditor = dynamic(() => import("@utils/Editor"), {
 
 const ProductDetail = (props) => {
   const { productId, token } = props;
-
-  // start_time, end_time 옵션 상수
-  const TIMES = [
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
-    22, 23, 24,
-  ];
-  // week_limit 옵션 상수
-  const DAYS = [1, 2, 3, 4, 5, 6, 7];
 
   // 운영 요일 checkbox 옵션
   const workingDaysOptions = [
@@ -58,8 +51,28 @@ const ProductDetail = (props) => {
 
   // detail로 들어온 경우 product info 저장 state
   const [productInfo, setProductInfo] = useState(undefined);
+
   // 생성된 product ID 저장 state
   const [generatedProductId, setGeneratedProductId] = useState(undefined);
+
+  // 상품 구분 선택 state
+  const [type, setType] = useState("membership");
+  // 카테고리 선택 state
+  const [category, setCategory] = useState("");
+  // 상품 구분에 따라 변경되는 카테고리 option 저장 state
+  const [categoryOptions, setCategoryOptions] = useState([]);
+
+  // 상품 소개 데이터 저장 state
+  const [intro, setIntro] = useState("");
+
+  // 권한 제공 기간 단위 표시 state
+  const [timeUnitVisible, setTimeUnitVisible] = useState(false);
+
+  // 차감 단위 state
+  const [serviceUnitDisable, setServiceUnitDisable] = useState(false);
+
+  // 권한 제공 기간 단위 저장 state
+  const [timeUnit, setTimeUnit] = useState("");
 
   // file 관련 state
   const [logoImage, setLogoImage] = useState([]);
@@ -72,26 +85,14 @@ const ProductDetail = (props) => {
   const [productPreviewImage, setProductPreviewImage] = useState("");
   const [removedFileList, setRemovedFileList] = useState([]);
 
+  // modal 표기 구분 state
   const [okModalVisible, setOkModalVisible] = useState(false);
 
-  // 상품 구분 선택 state
-  const [type, setType] = useState("membership");
-
-  // 운영 시간 start, end time 저장 state
-  const [startTime, setStartTime] = useState(0);
-  const [endTime, setEndTime] = useState(0);
-
-  // 에디터 데이터 저장 state
-  const [intro, setIntro] = useState("");
-  const [content, setContent] = useState("");
-
-  // 상품에 붙어있는 사용 가능 스팟 리스트
-  const [spotList, setSpotList] = useState(undefined);
-
-  // 사용 가능 스팟 - select box에 option으로 내려줄 스팟 list
-  const [optionSpotList, setOptionSpotList] = useState(undefined);
-
   const [form] = Form.useForm();
+
+  // 자식 컴포넌트가 먼저 로드되는 경우를 방지하기 위한 state
+  // generatedId가 생성되거나 productInfo가 모두 로드되면 true로 변경
+  const [isChildLoadReady, setIsChildLoadReady] = useState(undefined);
 
   // product 정보 조회
   useEffect(() => {
@@ -126,46 +127,62 @@ const ProductDetail = (props) => {
   // productData 세팅되면 알맞는 엘리먼트에 binding
   useEffect(() => {
     if (productInfo) {
-      console.log(`productInfo`, productInfo);
+      // console.log(`productInfo`, productInfo);
+      // 하위 컴포넌트 호출 준비 완료
+      setIsChildLoadReady(true);
+
+      // 권한 제공 기간 단위 저장
+      setTimeUnit(productInfo.time_unit);
+
+      // 상품 구분
+      handleTypeChange(productInfo.type);
+      // 상품 카테고리
+      handleCategoryChange(productInfo.category);
 
       form.setFieldsValue({
-        // 상품 구분
-        type: productInfo.type,
-        // 상품 옵션
-        plan_spot: productInfo.plan_spot,
-        // 메모
-        memo: productInfo.memo,
         // 활성 / 비활성
         status: productInfo.status,
+        // 상품 구분
+        type: productInfo.type,
         // 상품명
         name: productInfo.name,
-        // 결제 유형
-        pay_demand: productInfo.pay_demand,
-        // 총 사용 가능일
-        available_days: productInfo.available_days,
-        // 결제 방법
-        pay_method: productInfo.pay_method,
-        // 멤버십 유형
+        // 상품 카테고리
+        category: productInfo.category,
+        // 정산 유형
         service_type: productInfo.service_type,
-        // 체크인 단위
-        time_unit: productInfo.time_unit,
+        // 하위 스팟 권한 범위
+        plan_spot: productInfo.plan_spot,
+        // 차감 단위
+        service_unit: productInfo.service_unit,
         // 자동 결제
         pay_extend: productInfo.pay_extend,
-
-        // 주간 이용 한도
-        week_limit: productInfo.week_limit,
+        // 권한 제공 기간
+        period_amount: productInfo.period_amount,
+        // 총 사용 가능일
+        available_days: productInfo.available_days,
       });
+
+      // 권한 제공 기간 값이 있다면
+      if (productInfo.period_amount) {
+        // 권한 제공 기간 단위 필드 보여지게 하고
+        setTimeUnitVisible(true);
+        // 권한 제공 기간 단위 값 세팅
+        form.setFieldsValue({
+          time_unit: productInfo.time_unit,
+        });
+      }
 
       // 이미지 파일 세팅
       const productImages = [];
+
       if (productInfo.images) {
-        Object.entries(productInfo.images).map((image) => {
+        productInfo.images.map((image) => {
           const newObj = {
-            thumbUrl: image[1],
-            image_key: image[0],
+            thumbUrl: image.image_path,
+            image_key: image.image_key,
           };
 
-          if (image[0] === "logo") {
+          if (image.image_key === "logo") {
             setLogoImage([newObj]);
           } else {
             productImages.push(newObj);
@@ -174,23 +191,8 @@ const ProductDetail = (props) => {
         setProductImageList(productImages);
       }
 
-      // 운영 시간 시작 / 끝 시간
-      setStartTime(productInfo.start_time);
-      setEndTime(productInfo.end_time);
       // 에디터 컨텐츠
       setIntro(productInfo.intro);
-      setContent(productInfo.content);
-
-      // 상품 구분
-      setType(productInfo.type);
-
-      // 사용 가능 스팟 ID 세팅
-      if (productInfo.maps) {
-        console.log(`productInfo.maps`, productInfo.maps);
-        setSpotList(productInfo.maps);
-
-        getOptionsSpotList();
-      }
 
       // 운영 요일 binding
       let workingDays = [];
@@ -209,91 +211,49 @@ const ProductDetail = (props) => {
     }
   }, [productInfo]);
 
-  // useEffect(() => {
-  //   if (spotIdList) {
-  //     console.log(`spotIdList`, spotIdList);
-  //     const spotList = [];
-
-  //     spotIdList.map((spotId) => {
-  //       const config = {
-  //         headers: {
-  //           "Content-Type": "application/json;charset=UTF-8",
-  //           "Access-Control-Allow-Origin": "*",
-  //           Authorization: decodeURIComponent(token),
-  //         },
-  //       };
-
-  //       axios
-  //         .get(
-  //           `${process.env.BACKEND_API}/admin/product/space/get/${productId}/${spotId}`,
-  //           config
-  //         )
-  //         .then((response) => {
-  //           const spotData = response.data.item;
-  //           spotList.push(spotData);
-  //         })
-  //         .catch((error) => {
-  //           console.log(`error`, error);
-  //         });
-  //     });
-
-  //     setSpotList(spotList);
-  //     getOptionsSpotList();
-  //   }
-  // }, [spotIdList]);
-
-  // 상품 생성 되거나 spotList가 생기면 바로 공간 추가할 수 있게 option spot list 조회
   useEffect(() => {
-    // productId가 생성됐는데 optionSpotList가 비어있다면
+    // 방금 상품 등록을 마쳐서 productId를 response로 받은 경우
     if (generatedProductId) {
-      getOptionsSpotList();
+      // 사용 가능 스팟 표시
+      setIsChildLoadReady(true);
     }
   }, [generatedProductId]);
-
-  const getOptionsSpotList = () => {
-    console.log("call getOptionsSpotList");
-    axios
-      .post(
-        `${process.env.BACKEND_API}/admin/spot/list`,
-        { page: 1, size: 100 },
-        {
-          headers: {
-            "Content-Type": "application/json;charset=UTF-8",
-            "Access-Control-Allow-Origin": "*",
-            Authorization: decodeURIComponent(token),
-          },
-        }
-      )
-      .then((response) => {
-        const data = response.data.items;
-        // 활성화된 스팟들만 사용 가능 스팟으로 세팅 -> 다 불러서 disabled 시키는 쪽으로 변경
-        // const activeSpotList = data.filter((spot) => spot.status === "active");
-        setOptionSpotList(data);
-      })
-      .catch((error) => {
-        console.log(`error`, error);
-      });
-  };
 
   // 저장 버튼 클릭
   const handleSpotRegisterSubmit = (values) => {
     const formData = new FormData();
 
-    // console.log(`values`, values);
+    console.log(`values`, values);
 
-    formData.append("type", values.type);
-    formData.append("plan_spot", values.plan_spot);
-    formData.append("memo", values.memo);
     formData.append("status", values.status);
+    formData.append("type", values.type);
     formData.append("name", values.name);
-    formData.append("pay_demand", values.pay_demand);
-    formData.append("pay_method", values.pay_method);
-    formData.append("service_type", values.service_type);
-    formData.append("time_unit", values.time_unit);
-    formData.append("pay_extend", values.pay_extend);
-    formData.append("intro", intro);
-    formData.append("content", content);
+    formData.append("category", values.category);
+    if (values.service_type) {
+      formData.append("service_type", values.service_type);
+    }
 
+    if (values.plan_spot) {
+      formData.append("plan_spot", values.plan_spot);
+    }
+
+    if (values.service_unit) {
+      formData.append("service_unit", values.service_unit);
+    }
+
+    if (values.pay_extend) {
+      formData.append("pay_extend", values.pay_extend);
+    }
+
+    if (values.period_amount) {
+      formData.append("period_amount", values.period_amount);
+    }
+
+    if (values.time_unit) {
+      formData.append("time_unit", values.time_unit);
+    }
+
+    formData.append("intro", intro);
     // TO-DO 로고 처리
     if (values.logo) {
       formData.append("logo", values.logo[0].originFileObj);
@@ -311,9 +271,6 @@ const ProductDetail = (props) => {
         }
       });
     }
-    formData.append("start_time", startTime);
-    formData.append("end_time", endTime);
-    formData.append("week_limit", values.week_limit);
 
     // // 전체 요일 정보
     const allWorkginDays = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
@@ -381,13 +338,52 @@ const ProductDetail = (props) => {
       });
   };
 
-  // input value change handle
+  // 상품 구분 변경
   const handleTypeChange = (value) => {
     setType(value);
+
+    form.setFieldsValue({
+      category: null,
+    });
+
+    setCategory("");
+
+    if (value === "membership") {
+      setCategoryOptions([
+        { label: "ALL SPOT", value: "allspot" },
+        { label: "ONE SPOT", value: "onespot" },
+      ]);
+
+      setServiceUnitDisable(false);
+    } else if (value === "service") {
+      setCategoryOptions([
+        { label: "미팅룸", value: "meeting" },
+        { label: "코워킹룸", value: "coworking" },
+        { label: "라운지", value: "lounge" },
+        { label: "스마트 락커", value: "locker" },
+      ]);
+
+      setServiceUnitDisable(true);
+    } else if (value === "voucher") {
+      setServiceUnitDisable(false);
+    }
+  };
+
+  // 상품 카테고리 변경
+  const handleCategoryChange = (value) => {
+    // productSpot에 전달할 카테고리 값 세팅
+    setCategory(value);
+  };
+
+  // 권한 제공 기간 단위 변경
+  const handleTimeUnitChange = (e) => {
+    setTimeUnit(e.target.value);
   };
 
   // 로고 변경
   const handleLogoChange = ({ file }) => {
+    console.log(`file`, file);
+    console.log(`file.status`, file.status);
     if (file.status === "done") {
       // 파일 추가
       setLogoImage([...logoImage, file]);
@@ -396,7 +392,9 @@ const ProductDetail = (props) => {
       // 파일 삭제
 
       // 삭제된 파일 list 에서 삭제
-      const newFileList = logoImage.filter((fileObj) => fileObj !== file);
+      const newFileList = logoImage.filter(
+        (fileObj) => fileObj.uid !== file.uid
+      );
       setLogoImage(newFileList);
       form.setFieldsValue({ logo: newFileList });
 
@@ -409,6 +407,7 @@ const ProductDetail = (props) => {
     }
   };
 
+  // 로고 프리뷰
   const handleLogoPreview = (file) => {
     setLogoPreviewVisible(true);
     setLogoPreviewImage(file.url || file.thumbUrl);
@@ -416,16 +415,19 @@ const ProductDetail = (props) => {
 
   // 상품 이미지 변경
   const handleProductImagesChange = ({ file }) => {
+    console.log(`file`, file);
+    console.log(`file.status`, file.status);
     if (file.status === "done") {
       // 파일 추가
       setProductImageList([...productImageList, file]);
       form.setFieldsValue({ productImages: [...productImageList, file] });
     } else if (file.status === "removed") {
+      console.log("else");
       // 파일 삭제
 
       // 삭제된 파일 list 에서 삭제
       const newFileList = productImageList.filter(
-        (fileObj) => fileObj !== file
+        (fileObj) => fileObj.uid !== file.uid
       );
       setProductImageList(newFileList);
       form.setFieldsValue({ productImageList: newFileList });
@@ -443,41 +445,9 @@ const ProductDetail = (props) => {
     setProductPreviewImage(file.url || file.thumbUrl);
   };
 
-  // 시간 변경
-  const handleStartTimeChange = (values) => {
-    setStartTime(values);
-  };
-
-  const handleEndTimeChange = (values) => {
-    setEndTime(values);
-  };
-
-  // 에디터
+  // 에디터 입력
   const handleIntroChange = (values) => {
     setIntro(values);
-  };
-
-  const handleContentChange = (values) => {
-    setContent(values);
-  };
-
-  // 사용 가능한 스팟 추가
-  const handleAddSpot = () => {
-    const newList = spotList.concat({});
-    setSpotList(newList);
-  };
-
-  // 사용 가능한 스팟 삭제
-  const handleSpotDeleted = (spotId) => {
-    let newSpotList;
-    if (spotId) {
-      newSpotList = spotList.filter((spot) => spot.spot.spot_id !== spotId);
-    }
-    // else {
-    //   newSpotList = spotList.pop();
-    // }
-
-    setSpotList(newSpotList);
   };
 
   return (
@@ -498,204 +468,283 @@ const ProductDetail = (props) => {
               form={form}
               layout="vertical"
               onFinish={handleSpotRegisterSubmit}
+              initialValues={{
+                status: "inactive",
+                service_type: "accumulate",
+                service_unit: "day",
+                pay_extend: false,
+              }}
             >
-              <Form.Item name="type" label="상품 구분">
-                <Select
-                  initialValues="-"
-                  style={{ width: 120 }}
-                  onChange={handleTypeChange}
+              <Card>
+                <Form.Item
+                  name="status"
+                  label="활성 / 비활성"
+                  rules={[
+                    {
+                      required: true,
+                      message: "활성 비활성 여부를 선택해주세요",
+                    },
+                  ]}
                 >
-                  <Select.Option value="membership">멤버십</Select.Option>
-                  <Select.Option value="voucher">이용권</Select.Option>
-                  <Select.Option value="service">부가서비스</Select.Option>
-                </Select>
-              </Form.Item>
-              {type !== "service" && (
-                <Form.Item name="plan_spot" label="상품 옵션">
-                  <Select initialValues="-" style={{ width: 120 }}>
-                    <Select.Option value="one_spot">단일 스팟</Select.Option>
-                    <Select.Option value="all_spot">전 스팟</Select.Option>
-                  </Select>
-                </Form.Item>
-              )}
-
-              {type === "membership" && (
-                <Form.Item name="memo" label="메모">
-                  <Input />
-                </Form.Item>
-              )}
-
-              <Form.Item name="status" label="활성 / 비활성">
-                <Radio.Group>
-                  <Radio style={radioStyle} value={"active"}>
-                    활성
-                  </Radio>
-                  <Radio style={radioStyle} value={"inactive"}>
-                    비활성
-                  </Radio>
-                </Radio.Group>
-              </Form.Item>
-              <Form.Item name="name" label="상품명">
-                <Input />
-              </Form.Item>
-              <Form.Item name="pay_demand" label="결제 유형">
-                <Select initialValues="-" style={{ width: 120 }}>
-                  <Select.Option value="pre">선불</Select.Option>
-                  <Select.Option value="direct">바로결제</Select.Option>
-                  <Select.Option value="deffered">후불</Select.Option>
-                </Select>
-              </Form.Item>
-              {type !== "service" && (
-                <Form.Item name="pay_method" label="결제 방식">
-                  <Select initialValues="-" style={{ width: 120 }}>
-                    <Select.Option value="credit_card">카드결제</Select.Option>
-                    <Select.Option value="bank_trasfer">계좌이체</Select.Option>
-                  </Select>
-                </Form.Item>
-              )}
-
-              <Form.Item name="service_type" label="멤버십 유형">
-                <Select initialValues="-" style={{ width: 120 }}>
-                  <Select.Option value="accumulate">기본형</Select.Option>
-                  <Select.Option value="deduction">차감형</Select.Option>
-                </Select>
-              </Form.Item>
-              {type === "voucher" && (
-                <Form.Item name="available_days" label="총 사용 가능일">
-                  <Input />
-                </Form.Item>
-              )}
-
-              <Form.Item name="time_unit" label="체크인 단위">
-                <Radio.Group>
-                  <Radio style={radioStyle} value={"day"}>
-                    일간
-                  </Radio>
-                  <Radio style={radioStyle} value={"hour"}>
-                    시간
-                  </Radio>
-                </Radio.Group>
-              </Form.Item>
-              {type !== "service" && (
-                <Form.Item name="pay_extend" label="정기 결제">
                   <Radio.Group>
-                    <Radio style={radioStyle} value={true}>
-                      ON
+                    <Radio style={radioStyle} value={"active"}>
+                      활성
                     </Radio>
-                    <Radio style={radioStyle} value={false}>
-                      OFF
+                    <Radio style={radioStyle} value={"inactive"}>
+                      비활성
                     </Radio>
                   </Radio.Group>
                 </Form.Item>
-              )}
-
-              <Form.Item name="logo" label="상품  로고이미지">
-                <Upload
-                  name="image"
-                  listType="picture-card"
-                  fileList={logoImage}
-                  onChange={handleLogoChange}
-                  onPreview={handleLogoPreview}
+                <Form.Item
+                  name="type"
+                  label="상품 구분"
+                  rules={[
+                    {
+                      required: true,
+                      message: "상품 구분을 선택해주세요",
+                    },
+                  ]}
                 >
-                  {logoImage.length < 1 ? (
-                    <Button icon={<UploadOutlined />}>업로드</Button>
-                  ) : null}
-                </Upload>
-                <Modal
-                  visible={logoPreviewVisible}
-                  footer={null}
-                  onCancel={() => {
-                    setLogoPreviewVisible(false);
-                  }}
-                >
-                  <img
-                    alt="example"
-                    style={{ width: "100%" }}
-                    src={logoPreviewImage}
-                  />
-                </Modal>
-              </Form.Item>
-              <Form.Item name="intro" label="상품 소개">
-                <PostEditor onChange={handleIntroChange} setContents={intro} />
-              </Form.Item>
-              <Form.Item name="content" label="상품 신청">
-                <PostEditor
-                  onChange={handleContentChange}
-                  setContents={content}
-                />
-              </Form.Item>
-              <Form.Item
-                name="productImages"
-                label="상품 이미지 (최대 5장까지 첨부 가능)"
+                  <Select style={{ width: 120 }} onChange={handleTypeChange}>
+                    <Select.Option value="membership">멤버십</Select.Option>
+                    <Select.Option value="service">부가서비스</Select.Option>
+                    <Select.Option value="voucher">이용권</Select.Option>
+                  </Select>
+                </Form.Item>
+              </Card>
+              <Card
+                title={
+                  type === "membership"
+                    ? "멤버십"
+                    : type === "service"
+                    ? "부가서비스"
+                    : "이용권"
+                }
               >
-                <Upload
-                  name="image"
-                  listType="picture-card"
-                  fileList={productImageList}
-                  onChange={handleProductImagesChange}
-                  onPreview={handleProductImagesPreview}
+                <Form.Item
+                  name="name"
+                  label="상품명"
+                  rules={[
+                    {
+                      required: true,
+                      message: "상품명을 입력해주세요",
+                    },
+                  ]}
                 >
-                  {productImageList.length < 5 ? (
-                    <Button icon={<UploadOutlined />}>업로드</Button>
-                  ) : null}
-                </Upload>
-                <Modal
-                  visible={productImagePreviewVisible}
-                  footer={null}
-                  onCancel={() => {
-                    setProductImagePreviewVisible(false);
-                  }}
+                  <Input />
+                </Form.Item>
+                <Form.Item
+                  name="category"
+                  label="상품 카테고리"
+                  rules={[
+                    {
+                      required: true,
+                      message: "상품 카테고리를 선택해주세요",
+                    },
+                  ]}
                 >
-                  <img
-                    alt="example"
-                    style={{ width: "100%" }}
-                    src={productPreviewImage}
+                  <Select
+                    onChange={handleCategoryChange}
+                    style={{ width: 120 }}
+                    options={categoryOptions}
+                  ></Select>
+                </Form.Item>
+                {type === "membership" && (
+                  <Form.Item
+                    name="service_type"
+                    label="정산 유형"
+                    rules={[
+                      {
+                        required: true,
+                        message: "정산 유형을 선택해주세요",
+                      },
+                    ]}
+                  >
+                    <Radio.Group>
+                      <Radio style={radioStyle} value={"accumulate"}>
+                        기본형
+                      </Radio>
+                      <Radio style={radioStyle} value={"deduction"} disabled>
+                        차감형
+                      </Radio>
+                    </Radio.Group>
+                  </Form.Item>
+                )}
+
+                {type === "membership" && (
+                  <Form.Item
+                    name="plan_spot"
+                    label="하위 스팟 권한 범위"
+                    rules={[
+                      {
+                        required: true,
+                        message: "하위 스팟 권한 범위를 선택해주세요",
+                      },
+                    ]}
+                  >
+                    <Select style={{ width: 120 }}>
+                      <Select.Option value="many">전체</Select.Option>
+                      <Select.Option value="single">택1</Select.Option>
+                    </Select>
+                  </Form.Item>
+                )}
+
+                {type === "membership" && (
+                  <Form.Item name="service_unit" label="차감 단위">
+                    <Radio.Group disabled={serviceUnitDisable} disabled>
+                      <Radio style={radioStyle} value={"day"}>
+                        일
+                      </Radio>
+                      <Radio style={radioStyle} value={"hour"}>
+                        시간
+                      </Radio>
+                    </Radio.Group>
+                  </Form.Item>
+                )}
+
+                {type === "membership" && (
+                  <Form.Item
+                    name="pay_extend"
+                    label="자동 결제"
+                    rules={[
+                      {
+                        required: true,
+                        message: "자동 결제 여부를 선택해주세요",
+                      },
+                    ]}
+                  >
+                    <Radio.Group>
+                      <Radio style={radioStyle} value={true}>
+                        ON
+                      </Radio>
+                      <Radio style={radioStyle} value={false}>
+                        OFF
+                      </Radio>
+                    </Radio.Group>
+                  </Form.Item>
+                )}
+
+                <Form.Item name="period_amount" label="권한 제공 기간">
+                  <InputNumber
+                    min={0}
+                    onChange={(value) => {
+                      if (value) {
+                        setTimeUnitVisible(true);
+                      } else {
+                        setTimeUnitVisible(false);
+                      }
+                    }}
                   />
-                </Modal>
-              </Form.Item>
-              <Form.Item name="operation_time" label="운영 시간">
-                <Select
-                  initialValues="-"
-                  value={startTime}
-                  style={{ width: 120 }}
-                  onChange={handleStartTimeChange}
-                >
-                  {TIMES.map((time) => (
-                    <Select.Option key={time} value={time}>
-                      {time}
-                    </Select.Option>
-                  ))}
-                </Select>
-                <Select
-                  initialValues="-"
-                  value={endTime}
-                  style={{ width: 120 }}
-                  onChange={handleEndTimeChange}
-                >
-                  {TIMES.map((time) => (
-                    <Select.Option key={time} value={time}>
-                      {time}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-              <Form.Item name="week_limit" label="주간 이용 한도">
-                <Select initialValues="-" style={{ width: 120 }}>
-                  {DAYS.map((day) => (
-                    <Select.Option key={day} value={day}>
-                      {day}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
+                </Form.Item>
 
-              <Form.Item name="working_days" label="운영 요일">
-                <Checkbox.Group options={workingDaysOptions} />
-              </Form.Item>
+                {timeUnitVisible && (
+                  <Form.Item
+                    name="time_unit"
+                    label="권한 제공 기간 단위"
+                    rules={[
+                      {
+                        required: true,
+                        message: "권한 제공 기간 단위를 선택해주세요",
+                      },
+                    ]}
+                  >
+                    <Radio.Group onChange={handleTimeUnitChange}>
+                      <Radio style={radioStyle} value="hour">
+                        시간
+                      </Radio>
+                      <Radio style={radioStyle} value="day">
+                        일
+                      </Radio>
+                      {type === "membership" && (
+                        <Radio style={radioStyle} value="month">
+                          월
+                        </Radio>
+                      )}
+                    </Radio.Group>
+                  </Form.Item>
+                )}
 
-              <Button type="primary" htmlType="submit">
-                저장
-              </Button>
+                <Form.Item name="intro" label="상품 소개">
+                  <PostEditor
+                    onChange={handleIntroChange}
+                    setContents={intro}
+                  />
+                </Form.Item>
+                {type === "membership" && (
+                  <Form.Item name="logo" label="상품  로고이미지">
+                    <Upload
+                      name="image"
+                      listType="picture-card"
+                      fileList={logoImage}
+                      onChange={handleLogoChange}
+                      onPreview={handleLogoPreview}
+                    >
+                      {logoImage.length < 1 ? (
+                        <Button icon={<UploadOutlined />}>업로드</Button>
+                      ) : null}
+                    </Upload>
+                    <Modal
+                      visible={logoPreviewVisible}
+                      footer={null}
+                      onCancel={() => {
+                        setLogoPreviewVisible(false);
+                      }}
+                    >
+                      <img
+                        alt="example"
+                        style={{ width: "100%" }}
+                        src={logoPreviewImage}
+                      />
+                    </Modal>
+                  </Form.Item>
+                )}
+
+                <Form.Item
+                  name="productImages"
+                  label="상품 이미지 (최대 5장까지 첨부 가능)"
+                >
+                  <Upload
+                    name="image"
+                    listType="picture-card"
+                    fileList={productImageList}
+                    onChange={handleProductImagesChange}
+                    onPreview={handleProductImagesPreview}
+                  >
+                    {productImageList.length < 5 ? (
+                      <Button icon={<UploadOutlined />}>업로드</Button>
+                    ) : null}
+                  </Upload>
+                  <Modal
+                    visible={productImagePreviewVisible}
+                    footer={null}
+                    onCancel={() => {
+                      setProductImagePreviewVisible(false);
+                    }}
+                  >
+                    <img
+                      alt="example"
+                      style={{ width: "100%" }}
+                      src={productPreviewImage}
+                    />
+                  </Modal>
+                </Form.Item>
+
+                {type === "membership" && (
+                  <Form.Item name="working_days" label="운영 요일">
+                    <Checkbox.Group options={workingDaysOptions} />
+                  </Form.Item>
+                )}
+
+                {type === "voucher" && (
+                  <Form.Item name="available_days" label="총 사용 가능일">
+                    <Input />
+                  </Form.Item>
+                )}
+
+                <Button type="primary" htmlType="submit">
+                  저장
+                </Button>
+              </Card>
             </Form>
             <Modal
               visible={okModalVisible}
@@ -703,39 +752,20 @@ const ProductDetail = (props) => {
               onOk={() => setOkModalVisible(false)}
               cancelButtonProps={{ style: { display: "none" } }}
             >
-              스팟 등록 완료
+              상품 저장 완료
             </Modal>
           </Card>
 
-          {/* 공간 정보 */}
-          {(productId || generatedProductId) && spotList && optionSpotList && (
-            <Card
-              title="사용 가능 스팟"
-              extra={
-                <>
-                  <a onClick={handleAddSpot}>
-                    <PlusCircleOutlined />
-                  </a>
-                </>
-              }
-              bodyStyle={{ padding: "1rem" }}
-              className="mb-4"
-            >
-              <>
-                {spotList.map((spot, index) => (
-                  <ProductSpot
-                    key={spot.spot ? spot.spot.spot_id : `new${index}`}
-                    spotInfo={spot}
-                    handleSpotDeleted={handleSpotDeleted}
-                    optionSpotList={optionSpotList}
-                    token={token}
-                    productId={
-                      generatedProductId ? generatedProductId : productId
-                    }
-                  />
-                ))}
-              </>
-            </Card>
+          {/* 사용 가능 스팟 */}
+          {(productId || generatedProductId) && isChildLoadReady && (
+            <ProductSpotContainer
+              token={token}
+              productInfo={productInfo}
+              productType={type}
+              productCategory={category}
+              productTimeUnit={timeUnit}
+              productId={productId}
+            />
           )}
 
           <Row type="flex" align="middle" className="py-4">

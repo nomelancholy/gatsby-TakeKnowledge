@@ -10,6 +10,9 @@ import {
   Select,
   InputNumber,
   DatePicker,
+  Table,
+  Typography,
+  Popconfirm,
 } from "antd";
 
 import React, { useState, useEffect } from "react";
@@ -17,14 +20,10 @@ import { connect } from "react-redux";
 import axios from "axios";
 import { useRouter } from "next/router";
 import moment from "moment";
-// import ProductSpot from "./productSpot";
+import { rateBySpotListColumns } from "@utils/columns/rateplan";
 
 const RateplanDetail = (props) => {
   const { rateplanId, token } = props;
-
-  // 요금제 시작/종료일
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
 
   const radioStyle = {
     display: "inline",
@@ -47,7 +46,19 @@ const RateplanDetail = (props) => {
 
   const [okModalVisible, setOkModalVisible] = useState(false);
 
+  // 멤버십 / 부가서비스 구분 state
+  const [isService, setIsService] = useState(false);
+
+  // 요금제 table state
+  const [rateplanTableData, setRateplanTableData] = useState([]);
+
+  // 테이블에서 변경 시도한 row 의 spotId 저장 state
+  const [editingSpotId, setEditingSpotId] = useState("");
+
   const [form] = Form.useForm();
+
+  // Table 요금 수정시 입력 값 확인을 위한 form
+  const [tableForm] = Form.useForm();
 
   // 요금제 조회
   useEffect(() => {
@@ -119,10 +130,6 @@ const RateplanDetail = (props) => {
         // 게스트 요금
         guest_price: rateplanInfo.guest_price,
       });
-
-      // 전송용 state에도 세팅
-      setStartDate(rateplanInfo.start_date.replace(/\./gi, "-"));
-      setEndDate(rateplanInfo.end_date.replace(/\./gi, "-"));
     }
   }, [rateplanInfo]);
 
@@ -136,8 +143,62 @@ const RateplanDetail = (props) => {
       });
       // 그에 해당하는 옵션 리스트 조회
       getOptionProductList(productInfo.item.type);
+
+      const spotList = [];
+
+      // 스팟 리스트 조회해 와서 세팅하고
+      productInfo.item.maps.map((spotInfo) => {
+        console.log(`spotInfo`, spotInfo);
+        // console.log(`spot`, spot);
+        const spotObj = {
+          spot_id: spotInfo.spot.spot_id,
+          spot_name: spotInfo.spot.name,
+          price: "",
+          dc_price: "",
+          total: "",
+        };
+
+        spotList.push(spotObj);
+      });
+
+      setRateplanTableData(spotList);
+
+      console.log(`in pro rateplanInfo`, rateplanInfo);
     }
   }, [productInfo]);
+
+  const [isTableSetting, setIsTableSetting] = useState(false);
+
+  useEffect(() => {
+    if (rateplanTableData && !registerMode && !isTableSetting) {
+      const spot_prices = rateplanInfo.spot_prices;
+
+      const tempTableData = [...rateplanTableData];
+
+      if (spot_prices && spot_prices.length > 0) {
+        spot_prices.map((spotPrice) => {
+          const index = tempTableData.findIndex(
+            (item) => spotPrice.spot_id === item.spot_id
+          );
+
+          const item = tempTableData[index];
+
+          tempTableData.splice(index, 1, {
+            ...item,
+            price: spotPrice.price,
+            dc_price: spotPrice.dc_price,
+            total: Number(spotPrice.price) - Number(spotPrice.dc_price),
+          });
+        });
+
+        // 무한 루프 방지용 state
+        setIsTableSetting(true);
+
+        console.log(`tempTableData`, tempTableData);
+        setRateplanTableData(tempTableData);
+      }
+    }
+  }, [rateplanTableData]);
 
   // 상품 구분에 따라 option 상품 리스트 조회
   const getOptionProductList = (type) => {
@@ -164,6 +225,7 @@ const RateplanDetail = (props) => {
   };
 
   useEffect(() => {
+    console.log(`optionProductList`, optionProductList);
     // 옵션 상품 리스트가 조회되었고, detail로 들어와서 상품 정보도 있는 경우
     if (optionProductList && productInfo) {
       console.log(`optionProductList`, optionProductList);
@@ -180,7 +242,7 @@ const RateplanDetail = (props) => {
           product_id: null,
         });
       } else {
-        console.log("3");
+        // 상품 상세에 처음 들어와서, 상품 ID를 가지고 해당 타입을 찾고 옵션 세팅을 마쳤을 경우
         form.setFieldsValue({
           product_id: productInfo.item.product_id,
         });
@@ -192,26 +254,40 @@ const RateplanDetail = (props) => {
   const handleSpotRegisterSubmit = (values) => {
     let url = "";
 
-    if (registerMode) {
-      url = `${process.env.BACKEND_API}/admin/product/rateplan/add`;
-    } else {
-      url = `${process.env.BACKEND_API}/admin/product/rateplan/update`;
-    }
+    console.log(`values`, values);
 
     let data = {
       status: values.status,
       name: values.name,
       product_id: values.product_id,
-      price: values.price,
-      dc_price: values.dc_price,
-      start_date: startDate,
-      end_date: endDate,
-      guest_price: values.guest_price,
+      // price: values.price,
+      // dc_price: values.dc_price,
+      start_date: moment(values.start_date).format("YYYY-MM-DD"),
+      end_date: moment(values.end_date).format("YYYY-MM-DD"),
+      // guest_price: values.guest_price,
     };
 
-    // 수정일 경우
-    if (!registerMode) {
+    console.log(`rateplanTableData`, rateplanTableData);
+
+    const price = rateplanTableData.filter(
+      (dataObject) => dataObject.price !== ""
+    );
+
+    if (price && price.length > 0) {
+      if (isService) {
+        data.price = price[0].price;
+        data.dc_price = price[0].dc_price;
+        // 부가서비스 요금제일 경우
+      } else {
+        data.spot_prices = price;
+      }
+    }
+
+    if (registerMode) {
+      url = `${process.env.BACKEND_API}/admin/product/rateplan/add`;
+    } else {
       data.rateplan_id = Number(rateplanId);
+      url = `${process.env.BACKEND_API}/admin/product/rateplan/update`;
     }
 
     const config = {
@@ -236,17 +312,182 @@ const RateplanDetail = (props) => {
 
   // 상품 구분 변경
   const handleProductTypeChange = (type) => {
+    if (type === "service") {
+      setIsService(true);
+    } else {
+      setIsService(false);
+    }
+
     // 상품 구분에 따른 option list 재호출
     getOptionProductList(type);
   };
 
-  const handleStartDateChange = (date, dateString) => {
-    setStartDate(dateString);
+  // 상품명 선택
+  const handleProductSelect = (value, record) => {
+    console.log(`record`, record);
+
+    if (isService) {
+      setRateplanTableData([
+        {
+          spot_id: value,
+          spot_name: record.childern,
+          price: "",
+          dc_price: "",
+          total: "",
+        },
+      ]);
+    } else {
+      getProductSpots(value);
+    }
   };
 
-  const handleEndDateChange = (date, dateString) => {
-    setEndDate(dateString);
+  const getProductSpots = (productId) => {
+    axios
+      .get(`${process.env.BACKEND_API}/admin/product/get/${productId}`, {
+        headers: {
+          "Content-Type": "application/json;charset=UTF-8",
+          "Access-Control-Allow-Origin": "*",
+          Authorization: decodeURIComponent(token),
+        },
+      })
+      .then((response) => {
+        const item = response.data.item;
+        console.log(`item`, item);
+
+        if (item.maps && item.maps.length > 0) {
+          let spotList = [];
+
+          item.maps.map((spotInfo) => {
+            console.log(`spotInfo`, spotInfo);
+            // console.log(`spot`, spot);
+            const spotObj = {
+              spot_id: spotInfo.spot.spot_id,
+              spot_name: spotInfo.spot.name,
+              price: "",
+              dc_price: "",
+              total: "",
+            };
+
+            spotList.push(spotObj);
+          });
+
+          console.log(`spotList`, spotList);
+          setRateplanTableData(spotList);
+        }
+      })
+      .catch((error) => {
+        console.log(`error`, error);
+      });
   };
+
+  // 요금제 editable table 관련 함수
+
+  const isEditing = (record) => record.spot_id === editingSpotId;
+
+  const edit = (record) => {
+    setEditingSpotId(record.spot_id);
+  };
+
+  const save = async (key) => {
+    try {
+      // validateFields() 하면 promise가 return
+      // await로 받으면 table에 입력된 값이 확인된다.
+      const row = await tableForm.validateFields();
+
+      const newData = [...rateplanTableData];
+      // 데이터 변경한 row의 index 찾고
+      const index = rateplanTableData.findIndex((item) => key === item.spot_id);
+      // 데이터 특정해서
+      const item = newData[index];
+
+      // 기존 배열에서 그 row 값만 변경
+      newData.splice(index, 1, {
+        ...item,
+        ...row,
+        total: row.price - row.dc_price,
+      });
+
+      setRateplanTableData(newData);
+      setEditingSpotId("");
+    } catch (error) {}
+  };
+
+  // 컬럼
+  const rateBySpotListColumns = [
+    {
+      title: "",
+      dataIndex: "spot_name",
+    },
+    {
+      title: "상품 요금(A)",
+      dataIndex: "price",
+      editable: true,
+    },
+    {
+      title: "할인액(B)",
+      dataIndex: "dc_price",
+      editable: true,
+    },
+    {
+      title: "합계 금액 (A-B)",
+      dataIndex: "total",
+    },
+    {
+      title: "",
+      dataIndex: "operation",
+      render: (text, record) => {
+        const editable = isEditing(record);
+
+        console.log(`editable`, editable);
+        return editable ? (
+          <span>
+            <a
+              href="javascript:;"
+              onClick={() => save(record.spot_id)}
+              style={{
+                marginRight: 8,
+              }}
+            >
+              저장
+            </a>
+            <Popconfirm
+              title="취소하시겠습니까?"
+              onConfirm={() => {
+                setEditingSpotId("");
+              }}
+            >
+              <a>취소</a>
+            </Popconfirm>
+          </span>
+        ) : (
+          <Typography.Link
+            onClick={() => {
+              edit(record);
+            }}
+          >
+            수정
+          </Typography.Link>
+        );
+      },
+    },
+  ];
+
+  const mergedColumns = rateBySpotListColumns.map((col) => {
+    if (!col.editable) {
+      return col;
+    }
+
+    return {
+      ...col,
+      onCell: (record) => ({
+        record,
+        inputType: "number",
+        dataIndex: col.dataIndex,
+        title: col.title,
+        editing: isEditing(record),
+      }),
+    };
+  });
 
   return (
     <>
@@ -267,70 +508,108 @@ const RateplanDetail = (props) => {
               layout="vertical"
               onFinish={handleSpotRegisterSubmit}
             >
-              <Form.Item name="status" label="노출 여부">
-                <Radio.Group>
-                  <Radio style={radioStyle} value={"active"}>
-                    노출
-                  </Radio>
-                  <Radio style={radioStyle} value={"inactive"}>
-                    비노출
-                  </Radio>
-                </Radio.Group>
-              </Form.Item>
-              <Form.Item name="name" label="요금제 이름">
-                <Input />
-              </Form.Item>
-              <Form.Item name="product_type" label="상품 구분">
-                <Select
-                  style={{ width: 120 }}
-                  onChange={handleProductTypeChange}
-                >
-                  <Select.Option value="membership">멤버십</Select.Option>
-                  <Select.Option value="voucher">이용권</Select.Option>
-                  <Select.Option value="service">부가서비스</Select.Option>
-                </Select>
-              </Form.Item>
-              <Form.Item name="product_id" label="상품 명">
-                <Select style={{ width: 120 }}>
-                  {optionProductList.map((product) => (
-                    <Select.Option
-                      key={product.product_id}
-                      value={product.product_id}
-                    >
-                      {product.name}
-                    </Select.Option>
-                  ))}
-                  {/* <Select.Option value="one_spot">ALL SPOT</Select.Option>
-                  <Select.Option value="all_spot">전 스팟</Select.Option> */}
-                </Select>
-              </Form.Item>
-              <Form.Item name="price" label="이용 요금">
+              <Card>
+                <Form.Item name="status" label="노출 여부">
+                  <Radio.Group>
+                    <Radio style={radioStyle} value={"active"}>
+                      노출
+                    </Radio>
+                    <Radio style={radioStyle} value={"inactive"}>
+                      비노출
+                    </Radio>
+                  </Radio.Group>
+                </Form.Item>
+              </Card>
+              <Card>
+                <Form.Item name="name" label="요금제 이름">
+                  <Input />
+                </Form.Item>
+                <Form.Item name="product_type" label="상품 구분">
+                  <Select
+                    style={{ width: 120 }}
+                    onChange={handleProductTypeChange}
+                  >
+                    <Select.Option value="membership">멤버십</Select.Option>
+                    <Select.Option value="service">부가서비스</Select.Option>
+                  </Select>
+                </Form.Item>
+                <Form.Item name="product_id" label="상품 명">
+                  <Select style={{ width: 120 }} onChange={handleProductSelect}>
+                    {optionProductList.map((product) => (
+                      <Select.Option
+                        key={product.product_id}
+                        value={product.product_id}
+                      >
+                        {product.name}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+
+                <Form.Item name="start_date" label="시작일">
+                  <DatePicker placeholder="시작일" />
+                </Form.Item>
+                <Form.Item name="end_date" label="종료일">
+                  <DatePicker placeholder="종료일" />
+                </Form.Item>
+              </Card>
+              {/* <Form.Item name="guest_price" label="게스트 요금">
                 <InputNumber
                   formatter={(value) =>
                     `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                   }
                 />
-              </Form.Item>
-              <Form.Item name="dc_price" label="할인 요금">
-                <InputNumber
-                  formatter={(value) =>
-                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                  }
-                />
-              </Form.Item>
-              <Form.Item name="start_date" label="시작일">
-                <DatePicker onChange={handleStartDateChange} />
-              </Form.Item>
-              <Form.Item name="end_date" label="종료일">
-                <DatePicker onChange={handleEndDateChange} />
-              </Form.Item>
-              <Form.Item name="guest_price" label="게스트 요금">
-                <InputNumber
-                  formatter={(value) =>
-                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                  }
-                />
-              </Form.Item>
+              </Form.Item> */}
+              <Card>
+                <Form form={tableForm} component={false}>
+                  <Table
+                    components={{
+                      body: {
+                        cell: ({
+                          editing,
+                          dataIndex,
+                          title,
+                          record,
+                          index,
+                          children,
+                          ...restProps
+                        }) => {
+                          return (
+                            <td {...restProps}>
+                              {editing ? (
+                                <Form.Item
+                                  name={dataIndex}
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: `${title}을 입력해주세요`,
+                                    },
+                                  ]}
+                                >
+                                  <InputNumber
+                                    formatter={(value) =>
+                                      `${value}`.replace(
+                                        /\B(?=(\d{3})+(?!\d))/g,
+                                        ","
+                                      )
+                                    }
+                                  />
+                                </Form.Item>
+                              ) : (
+                                children
+                              )}
+                            </td>
+                          );
+                        },
+                      },
+                    }}
+                    bordered
+                    dataSource={rateplanTableData}
+                    columns={mergedColumns}
+                    rowClassName="editable-row"
+                  />
+                </Form>
+              </Card>
               <>
                 <Button type="primary" htmlType="submit">
                   저장
@@ -339,11 +618,11 @@ const RateplanDetail = (props) => {
                   visible={okModalVisible}
                   okText="확인"
                   onOk={() => {
-                    router.push("/payment");
+                    router.push("/rateplan");
                   }}
                   cancelButtonProps={{ style: { display: "none" } }}
                 >
-                  {registerMode ? "스팟 등록 완료" : "스팟 수정 완료"}
+                  {registerMode ? "요금제 등록 완료" : "요금제 수정 완료"}
                 </Modal>
               </>
             </Form>
