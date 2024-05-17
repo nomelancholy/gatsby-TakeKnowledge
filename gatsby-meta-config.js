@@ -1,6 +1,6 @@
 module.exports = {
   title: `Take Knowledge`,
-  description: `Take Knowledge's Tech Blog`,
+  description: `Take Knowledge's tech blog. It keeps records of difficult or impressive points that I encountered while developing. The content will mainly contain the stack I often use, such as react, nextjs, django, spring, aws, etc., and it will be available in English and Korean using i18n.`,
   author: `Take Knowledge`,
   introduction: `주로 개발을 하고, 가끔 글을 쓰며, 어쩌다 랩을 합니다`,
   siteUrl: `https://takeknowledge.netlify.app/`, // Your blog site url
